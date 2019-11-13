@@ -1,3 +1,5 @@
+USE `Team20`;
+
 --
 -- Derived attributes for User such as CC Count & Type string
 --

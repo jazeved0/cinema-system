@@ -9,7 +9,7 @@ DROP TABLE IF EXISTS `Movie`;
 CREATE TABLE `Movie` (
   `Name` varchar(240) NOT NULL,
   `ReleaseDate` date NOT NULL,
-  `Duration` int NOT NULL,
+  `Duration` int unsigned NOT NULL,
   PRIMARY KEY (`Name`, `ReleaseDate`)
 );
 
@@ -78,9 +78,9 @@ CREATE TABLE `Theater` (
   `State` char(2) NOT NULL,
   `City` varchar(240) NOT NULL,
   `Zipcode` char(5) NOT NULL,
-  `Street` varchar(240) NOT NULL,
-  `Capacity` int NOT NULL,
+  `Capacity` int unsigned NOT NULL,
   `Manager` varchar(240) NOT NULL,
+  `Street` varchar(240) NOT NULL,
   /* full participation */
   PRIMARY KEY (`TheaterName`, `CompanyName`),
   CONSTRAINT FOREIGN KEY (`CompanyName`) REFERENCES `Company` (`Name`),

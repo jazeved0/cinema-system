@@ -245,8 +245,8 @@ BEGIN
                 DROP TABLE IF EXISTS UserFilterTemp;
                 CREATE TABLE UserFilterTemp
                     SELECT username, status, creditCardCount, userType FROM UserDerived
-                    -- Perform fuzzy filter on username parameter
-                    WHERE UPPER(Username) LIKE CONCAT('%', UPPER(i_username), '%')
+                    -- Perform filter on username parameter
+                    WHERE UPPER(Username) <=> UPPER(i_username)
                     -- Perform status filter (if applicable)
                     AND CASE WHEN i_status <> 'ALL' THEN Status = i_status ELSE TRUE END;
                 -- Build dynamic sort query
@@ -306,8 +306,8 @@ BEGIN
                 DROP TABLE IF EXISTS CompanyFilterTemp;
                 CREATE TABLE CompanyFilterTemp
                     SELECT Name AS comName, numCityCover, numTheater, numEmployee FROM CompanyDerived
-                    -- Perform fuzzy filter on company name parameter
-                    WHERE UPPER(Name) LIKE CONCAT('%', UPPER(i_comName), '%')
+                    -- Perform filter on company name parameter
+                    WHERE UPPER(Name) <=> UPPER(i_comName)
                     -- Perform min/max city filter
                     AND CASE WHEN NOT i_minCity     IS NULL THEN numCityCover >= i_minCity     ELSE TRUE END
                     AND CASE WHEN NOT i_maxCity     IS NULL THEN numCityCover <= i_maxCity     ELSE TRUE END
@@ -338,10 +338,25 @@ DELIMITER ;
 
 DROP PROCEDURE IF EXISTS `admin_create_theater`;
 DELIMITER $$
-CREATE PROCEDURE `admin_create_theater` ()
+CREATE PROCEDURE `admin_create_theater` (
+    IN i_thName varchar(240),
+    IN i_comName varchar(240),
+    IN i_thStreet varchar(240),
+    IN i_thCity varchar(240),
+    IN i_thState char(2),
+    IN i_thZipcode char(5),
+    IN i_capacity int unsigned,
+    IN i_managerUsername varchar(240)
+)
 BEGIN
-    -- TODO Implement
-    SELECT * FROM user;
+    INSERT INTO theater (
+        TheaterName, CompanyName, State,
+        City, Zipcode, Street, Capacity, Manager
+    ) VALUES (
+        i_thName, i_comName, i_thState, i_thCity,
+        i_thZipcode, i_thStreet, i_capacity,
+        i_managerUsername
+    );
 END$$
 DELIMITER ;
 
@@ -351,10 +366,13 @@ DELIMITER ;
 
 DROP PROCEDURE IF EXISTS `admin_view_comDetail_emp`;
 DELIMITER $$
-CREATE PROCEDURE `admin_view_comDetail_emp` ()
+CREATE PROCEDURE `admin_view_comDetail_emp` (
+    IN i_comName varchar(240)
+)
 BEGIN
-    -- TODO Implement
-    SELECT * FROM user;
+    SELECT user.Firstname as empFirstname, user.Lastname as empLastname FROM manager
+    INNER JOIN user ON manager.Username = user.Username
+    WHERE CompanyName <=> i_comName;
 END$$
 DELIMITER ;
 
@@ -364,10 +382,17 @@ DELIMITER ;
 
 DROP PROCEDURE IF EXISTS `admin_view_comDetail_th`;
 DELIMITER $$
-CREATE PROCEDURE `admin_view_comDetail_th` ()
+CREATE PROCEDURE `admin_view_comDetail_th` (
+    IN i_comName varchar(240)
+)
 BEGIN
-    -- TODO Implement
-    SELECT * FROM user;
+    SELECT TheaterName as thName,
+        Manager as thManagerUsername,
+        City as thCity,
+        State as thState,
+        Capacity as thCapacity
+    FROM theater
+    WHERE CompanyName <=> i_comName;
 END$$
 DELIMITER ;
 
@@ -377,10 +402,14 @@ DELIMITER ;
 
 DROP PROCEDURE IF EXISTS `admin_create_mov`;
 DELIMITER $$
-CREATE PROCEDURE `admin_create_mov` ()
+CREATE PROCEDURE `admin_create_mov` (
+    IN i_movName varchar(240),
+    IN i_movDuration int unsigned,
+    IN i_movReleaseDate date
+)
 BEGIN
-    -- TODO Implement
-    SELECT * FROM user;
+    INSERT INTO movie (Name, ReleaseDate, Duration)
+    VALUES (i_movName, i_movReleaseDate, i_movDuration);
 END$$
 DELIMITER ;
 
