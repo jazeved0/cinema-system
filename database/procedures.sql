@@ -160,11 +160,11 @@ BEGIN
     CASE
         WHEN NOT EXISTS (
             SELECT Username from user WHERE Username = i_username
-        ) THEN SELECT 'User does not exist' as '';
+        ) THEN SELECT 'User does not exist' as 'Error';
         WHEN EXISTS (
             SELECT Status from user
             WHERE Username = i_username and Status = "Approved"
-        ) THEN SELECT 'Can not approve already approved user' as '';
+        ) THEN SELECT 'Can not approve already approved user' as 'Error';
         ELSE UPDATE user
         SET Status = "Approved"
         WHERE Username = i_username;
@@ -185,15 +185,15 @@ BEGIN
     CASE
         WHEN NOT EXISTS (
             SELECT Username from user WHERE Username = i_username
-        ) THEN SELECT 'User does not exist' as '';
+        ) THEN SELECT 'User does not exist' as 'Error';
         WHEN EXISTS (
             SELECT Status from user
             WHERE Username = i_username and Status = "Approved"
-        ) THEN SELECT 'Can not decline already approved user' as '';
+        ) THEN SELECT 'Can not decline already approved user' as 'Error';
         WHEN EXISTS (
             SELECT Status from user
             WHERE Username = i_username and Status = "Declined"
-        ) THEN SELECT 'Can not decline already declined user' as '';
+        ) THEN SELECT 'Can not decline already declined user' as 'Error';
         ELSE UPDATE user
         SET Status = "Declined"
         WHERE Username = i_username;
@@ -221,13 +221,13 @@ BEGIN
             OR i_status = 'Approved'
             OR i_status = 'Declined'
             OR i_status = 'ALL'
-        ) THEN SELECT 'Invalid status filter provided' as '';
+        ) THEN SELECT 'Invalid status filter provided' as 'Error';
         -- i_sortDirection has default value 'DESC' if '' supplied
         WHEN NOT (
             i_sortDirection = 'ASC'
             OR i_sortDirection = 'DESC'
             OR i_sortDirection = ''
-        ) THEN SELECT 'Invalid sort direction provided' as '';
+        ) THEN SELECT 'Invalid sort direction provided' as 'Error';
         -- i_sortBy has default value 'username' if '' supplied
         WHEN NOT (
             i_sortBy = 'username'
@@ -235,20 +235,20 @@ BEGIN
             OR i_sortBy = 'userType'
             OR i_sortBy = 'status'
             OR i_sortBy = ''
-        ) THEN SELECT 'Invalid sort by column provided' as '';
+        ) THEN SELECT 'Invalid sort by column provided' as 'Error';
         ELSE
             BEGIN
-                -- Create temporary table to store calculated column data for each user
+                -- Resolve defaults
+                SET @sort_column    = CASE WHEN i_sortBy        = '' THEN 'username' ELSE i_sortBy        END;
+                SET @sort_direction = CASE WHEN i_sortDirection = '' THEN 'DESC'     ELSE i_sortDirection END;
+                -- Create temporary table to store filtered values
                 DROP TABLE IF EXISTS UserFilterTemp;
                 CREATE TABLE UserFilterTemp
                     SELECT username, status, creditCardCount, userType FROM UserDerived
                     -- Perform fuzzy filter on username parameter
-                    HAVING UPPER(Username) LIKE CONCAT('%', UPPER(i_username), '%')
+                    WHERE UPPER(Username) LIKE CONCAT('%', UPPER(i_username), '%')
                     -- Perform status filter (if applicable)
                     AND CASE WHEN i_status <> 'ALL' THEN Status = i_status ELSE TRUE END;
-                -- Resolve defaults
-                SET @sort_column = CASE WHEN i_sortBy = '' THEN 'username' ELSE i_sortBy END;
-                SET @sort_direction = CASE WHEN i_sortDirection = '' THEN 'DESC' ELSE i_sortDirection END;
                 -- Build dynamic sort query
                 SET @query = CONCAT(
                     "SELECT * FROM UserFilterTemp ORDER BY UserFilterTemp.",
@@ -256,9 +256,9 @@ BEGIN
                     " ", 
                     @sort_direction
                 );
-                PREPARE stmt3 FROM @query;
-                EXECUTE stmt3;
-                DEALLOCATE PREPARE stmt3;
+                PREPARE stmt FROM @query;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
             END;
     END CASE;
 END$$
@@ -270,10 +270,65 @@ DELIMITER ;
 
 DROP PROCEDURE IF EXISTS `admin_filter_company`;
 DELIMITER $$
-CREATE PROCEDURE `admin_filter_company` ()
+CREATE PROCEDURE `admin_filter_company` (
+    IN i_comName varchar(240),
+    IN i_minCity int unsigned,
+    IN i_maxCity int unsigned,
+    IN i_minTheater int unsigned,
+    IN i_maxTheater int unsigned,
+    IN i_minEmployee int unsigned,
+    IN i_maxEmployee int unsigned,
+    IN i_sortBy varchar(12),
+    IN i_sortDirection char(4)
+)
 BEGIN
-    -- TODO Implement
-    SELECT * FROM user;
+    CASE
+        -- i_sortDirection has default value 'DESC' if '' supplied
+        WHEN NOT (
+            i_sortDirection = 'ASC'
+            OR i_sortDirection = 'DESC'
+            OR i_sortDirection = ''
+        ) THEN SELECT 'Invalid sort direction provided' as 'Error';
+        -- i_sortBy has default value 'comName' if '' supplied
+        WHEN NOT (
+            i_sortBy = 'comName'
+            OR i_sortBy = 'numCityCover'
+            OR i_sortBy = 'numTheater'
+            OR i_sortBy = 'numEmployee'
+            OR i_sortBy = ''
+        ) THEN SELECT 'Invalid sort by column provided' as 'Error';
+        ELSE
+            BEGIN
+                -- Resolve defaults
+                SET @sort_column    = CASE WHEN i_sortBy        = '' THEN 'comName' ELSE i_sortBy        END;
+                SET @sort_direction = CASE WHEN i_sortDirection = '' THEN 'DESC'    ELSE i_sortDirection END;
+                -- Create temporary table to store filtered values
+                DROP TABLE IF EXISTS CompanyFilterTemp;
+                CREATE TABLE CompanyFilterTemp
+                    SELECT Name AS comName, numCityCover, numTheater, numEmployee FROM CompanyDerived
+                    -- Perform fuzzy filter on company name parameter
+                    WHERE UPPER(Name) LIKE CONCAT('%', UPPER(i_comName), '%')
+                    -- Perform min/max city filter
+                    AND CASE WHEN NOT i_minCity     IS NULL THEN numCityCover >= i_minCity     ELSE TRUE END
+                    AND CASE WHEN NOT i_maxCity     IS NULL THEN numCityCover <= i_maxCity     ELSE TRUE END
+                    -- Perform min/max employee filter
+                    AND CASE WHEN NOT i_minTheater  IS NULL THEN numTheater   >= i_minTheater  ELSE TRUE END
+                    AND CASE WHEN NOT i_maxTheater  IS NULL THEN numTheater   <= i_maxTheater  ELSE TRUE END
+                    -- Perform min/max theater filter
+                    AND CASE WHEN NOT i_minEmployee IS NULL THEN numEmployee  >= i_minEmployee ELSE TRUE END
+                    AND CASE WHEN NOT i_maxEmployee IS NULL THEN numEmployee  <= i_maxEmployee ELSE TRUE END;
+                -- Build dynamic sort query
+                SET @query = CONCAT(
+                    "SELECT * FROM CompanyFilterTemp ORDER BY CompanyFilterTemp.",
+                    @sort_column,
+                    " ", 
+                    @sort_direction
+                );
+                PREPARE stmt FROM @query;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+            END;
+    END CASE;
 END$$
 DELIMITER ;
 
