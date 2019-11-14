@@ -1,0 +1,165 @@
+@import "./colors";
+@import "./fonts";
+@import "./theme";
+@import "./media";
+@import "../components/style";
+
+// Bootstrap config options
+$enable-rounded: true !default;
+$enable-shadows: true !default;
+$enable-gradients: false !default;
+$enable-transitions: true !default;
+$enable-hover-media-query: false !default;
+$enable-grid-classes: true !default;
+$enable-print-styles: true !default;
+
+// Grid containers
+$container-max-widths: (
+    sm: 540px,
+    md: 640px,
+    lg: 960px,
+    xl: 1140px
+) !default;
+
+// Body
+$body-bg: $-light !default;
+$body-color: $-dark !default;
+$inverse-bg: $-primary !default;
+$inverse-color: $-light !default;
+
+// Links
+$link-decoration: none !default;
+$link-hover-decoration: none !default;
+
+// Base Bootstrap
+@import "./bootstrap";
+@import "node_modules/bootstrap/scss/mixins/buttons";
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
+    letter-spacing: $headings-letter-spacing;
+    margin-bottom: $headings-margin-bottom;
+}
+
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+hr {
+    @include dark-border(rgba($-light, 0.25), $side: top);
+    @include light-border(rgba($-dark, 0.25), $side: top);
+}
+
+button,
+[type="button"],
+[type="reset"],
+[type="submit"] {
+    -webkit-appearance: none;
+}
+
+.hr-short {
+    width: 160px;
+    border: none;
+    border-top: 2px solid $-secondary;
+}
+
+#root {
+    @include dark-fg;
+    @include light-fg;
+    @include dark-bg;
+    @include light-bg;
+}
+
+html,
+body,
+#root {
+    min-height: 100vh;
+}
+
+#root {
+    display: flex;
+    flex-direction: column;
+
+    & > nav {
+        flex-grow: 0;
+    }
+
+    & > .docs-root {
+        flex-grow: 1;
+    }
+}
+
+.badge {
+    font-weight: 400;
+    padding: 0.45em 0.6em 0.35em;
+    border-radius: 4px;
+    margin-left: 0.4em;
+    margin-top: 0.2em;
+}
+
+input[type="text"] {
+    outline: none;
+    padding: {
+        top: 6px;
+        bottom: 6px;
+        right: 6px;
+        left: 10px;
+    }
+    border-radius: 8px;
+    transition: box-shadow 0.25s ease;
+    box-shadow: none;
+    background-color: white !important;
+    color: $-dark !important;
+
+    &::placeholder {
+        color: rgba($-dark, 0.4);
+    }
+
+    &:focus {
+        @include highlight-shadow($-primary);
+    }
+
+    &.form-control.is-invalid {
+        border-color: $-danger;
+    }
+    &.form-control.is-valid {
+        border-color: $-success;
+    }
+}
+
+.button-blank {
+    @extend %button-blank;
+}
+
+@mixin generate-color-classes($map, $prefix, $property) {
+    @each $name, $color in $map {
+        .#{$prefix}-#{$name} {
+            #{$property}: $color;
+        }
+    }
+}
+
+@include generate-color-classes(($dark-shades), bg, background-color);
+@include generate-color-classes(($light-shades), bg, background-color);
+
+.seamless-image {
+    .gatsby-resp-image-wrapper {
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        overflow: hidden;
+        margin-left: 0 !important;
+    }
+}

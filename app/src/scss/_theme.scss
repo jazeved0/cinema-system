@@ -1,0 +1,63 @@
+@import "./colors";
+@import "./util";
+
+$drop-shadow-0: 0 4px 12px 0 rgba(black, 0.125);
+$drop-shadow-1: 0 8px 14px 0 rgba(black, 0.225);
+$drop-shadow-2: 0 10px 20px rgba(black, 0.16), 0 6px 6px rgba(black, 0.23);
+$drop-shadow-3: 0 14px 28px rgba(black, 0.25), 0 10px 10px rgba(black, 0.22);
+
+$drop-shadow: $drop-shadow-0;
+$drop-shadow-light: 0 3px 8px 0 rgba(black, 0.05);
+$drop-shadow-slight: 0 2px 8px 0 rgba(black, 0.3);
+
+$drop-shadow-inner-top: inset 0px 11px 8px -10px rgba(black, 0.125);
+
+$border-radius: 8px;
+$border-radius-sm: 4px;
+$jumbotron-background: darken($-light, 5%);
+$window-padding: 1.25rem;
+$window-padding-bottom: 0.5rem;
+$window-border-radius: 8px;
+$ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+
+@mixin scrollbar($color, $width) {
+    scrollbar-face-color: #646464;
+    scrollbar-base-color: #646464;
+    scrollbar-3dlight-color: #646464;
+    scrollbar-highlight-color: #646464;
+    scrollbar-track-color: #000;
+    scrollbar-arrow-color: #000;
+    scrollbar-shadow-color: #646464;
+    scrollbar-dark-shadow-color: #646464;
+
+    &::-webkit-scrollbar {
+        width: $width;
+        height: $width;
+    }
+    &::-webkit-scrollbar-track {
+        background-color: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+        background-color: rgba($color, 0.25);
+        border-radius: 1000px;
+
+        &:hover {
+            background-color: rgba($color, 0.4);
+        }
+
+        &:active {
+            background-color: rgba($color, 0.6);
+        }
+    }
+}
+
+$scrollbar-width: 12px;
+%custom-scrollbar {
+    @include light {
+        @include scrollbar($-dark, $scrollbar-width);
+    }
+
+    @include dark {
+        @include scrollbar(blend($dark-main-bg, $-light, 0.4), $scrollbar-width);
+    }
+}

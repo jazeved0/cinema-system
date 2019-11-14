@@ -1,0 +1,173 @@
+@import "./colorfunctions";
+
+// B/W color ramp
+$white: #fff !default;
+$gray-100: #f8f9fa !default;
+$gray-200: #e9ecef !default;
+$gray-300: #dee2e6 !default;
+$gray-400: #ced4da !default;
+$gray-500: #adb5bd !default;
+$gray-600: #868e96 !default;
+$gray-700: #495057 !default;
+$gray-800: #343a40 !default;
+$gray-900: #212529 !default;
+$black: #000 !default;
+
+// Theme colors
+$hint-of-red: #F8F6F6 !default;
+$lynch: #6D8397 !default;
+$hibiscus: #B63769 !default;
+$lombolly: #BCC3CA !default;
+$shark: #282c34 !default;
+$steel-gray: #272134 !default;
+$brady-punch: #d3912e !default;
+$fruit-salad: #56a166 !default;
+$pomegranate: #f44336 !default;
+
+// Default bootstrap colors
+$blue: #03a9f4 !default;
+$indigo: #3f51b5 !default;
+$purple: #673ab7 !default;
+$pink: #e91e63 !default;
+$red: #f44336 !default;
+$orange: #ff5722 !default;
+$yellow: #ffab00 !default;
+$green: #8bc34a !default;
+$teal: #009688 !default;
+$cyan: #00bcd4 !default;
+
+// Custom color scheme
+$theme-colors: (
+    primary: $lynch,
+    secondary: $hibiscus,
+    tertiary: $lombolly,
+    success: $fruit-salad,
+    info: $steel-gray,
+    warning: $brady-punch,
+    danger: $pomegranate,
+    light: $hint-of-red,
+    dark: $shark
+) !default;
+
+// Color aliases:
+$-primary: map-get($theme-colors, primary);
+$-secondary: map-get($theme-colors, secondary);
+$-tertiary: map-get($theme-colors, tertiary);
+$-success: map-get($theme-colors, success);
+$-info: map-get($theme-colors, info);
+$-warning: map-get($theme-colors, warning);
+$-danger: map-get($theme-colors, danger);
+$-light: map-get($theme-colors, light);
+$-dark: map-get($theme-colors, dark);
+
+// App color ramps
+$dark-000: color-adjust($-dark, -37%);
+$dark-100: color-adjust($-dark, -11%);
+$dark-200: color-adjust($-dark, 1.5%);
+$dark-300: color-adjust($-dark, 6%);
+$dark-400: color-adjust($-dark, 9%);
+$dark-500: color-adjust($-dark, 13%);
+
+$dark-050: blend($dark-000, $dark-100);
+$dark-150: blend($dark-100, $dark-200);
+$dark-250: blend($dark-200, $dark-300);
+$dark-350: blend($dark-300, $dark-400);
+$dark-450: blend($dark-400, $dark-500);
+
+$dark-shades: (
+    dark-000: $dark-000,
+    dark-050: $dark-050,
+    dark-100: $dark-100,
+    dark-150: $dark-150,
+    dark-200: $dark-200,
+    dark-250: $dark-250,
+    dark-300: $dark-300,
+    dark-350: $dark-350,
+    dark-400: $dark-400,
+    dark-450: $dark-450,
+    dark-500: $dark-500
+);
+
+$light-000: color-adjust($-light, -35%);
+$light-100: color-adjust($-light, -25%);
+$light-200: color-adjust($-light, -15%);
+$light-300: color-adjust($-light, -5%);
+$light-400: color-adjust($-light, 0%);
+$light-500: white;
+
+$light-050: blend($light-000, $light-100);
+$light-150: blend($light-100, $light-200);
+$light-250: blend($light-200, $light-300);
+$light-350: blend($light-300, $light-400);
+$light-450: blend($light-400, $light-500);
+
+$light-shades: (
+    light-000: $light-000,
+    light-050: $light-050,
+    light-100: $light-100,
+    light-150: $light-150,
+    light-200: $light-200,
+    light-250: $light-250,
+    light-300: $light-300,
+    light-350: $light-350,
+    light-400: $light-400,
+    light-450: $light-450,
+    light-500: $light-500
+);
+
+// Additional colors
+
+// ? =======================
+// ? Dark/light theme mixins
+// ? =======================
+
+$dark-main-bg: $dark-150;
+$light-main-bg: $light-400;
+
+@mixin dark-bg($color: $dark-main-bg, $adjust: 0%, $important: false) {
+    @include theme-bg(dark, $color, $adjust, $important);
+}
+
+@mixin light-bg($color: $light-main-bg, $adjust: 0%, $important: false) {
+    @include theme-bg(light, $color, $adjust, $important);
+}
+
+@mixin dark-fg($color: rgba($-light, 0.9), $adjust: 0%, $important: false) {
+    @include theme-fg(dark, $color, $adjust, $important);
+}
+
+@mixin light-fg($color: $dark-400, $adjust: 0%, $important: false) {
+    @include theme-fg(light, $color, $adjust, $important);
+}
+
+@mixin dark-fade-fg($color: rgba($-light, 0.6), $adjust: 0%, $important: false) {
+    @include theme-fg(dark, $color, $adjust, $important);
+}
+
+@mixin light-fade-fg($color: rgba($-dark, 0.6), $adjust: 0%, $important: false) {
+    @include theme-fg(light, $color, $adjust, $important);
+}
+
+@mixin dark-semi-fade-fg($color: rgba($-light, 0.775), $adjust: 0%, $important: false) {
+    @include theme-fg(dark, $color, $adjust, $important);
+}
+
+@mixin light-semi-fade-fg($color: rgba($-dark, 0.775), $adjust: 0%, $important: false) {
+    @include theme-fg(light, $color, $adjust, $important);
+}
+
+@mixin dark-very-fade-fg($color: rgba($-light, 0.45), $adjust: 0%, $important: false) {
+    @include theme-fg(dark, $color, $adjust, $important);
+}
+
+@mixin light-very-fade-fg($color: rgba($-dark, 0.45), $adjust: 0%, $important: false) {
+    @include theme-fg(light, $color, $adjust, $important);
+}
+
+@mixin dark-border($color, $adjust: 0%, $border: 1px solid, $side: null, $important: false) {
+    @include theme-border(dark, $color, $adjust, $border, $side, $important);
+}
+
+@mixin light-border($color, $adjust: 0%, $border: 1px solid, $side: null, $important: false) {
+    @include theme-border(light, $color, $adjust, $border, $side, $important);
+}
