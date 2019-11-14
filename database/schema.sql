@@ -30,21 +30,30 @@ DROP TABLE IF EXISTS `Employee`;
 CREATE TABLE `Employee` (
   `Username` varchar(240) NOT NULL,
   PRIMARY KEY (`Username`),
-  CONSTRAINT FOREIGN KEY (`Username`) REFERENCES `User` (`Username`)
+  CONSTRAINT FOREIGN KEY (`Username`)
+    REFERENCES `User` (`Username`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
 );
 
 DROP TABLE IF EXISTS `Customer`;
 CREATE TABLE `Customer` (
   `Username` varchar(240) NOT NULL,
   PRIMARY KEY (`Username`),
-  CONSTRAINT FOREIGN KEY (`Username`) REFERENCES `User` (`Username`)
+  CONSTRAINT FOREIGN KEY (`Username`)
+    REFERENCES `User` (`Username`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
 );
 
 DROP TABLE IF EXISTS `Admin`;
 CREATE TABLE `Admin` (
   `Username` varchar(240) NOT NULL,
   PRIMARY KEY (`Username`),
-  CONSTRAINT FOREIGN KEY (`Username`) REFERENCES `Employee` (`Username`)
+  CONSTRAINT FOREIGN KEY (`Username`)
+    REFERENCES `Employee` (`Username`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
 );
 
 DROP TABLE IF EXISTS `Manager`;
@@ -54,19 +63,28 @@ CREATE TABLE `Manager` (
   `City` varchar(240) NOT NULL,
   `Zipcode` char(5) NOT NULL,
   `Street` varchar(240) NOT NULl,
-  `CompanyName` varchar(240) NOT NULL,
+  `CompanyName` varchar(240),
   PRIMARY KEY (`Username`),
   CONSTRAINT UNIQUE (`State`, `City`, `Zipcode`, `Street`),
-  CONSTRAINT FOREIGN KEY (`Username`) REFERENCES `Employee` (`Username`),
-  CONSTRAINT FOREIGN KEY (`CompanyName`) REFERENCES `Company` (`Name`)
+  CONSTRAINT FOREIGN KEY (`Username`)
+    REFERENCES `Employee` (`Username`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT FOREIGN KEY (`CompanyName`)
+    REFERENCES `Company` (`Name`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE
 );
 
 DROP TABLE IF EXISTS `CreditCard`;
 CREATE TABLE `CreditCard` (
-  `CreditCardNum` char(16) NOT NULL,
+  `CreditCardNum` char(19) NOT NULL,
   `Owner` varchar(240) NOT NULL,
   PRIMARY KEY (`CreditCardNum`),
-  CONSTRAINT FOREIGN KEY (`Owner`) REFERENCES `User` (`Username`)
+  CONSTRAINT FOREIGN KEY (`Owner`)
+    REFERENCES `Customer` (`Username`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
 );
 
 DROP TABLE IF EXISTS `Theater`; 
@@ -79,12 +97,19 @@ CREATE TABLE `Theater` (
   `City` varchar(240) NOT NULL,
   `Zipcode` char(5) NOT NULL,
   `Capacity` int unsigned NOT NULL,
-  `Manager` varchar(240) NOT NULL,
+  `Manager` varchar(240),
   `Street` varchar(240) NOT NULL,
   /* full participation */
   PRIMARY KEY (`TheaterName`, `CompanyName`),
-  CONSTRAINT FOREIGN KEY (`CompanyName`) REFERENCES `Company` (`Name`),
-  CONSTRAINT FOREIGN KEY (`Manager`) REFERENCES `Manager` (`Username`)
+  CONSTRAINT FOREIGN KEY (`CompanyName`)
+    REFERENCES `Company` (`Name`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT FOREIGN KEY (`Manager`)
+    REFERENCES `Manager` (`Username`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE
+
 );
 
 DROP TABLE IF EXISTS `MoviePlay`;
@@ -101,8 +126,14 @@ CREATE TABLE `MoviePlay` (
     `TheaterName`,
     `CompanyName`
   ),
-  CONSTRAINT FOREIGN KEY (`MovieName`, `ReleaseDate`) REFERENCES `Movie` (`Name`, `ReleaseDate`),
-  CONSTRAINT FOREIGN KEY (`TheaterName`, `CompanyName`) REFERENCES `Theater` (`TheaterName`, `CompanyName`)
+  CONSTRAINT FOREIGN KEY (`MovieName`, `ReleaseDate`)
+    REFERENCES `Movie` (`Name`, `ReleaseDate`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT FOREIGN KEY (`TheaterName`, `CompanyName`)
+    REFERENCES `Theater` (`TheaterName`, `CompanyName`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
 );
 
 DROP TABLE IF EXISTS `Visit`;
@@ -113,39 +144,51 @@ CREATE TABLE `Visit` (
   `TheaterName` varchar(240) NOT NULL,
   `CompanyName` varchar(240) NOT NULL,
   PRIMARY KEY (id),
-  CONSTRAINT FOREIGN KEY (`Username`) REFERENCES `User`(`Username`),
-  CONSTRAINT FOREIGN KEY (`TheaterName`, `CompanyName`) REFERENCES `Theater`(`TheaterName`, `CompanyName`)
+  CONSTRAINT FOREIGN KEY (`Username`)
+    REFERENCES `User`(`Username`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT FOREIGN KEY (`TheaterName`, `CompanyName`)
+    REFERENCES `Theater`(`TheaterName`, `CompanyName`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
 );
 
 DROP TABLE IF EXISTS `Used`;
 CREATE TABLE `Used` (
-  `CreditCardNum` char(16) NOT NULL,
-  `Date` date NOT NULL,
+  `CreditCardNum` char(19) NOT NULL,
+  `PlayDate` date NOT NULL,
   `MovieName` varchar(240) NOT NULL,
   `ReleaseDate` date NOT NULL,
   `TheaterName` varchar(240) NOT NULL,
   `CompanyName` varchar(240) NOT NULL,
   PRIMARY KEY (
     `CreditCardNum`,
-    `Date`,
+    `PlayDate`,
     `MovieName`,
     `ReleaseDate`,
     `TheaterName`,
     `CompanyName`
   ),
-  CONSTRAINT FOREIGN KEY (`CreditCardNum`) REFERENCES `CreditCard` (`CreditCardNum`),
+  CONSTRAINT FOREIGN KEY (`CreditCardNum`)
+    REFERENCES `CreditCard` (`CreditCardNum`)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE,
   CONSTRAINT FOREIGN KEY (
-    `Date`,
-    `MovieName`,
-    `ReleaseDate`,
-    `TheaterName`,
-    `CompanyName`
-  ) REFERENCES `MoviePlay` (
-    `Date`,
+    `PlayDate`,
     `MovieName`,
     `ReleaseDate`,
     `TheaterName`,
     `CompanyName`
   )
+    REFERENCES `MoviePlay` (
+      `Date`,
+      `MovieName`,
+      `ReleaseDate`,
+      `TheaterName`,
+      `CompanyName`
+    ) 
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
 );
 SET FOREIGN_KEY_CHECKS = 1;

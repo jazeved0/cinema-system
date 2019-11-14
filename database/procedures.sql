@@ -11,17 +11,19 @@ CREATE PROCEDURE `user_login`(
     IN `i_password` varchar(240)
 )
 BEGIN
-    SELECT user.Username, Status, Password, case WHEN EXISTS (
-        SELECT employee.Username FROM employee
-        WHERE employee.Username = user.Username
-    ) THEN 1 ELSE 0 END AS isEmployee, case WHEN EXISTS (
-        SELECT admin.Username FROM admin
-        WHERE admin.Username = user.Username
-    ) THEN 1 ELSE 0 END AS isAdmin, case WHEN EXISTS (
-        SELECT manager.Username FROM manager
-        WHERE manager.Username = user.Username
-    ) THEN 1 ELSE 0 END AS isManager from user
-    WHERE Username = i_username AND Password = MD5(i_password);
+    DROP TABLE IF EXISTS UserLogin;
+    CREATE TABLE UserLogin
+        SELECT user.Username, Status, Password, case WHEN EXISTS (
+            SELECT employee.Username FROM employee
+            WHERE employee.Username = user.Username
+        ) THEN 1 ELSE 0 END AS isEmployee, case WHEN EXISTS (
+            SELECT admin.Username FROM admin
+            WHERE admin.Username = user.Username
+        ) THEN 1 ELSE 0 END AS isAdmin, case WHEN EXISTS (
+            SELECT manager.Username FROM manager
+            WHERE manager.Username = user.Username
+        ) THEN 1 ELSE 0 END AS isManager from user
+        WHERE Username = i_username AND Password = MD5(i_password);
 END$$
 DELIMITER ;
 
@@ -71,7 +73,7 @@ DROP PROCEDURE IF EXISTS `customer_add_creditcard`;
 DELIMITER $$
 CREATE PROCEDURE `customer_add_creditcard` (
     IN i_username varchar(240),
-    IN i_creditCardNum char(16)
+    IN i_creditCardNum char(19)
 )
 BEGIN
     INSERT INTO creditcard (owner, creditcardnum)
@@ -139,7 +141,7 @@ DROP PROCEDURE IF EXISTS `manager_customer_add_creditcard`;
 DELIMITER $$
 CREATE PROCEDURE `manager_customer_add_creditcard` (
     IN i_username varchar(240),
-    IN i_creditCardNum char(16)
+    IN i_creditCardNum char(19)
 )
 BEGIN
     INSERT INTO creditcard (owner, creditcardnum)
@@ -157,18 +159,20 @@ CREATE PROCEDURE `admin_approve_user` (
     IN i_username varchar(240)
 )
 BEGIN
-    CASE
-        WHEN NOT EXISTS (
-            SELECT Username from user WHERE Username = i_username
-        ) THEN SELECT 'User does not exist' as 'Error';
-        WHEN EXISTS (
-            SELECT Status from user
-            WHERE Username = i_username and Status = "Approved"
-        ) THEN SELECT 'Can not approve already approved user' as 'Error';
-        ELSE UPDATE user
+    IF NOT EXISTS (
+        SELECT Username from user WHERE Username = i_username
+    ) THEN SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'User does not exist';
+    ELSEIF EXISTS (
+        SELECT Status from user
+        WHERE Username = i_username and Status = "Approved"
+    ) THEN SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Can not approve already approved user';
+    ELSE
+        UPDATE user
         SET Status = "Approved"
         WHERE Username = i_username;
-    END CASE;
+    END IF;
 END$$
 DELIMITER ;
 
@@ -182,22 +186,25 @@ CREATE PROCEDURE `admin_decline_user` (
     IN i_username varchar(240)
 )
 BEGIN
-    CASE
-        WHEN NOT EXISTS (
-            SELECT Username from user WHERE Username = i_username
-        ) THEN SELECT 'User does not exist' as 'Error';
-        WHEN EXISTS (
-            SELECT Status from user
-            WHERE Username = i_username and Status = "Approved"
-        ) THEN SELECT 'Can not decline already approved user' as 'Error';
-        WHEN EXISTS (
-            SELECT Status from user
-            WHERE Username = i_username and Status = "Declined"
-        ) THEN SELECT 'Can not decline already declined user' as 'Error';
-        ELSE UPDATE user
+    IF NOT EXISTS (
+        SELECT Username from user WHERE Username = i_username
+    ) THEN SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'User does not exist';
+    ELSEIF EXISTS (
+        SELECT Status from user
+        WHERE Username = i_username and Status = "Approved"
+    ) THEN SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Can not decline already approved user';
+    ELSEIF EXISTS (
+        SELECT Status from user
+        WHERE Username = i_username and Status = "Declined"
+    ) THEN SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Can not decline already declined user';
+    ELSE
+        UPDATE user
         SET Status = "Declined"
         WHERE Username = i_username;
-    END CASE;
+    END IF;
 END$$
 DELIMITER ;
 
@@ -214,53 +221,57 @@ CREATE PROCEDURE `admin_filter_user` (
     IN i_sortBy varchar(15)
 )
 BEGIN
-    CASE
-        -- i_status has implicit 'ALL' possibility
-        WHEN NOT (
-            i_status = 'Pending'
-            OR i_status = 'Approved'
-            OR i_status = 'Declined'
-            OR i_status = 'ALL'
-        ) THEN SELECT 'Invalid status filter provided' as 'Error';
-        -- i_sortDirection has default value 'DESC' if '' supplied
-        WHEN NOT (
-            i_sortDirection = 'ASC'
-            OR i_sortDirection = 'DESC'
-            OR i_sortDirection = ''
-        ) THEN SELECT 'Invalid sort direction provided' as 'Error';
-        -- i_sortBy has default value 'username' if '' supplied
-        WHEN NOT (
-            i_sortBy = 'username'
-            OR i_sortBy = 'creditCardCount'
-            OR i_sortBy = 'userType'
-            OR i_sortBy = 'status'
-            OR i_sortBy = ''
-        ) THEN SELECT 'Invalid sort by column provided' as 'Error';
-        ELSE
-            BEGIN
-                -- Resolve defaults
-                SET @sort_column    = CASE WHEN i_sortBy        = '' THEN 'username' ELSE i_sortBy        END;
-                SET @sort_direction = CASE WHEN i_sortDirection = '' THEN 'DESC'     ELSE i_sortDirection END;
-                -- Create temporary table to store filtered values
-                DROP TABLE IF EXISTS UserFilterTemp;
-                CREATE TABLE UserFilterTemp
-                    SELECT username, status, creditCardCount, userType FROM UserDerived
-                    -- Perform filter on username parameter
-                    WHERE UPPER(Username) <=> UPPER(i_username)
-                    -- Perform status filter (if applicable)
-                    AND CASE WHEN i_status <> 'ALL' THEN Status = i_status ELSE TRUE END;
-                -- Build dynamic sort query
-                SET @query = CONCAT(
-                    "SELECT * FROM UserFilterTemp ORDER BY UserFilterTemp.",
-                    @sort_column,
-                    " ", 
-                    @sort_direction
-                );
-                PREPARE stmt FROM @query;
-                EXECUTE stmt;
-                DEALLOCATE PREPARE stmt;
-            END;
-    END CASE;
+    -- i_status has implicit 'ALL' possibility
+    IF NOT (
+        i_status = 'Pending'
+        OR i_status = 'Approved'
+        OR i_status = 'Declined'
+        OR i_status = 'ALL'
+    ) THEN SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Invalid status filter provided';
+    -- i_sortDirection has default value 'DESC' if '' supplied
+    ELSEIF NOT (
+        i_sortDirection = 'ASC'
+        OR i_sortDirection = 'DESC'
+        OR i_sortDirection = ''
+    ) THEN SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Invalid sort direction provided';
+    -- i_sortBy has default value 'username' if '' supplied
+    ELSEIF NOT (
+        i_sortBy = 'username'
+        OR i_sortBy = 'creditCardCount'
+        OR i_sortBy = 'userType'
+        OR i_sortBy = 'status'
+        OR i_sortBy = ''
+    ) THEN SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Invalid sort by column provided';
+    ELSE
+        BEGIN
+            -- Resolve defaults
+            SET @sort_column    = CASE WHEN i_sortBy        = '' THEN 'username' ELSE i_sortBy        END;
+            SET @sort_direction = CASE WHEN i_sortDirection = '' THEN 'DESC'     ELSE i_sortDirection END;
+            -- Create temporary table to store filtered values
+            DROP TABLE IF EXISTS UserFilterTemp;
+            CREATE TABLE UserFilterTemp
+                SELECT username, status, creditCardCount, userType FROM UserDerived
+                -- Perform filter on username parameter
+                WHERE UPPER(Username) <=> UPPER(i_username)
+                -- Perform status filter (if applicable)
+                AND CASE WHEN i_status <> 'ALL' THEN Status = i_status ELSE TRUE END;
+            DROP TABLE IF EXISTS AdFilterUser;
+            -- Build dynamic sort query
+            SET @query = CONCAT(
+                "CREATE TABLE AdFilterUser "
+                "SELECT * FROM UserFilterTemp ORDER BY UserFilterTemp.",
+                @sort_column,
+                " ", 
+                @sort_direction
+            );
+            PREPARE stmt FROM @query;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+        END;
+    END IF;
 END$$
 DELIMITER ;
 
@@ -282,53 +293,56 @@ CREATE PROCEDURE `admin_filter_company` (
     IN i_sortDirection char(4)
 )
 BEGIN
-    CASE
-        -- i_sortDirection has default value 'DESC' if '' supplied
-        WHEN NOT (
-            i_sortDirection = 'ASC'
-            OR i_sortDirection = 'DESC'
-            OR i_sortDirection = ''
-        ) THEN SELECT 'Invalid sort direction provided' as 'Error';
-        -- i_sortBy has default value 'comName' if '' supplied
-        WHEN NOT (
-            i_sortBy = 'comName'
-            OR i_sortBy = 'numCityCover'
-            OR i_sortBy = 'numTheater'
-            OR i_sortBy = 'numEmployee'
-            OR i_sortBy = ''
-        ) THEN SELECT 'Invalid sort by column provided' as 'Error';
-        ELSE
-            BEGIN
-                -- Resolve defaults
-                SET @sort_column    = CASE WHEN i_sortBy        = '' THEN 'comName' ELSE i_sortBy        END;
-                SET @sort_direction = CASE WHEN i_sortDirection = '' THEN 'DESC'    ELSE i_sortDirection END;
-                -- Create temporary table to store filtered values
-                DROP TABLE IF EXISTS CompanyFilterTemp;
-                CREATE TABLE CompanyFilterTemp
-                    SELECT Name AS comName, numCityCover, numTheater, numEmployee FROM CompanyDerived
-                    -- Perform filter on company name parameter
-                    WHERE UPPER(Name) <=> UPPER(i_comName)
-                    -- Perform min/max city filter
-                    AND CASE WHEN NOT i_minCity     IS NULL THEN numCityCover >= i_minCity     ELSE TRUE END
-                    AND CASE WHEN NOT i_maxCity     IS NULL THEN numCityCover <= i_maxCity     ELSE TRUE END
-                    -- Perform min/max employee filter
-                    AND CASE WHEN NOT i_minTheater  IS NULL THEN numTheater   >= i_minTheater  ELSE TRUE END
-                    AND CASE WHEN NOT i_maxTheater  IS NULL THEN numTheater   <= i_maxTheater  ELSE TRUE END
-                    -- Perform min/max theater filter
-                    AND CASE WHEN NOT i_minEmployee IS NULL THEN numEmployee  >= i_minEmployee ELSE TRUE END
-                    AND CASE WHEN NOT i_maxEmployee IS NULL THEN numEmployee  <= i_maxEmployee ELSE TRUE END;
-                -- Build dynamic sort query
-                SET @query = CONCAT(
-                    "SELECT * FROM CompanyFilterTemp ORDER BY CompanyFilterTemp.",
-                    @sort_column,
-                    " ", 
-                    @sort_direction
-                );
-                PREPARE stmt FROM @query;
-                EXECUTE stmt;
-                DEALLOCATE PREPARE stmt;
-            END;
-    END CASE;
+    -- i_sortDirection has default value 'DESC' if '' supplied
+    IF NOT (
+        i_sortDirection = 'ASC'
+        OR i_sortDirection = 'DESC'
+        OR i_sortDirection = ''
+    ) THEN SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Invalid sort direction provided';
+    -- i_sortBy has default value 'comName' if '' supplied
+    ELSEIF NOT (
+        i_sortBy = 'comName'
+        OR i_sortBy = 'numCityCover'
+        OR i_sortBy = 'numTheater'
+        OR i_sortBy = 'numEmployee'
+        OR i_sortBy = ''
+    ) THEN SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Invalid sort by column provided';
+    ELSE
+        BEGIN
+            -- Resolve defaults
+            SET @sort_column    = CASE WHEN i_sortBy        = '' THEN 'comName' ELSE i_sortBy        END;
+            SET @sort_direction = CASE WHEN i_sortDirection = '' THEN 'DESC'    ELSE i_sortDirection END;
+            -- Create temporary table to store filtered values
+            DROP TABLE IF EXISTS CompanyFilterTemp;
+            CREATE TABLE CompanyFilterTemp
+                SELECT Name AS comName, numCityCover, numTheater, numEmployee FROM CompanyDerived
+                -- Perform filter on company name parameter
+                WHERE (i_comName <=> '' OR UPPER(Name) <=> UPPER(i_comName))
+                -- Perform min/max city filter
+                AND (i_minCity     IS NULL OR numCityCover >= i_minCity)
+                AND (i_maxCity     IS NULL OR numCityCover <= i_maxCity)
+                -- Perform min/max employee filter
+                AND (i_minTheater  IS NULL OR numTheater   >= i_minTheater)
+                AND (i_maxTheater  IS NULL OR numTheater   <= i_maxTheater)
+                -- Perform min/max theater filter
+                AND (i_minEmployee IS NULL OR numEmployee  >= i_minEmployee)
+                AND (i_maxEmployee IS NULL OR numEmployee  <= i_maxEmployee);
+            DROP TABLE IF EXISTS AdFilterCom;
+            -- Build dynamic sort query
+            SET @query = CONCAT(
+                "CREATE TABLE AdFilterCom ",
+                "SELECT * FROM CompanyFilterTemp ORDER BY CompanyFilterTemp.",
+                @sort_column,
+                " ", 
+                @sort_direction
+            );
+            PREPARE stmt FROM @query;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+        END;
+    END IF;
 END$$
 DELIMITER ;
 
@@ -370,9 +384,11 @@ CREATE PROCEDURE `admin_view_comDetail_emp` (
     IN i_comName varchar(240)
 )
 BEGIN
-    SELECT user.Firstname as empFirstname, user.Lastname as empLastname FROM manager
-    INNER JOIN user ON manager.Username = user.Username
-    WHERE CompanyName <=> i_comName;
+    DROP TABLE IF EXISTS AdComDetailEmp;
+    CREATE TABLE AdComDetailEmp
+        SELECT user.Firstname as empFirstname, user.Lastname as empLastname FROM manager
+        INNER JOIN user ON manager.Username = user.Username
+        WHERE CompanyName <=> i_comName;
 END$$
 DELIMITER ;
 
@@ -386,13 +402,15 @@ CREATE PROCEDURE `admin_view_comDetail_th` (
     IN i_comName varchar(240)
 )
 BEGIN
-    SELECT TheaterName as thName,
-        Manager as thManagerUsername,
-        City as thCity,
-        State as thState,
-        Capacity as thCapacity
-    FROM theater
-    WHERE CompanyName <=> i_comName;
+    DROP TABLE IF EXISTS AdComDetailTh;
+    CREATE TABLE AdComDetailTh
+        SELECT TheaterName as thName,
+            Manager as thManagerUsername,
+            City as thCity,
+            State as thState,
+            Capacity as thCapacity
+        FROM theater
+        WHERE CompanyName <=> i_comName;
 END$$
 DELIMITER ;
 
@@ -419,10 +437,41 @@ DELIMITER ;
 
 DROP PROCEDURE IF EXISTS `manager_filter_th`;
 DELIMITER $$
-CREATE PROCEDURE `manager_filter_th` ()
+CREATE PROCEDURE `manager_filter_th` (
+    IN i_manUsername varchar(240),
+    IN i_movName varchar(240),
+    IN i_minMovDuration int unsigned,
+    IN i_maxMovDuration int unsigned,
+    IN i_minMovReleaseDate date,
+    IN i_maxMovReleaseDate date,
+    IN i_minMovPlayDate date,
+    IN i_maxMovPlayDate date,
+    IN i_includeNotPlayed boolean
+)
 BEGIN
-    -- TODO Implement
-    SELECT * FROM user;
+    DROP TABLE IF EXISTS ManFilterTh;
+    CREATE TABLE ManFilterTh
+        SELECT movieplay.MovieName AS movName, movieplay.Duration as movDuration,
+            movieplay.ReleaseDate AS movReleaseDate, movieplay.Date as movPlayDate
+        FROM movieplay
+        LEFT JOIN movie ON movieplay.MovieName = movie.Name
+            AND movieplay.ReleaseDate = movie.ReleaaseDate
+        LEFT JOIN theater ON movieplay.TheaterName = theater.TheaterName
+            AND movieplay.CompanyName = theater.CompanyName
+        WHERE i_manUsername = theater.Manager
+        -- Perform movie name filter
+        AND (i_movName <=> '' OR UPPER(movie.Name) <=> UPPER(i_movName))
+        -- Perform movie duration filter
+        AND (i_minMovDuration     IS NULL OR Duration              >= i_minMovDuration)
+        AND (i_maxMovDuration     IS NULL OR Duration              <= i_maxMovDuration)
+        -- Perform movie release date filter
+        AND (i_minMovReleaseDate  IS NULL OR movieplay.ReleaseDate >= i_minMovReleaseDate)
+        AND (i_maxMovReleaseDate  IS NULL OR movieplay.ReleaseDate <= i_maxMovReleaseDate)
+        -- Perform movie play date filter
+        AND (i_minMovPlayDate     IS NULL OR movieplay.Date        >= i_minMovPlayDate)
+        AND (i_maxMovPlayDate     IS NULL OR movieplay.Date        <= i_maxMovPlayDate)
+        -- Perform include not played
+        AND IFNULL(i_includeNotPlayed, FALSE) OR movieplay.Date <= CURDATE();
 END$$
 DELIMITER ;
 
@@ -432,10 +481,19 @@ DELIMITER ;
 
 DROP PROCEDURE IF EXISTS `manager_schedule_mov`;
 DELIMITER $$
-CREATE PROCEDURE `manager_schedule_mov` ()
+CREATE PROCEDURE `manager_schedule_mov` (
+    IN i_manUsername varchar(240),
+    IN i_movName varchar(240),
+    IN i_movReleaseDate date,
+    IN i_movPlayDate date
+)
 BEGIN
-    -- TODO Implement
-    SELECT * FROM user;
+    -- Find theater/company of manager
+    SET @theater_name = (SELECT TheaterName FROM Theater WHERE Manager = i_manUsername);
+    SET @company_name = (SELECT CompanyName FROM Theater WHERE Manager = i_manUsername);
+    -- Add new MoviePlay row
+    INSERT INTO movieplay (Date, MovieName, ReleaseDate, TheaterName, CompanyName)
+    VALUES (i_movPlayDate, i_movName, i_movReleaseDate, @theater_name, @company_name );
 END$$
 DELIMITER ;
 
@@ -445,10 +503,38 @@ DELIMITER ;
 
 DROP PROCEDURE IF EXISTS `customer_filter_mov`;
 DELIMITER $$
-CREATE PROCEDURE `customer_filter_mov` ()
+CREATE PROCEDURE `customer_filter_mov` (
+    IN i_movName varchar(240),
+    IN i_comName varchar(240),
+    IN i_city varchar(240),
+    IN i_state varchar(3),
+    IN i_minMovPlayDate date,
+    IN i_maxMovPlayDate date
+)
 BEGIN
-    -- TODO Implement
-    SELECT * FROM user;
+    DROP TABLE IF EXISTS CosFilterMovie;
+    CREATE TABLE CosFilterMovie
+        SELECT movieplay.MovieName AS movName,
+            movieplay.TheaterName as thName,
+            Street AS thStreet,
+            City AS thCity,
+            State AS thState,
+            Zipcode AS thZipcode,
+            movieplay.CompanyName AS comName,
+            movieplay.Date AS movPlayDate,
+            movieplay.ReleaseDate AS movReleaseDate
+        FROM movieplay
+        LEFT JOIN theater ON movieplay.TheaterName = theater.TheaterName
+            AND movieplay.CompanyName = theater.CompanyName
+        -- Perform simple filters
+        WHERE (i_movName = '' OR movieplay.MovieName   <=> i_movName)
+        AND (i_comName   = '' OR movieplay.CompanyName <=> i_comName)
+        AND (i_city      = '' OR City                  <=> i_city)
+        -- State can be '' or 'ALL' to indicate no filter
+        AND (i_state = '' OR i_state = 'ALL' OR State <=> i_state)
+        -- Perform min/max movie play date filters
+        AND (i_minMovPlayDate IS NULL OR movieplay.Date >= i_minMovPlayDate)
+        AND (i_maxMovPlayDate IS NULL OR movieplay.Date <= i_maxMovPlayDate);
 END$$
 DELIMITER ;
 
@@ -458,10 +544,22 @@ DELIMITER ;
 
 DROP PROCEDURE IF EXISTS `customer_view_mov`;
 DELIMITER $$
-CREATE PROCEDURE `customer_view_mov` ()
+CREATE PROCEDURE `customer_view_mov` (
+    IN i_creditCardNum char(19),
+    IN i_movName varchar(240),
+    IN i_movReleaseDate date,
+    IN i_thName varchar(240),
+    IN i_comName varchar(240),
+    IN i_movPlayDate date
+)
 BEGIN
-    -- TODO Implement
-    SELECT * FROM user;
+    INSERT INTO used (
+        CreditCardNum, Date, MovieName,
+        ReleaseDate, TheaterName, CompanyName
+    ) VALUES (
+        i_creditCardNum, i_movPlayDate, i_movName,
+        i_movReleaseDate, i_thName, i_comName
+    );
 END$$
 DELIMITER ;
 
@@ -471,10 +569,19 @@ DELIMITER ;
 
 DROP PROCEDURE IF EXISTS `customer_view_history`;
 DELIMITER $$
-CREATE PROCEDURE `customer_view_history` ()
+CREATE PROCEDURE `customer_view_history` (
+    IN i_cusUsername varchar(240)
+)
 BEGIN
-    -- TODO Implement
-    SELECT * FROM user;
+    DROP TABLE IF EXISTS CosViewHistory;
+    CREATE TABLE CosViewHistory
+        SELECT MovieName AS movName,
+            TheaterName AS thName,
+            CompanyName AS comName,
+            creditCardNum,
+            PlayDate AS movPlayDate
+        FROM used NATURAL JOIN CreditCard
+        WHERE Owner = i_cusUsername;
 END$$
 DELIMITER ;
 
@@ -488,18 +595,18 @@ CREATE PROCEDURE `user_filter_th` (
     IN i_thName VARCHAR(240),
     IN i_comName VARCHAR(240),
     IN i_city VARCHAR(240),
-    IN i_state CHAR(2)
+    IN i_state CHAR(3)
 )
 BEGIN
     DROP TABLE IF EXISTS UserFilterTh;
     CREATE TABLE UserFilterTh
-    SELECT thName, thStreet, thCity, thState, thZipcode, comName 
-    FROM Theater
-    WHERE 
-        (thName = i_thName OR i_thName = "ALL") AND
-        (comName = i_comName OR i_comName = "ALL") AND
-        (thCity = i_city OR i_city = "") AND
-        (thState = i_state OR i_state = "ALL");
+        SELECT thName, thStreet, thCity, thState, thZipcode, comName 
+        FROM Theater
+        WHERE 
+            (thName = i_thName OR i_thName = "ALL") AND
+            (comName = i_comName OR i_comName = "ALL") AND
+            (thCity = i_city OR i_city = "") AND
+            (thState = i_state OR i_state = "ALL");
 END$$
 DELIMITER ;
 
@@ -510,10 +617,10 @@ DELIMITER ;
 DROP PROCEDURE IF EXISTS `user_visit_th`;
 DELIMITER $$
 CREATE PROCEDURE `user_visit_th` (
-    IN i_thName VARCHAR(50),
-    IN i_comName VARCHAR(50),
+    IN i_thName VARCHAR(240),
+    IN i_comName VARCHAR(240),
     IN i_visitDate DATE,
-    IN i_username VARCHAR(50)
+    IN i_username VARCHAR(240)
 )
 BEGIN
     INSERT INTO UserVisitTheater (thName, comName, visitDate, username)
@@ -528,20 +635,18 @@ DELIMITER ;
 DROP PROCEDURE IF EXISTS `user_filter_visitHistory`;
 DELIMITER $$
 CREATE PROCEDURE `user_filter_visitHistory` (
-    IN i_username VARCHAR(50), 
+    IN i_username VARCHAR(240), 
     IN i_minVisitDate DATE,
     IN i_maxVisitDate DATE
 )
 BEGIN
     DROP TABLE IF EXISTS UserVisitHistory;
     CREATE TABLE UserVisitHistory
-    SELECT thName, thStreet, thCity, thState, thZipcode, comName, visitDate
-    FROM UserVisitTheater
-        NATURAL JOIN
-        Theater
-    WHERE
-        (username = i_username) AND
-        (i_minVisitDate IS NULL OR visitDate >= i_minVisitDate) AND
-        (i_maxVisitDate IS NULL OR visitDate <= i_maxVisitDate);
+        SELECT thName, thStreet, thCity, thState, thZipcode, comName, visitDate
+        FROM UserVisitTheater NATURAL JOIN Theater
+        WHERE
+            (username = i_username) AND
+            (i_minVisitDate IS NULL OR visitDate >= i_minVisitDate) AND
+            (i_maxVisitDate IS NULL OR visitDate <= i_maxVisitDate);
 END$$
 DELIMITER ;
