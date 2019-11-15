@@ -149,8 +149,10 @@ $line-width: 225px;
 
     &.login-button__reverse {
         background-color: $-secondary;
+        color: $-light;
         @include transitions(
             (
+                color,
                 background-color,
                 padding,
                 margin-left,
