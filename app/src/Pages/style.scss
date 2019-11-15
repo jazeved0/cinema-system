@@ -1,0 +1,272 @@
+@import "../scss/media";
+@import "../scss/colors";
+@import "../scss/util";
+@import "../scss/theme";
+
+.intro-space {
+    margin-top: 2.5rem;
+
+    @include respond-above(sm) {
+        margin-top: 3rem;
+    }
+}
+
+$full-width: 600px;
+$line-width: 225px;
+
+.cta-button.login-button {
+    $this: &;
+    border-radius: 32px !important;
+    position: relative;
+    max-width: 100%;
+    border: none !important;
+
+    .login-wrapper {
+        @include transitions("width", 0.4s);
+        width: 0;
+    }
+
+    .cta-button--content-wrapper {
+        margin: 0 0.5rem;
+        width: calc(100% - 1rem);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cta-button--content {
+        position: relative;
+
+        $height: 2px;
+        $h-offset: 16px;
+        $v-offset: 2px;
+
+        &::after,
+        &::before {
+            @include transitions("width", 0.6s);
+            @include dark-bg(rgba($-light, 0.16));
+            @include light-bg(rgba($-dark, 0.12));
+
+            content: " ";
+            height: 2px;
+            position: absolute;
+            top: calc(50% - #{$height / 2} + #{$v-offset});
+            width: 0;
+        }
+
+        &::before {
+            left: calc(100% + #{$h-offset});
+        }
+
+        &::after {
+            right: calc(100% + #{$h-offset});
+        }
+    }
+
+    &::before {
+        @include transitions("width", 0.4s);
+        position: relative;
+        display: block;
+        height: 1px;
+        width: 0;
+        max-width: 100%;
+        content: " ";
+    }
+
+    &::after {
+        @include transitions("opacity", 0.4s);
+        content: "";
+        border-radius: 8px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        box-shadow: $drop-shadow;
+        opacity: 0;
+    }
+
+    &:not(.cta-button__active) {
+        transition-delay: 0.5s;
+    }
+
+    &#{$this}__active {
+        @include dark-bg($dark-400, $important: true);
+        @include light-bg($light-500, $important: true);
+        @include dark-border(transparent, $important: true);
+        @include light-border(transparent, $important: true);
+        @include light-fg;
+
+        padding: 1rem !important;
+        margin-left: 0 !important;
+        border-radius: 8px !important;
+        box-shadow: none !important;
+        cursor: initial;
+        user-select: text;
+        transition: none;
+        pointer-events: none;
+
+        & > * {
+            pointer-events: all;
+        }
+
+        &::before {
+            width: $full-width;
+        }
+
+        &::after {
+            opacity: 1;
+        }
+
+        .cta-button--content {
+            &::before,
+            &::after {
+                transition-delay: 0.7s;
+                transition-timing-function: cubic-bezier(0.45, 0, 0, 1);
+                width: $line-width;
+            }
+        }
+
+        .login-wrapper {
+            width: 100%;
+            max-width: $full-width;
+        }
+
+        &#{$this}__transitioning {
+            @include transitions(
+                (
+                    background-color,
+                    padding,
+                    margin-left,
+                    transform,
+                    border-radius,
+                    box-shadow,
+                    min-width
+                ),
+                0.5s
+            );
+        }
+    }
+
+    &.login-button__reverse {
+        background-color: $-secondary;
+        @include transitions(
+            (
+                background-color,
+                padding,
+                margin-left,
+                transform,
+                border-radius,
+                box-shadow,
+                min-width
+            ),
+            0.5s
+        );
+        transition-delay: 0.35s !important;
+
+        &::before {
+            transition-duration: 0.35s;
+            transition-delay: 0.4s;
+        }
+
+        &::after {
+            transition-duration: 0.35s;
+            transition-delay: 0.4s;
+        }
+    }
+}
+
+.login-pane {
+    $this: &;
+
+    position: relative;
+    font-size: 1rem !important;
+    text-align: left;
+    padding: 1rem 0.5rem 0.5rem;
+
+    .form-group {
+        label {
+            @include dark-fade-fg;
+            @include light-fade-fg;
+        }
+
+        &:last-child {
+            margin-top: 1.45rem;
+            margin-bottom: 0;
+        }
+    }
+
+    #{$this}--close {
+        @extend %button-blank;
+
+        @include dark {
+            background-color: $dark-400;
+            color: rgba($-light, 0.5);
+
+            &:hover {
+                color: $-light;
+            }
+        }
+
+        @include light {
+            background-color: $light-500;
+            color: rgba($-dark, 0.5);
+
+            &:hover {
+                color: $-dark;
+            }
+        }
+
+        font-size: 1.5rem;
+        height: 3rem;
+        width: 3rem;
+        border-radius: 768px;
+        position: absolute;
+        top: -40px;
+        right: -6px;
+
+        span:first-child {
+            position: relative;
+            top: -4px;
+        }
+    }
+
+    #{$this}--buttons {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+
+        .btn {
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+            flex-grow: 1;
+            flex-shrink: 1;
+            max-width: 130px;
+
+            &:not(:last-child) {
+                margin-right: 1.25rem;
+            }
+        }
+
+        #{$this}--login-button {
+            #{$this}--login-button-spinner {
+                @include transitions((width, opacity, margin-left));
+                margin-left: 0;
+                opacity: 0;
+                position: relative;
+                top: -1px;
+                display: inline-block;
+                width: 0;
+            }
+
+            &#{$this}--login-button__loading {
+                cursor: not-allowed;
+
+                #{$this}--login-button-spinner {
+                    opacity: 1;
+                    margin-left: 0.75rem;
+                    width: 1rem;
+                }
+            }
+        }
+    }
+}

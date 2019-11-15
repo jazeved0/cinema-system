@@ -1,4 +1,4 @@
-import { invertMap } from "utility";
+import { invertMap, isDefined } from "Utility";
 import { library } from "@fortawesome/fontawesome-svg-core";
 
 import * as FontAwesomeIcons from "./fontawesome";
@@ -26,6 +26,6 @@ function resolveTypeClass(name) {
   return foundClass;
 }
 
-export function resolveIcon(name) {
-  return [resolveTypeClass(name), name];
+export function resolveIcon(name, typeClass) {
+  return [isDefined(typeClass) ? typeClass : resolveTypeClass(name), name];
 }

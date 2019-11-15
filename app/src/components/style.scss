@@ -16,39 +16,42 @@
         }
 
         .brand {
-            @include transitions("background-color");
+            @include transitions("background-color, box-shadow");
             display: flex;
             flex-direction: row;
             align-items: center;
+            border-radius: 0.35rem;
+            color: rgba($-light, 0.8) !important;
 
             .brand--icon {
                 font-size: 2.2rem;
-
-                svg {
-                    position: relative;
-                    top: -11px;
-                }
+                color: $-light;
+                top: -6px;
             }
 
             .brand--text {
+                @include transitions("color");
                 margin-bottom: 0;
                 margin-top: 0;
                 margin-left: 1rem;
                 font-size: 1.1em;
                 font-weight: 400;
-                color: rgba($-light, 0.8);
+                color: inherit;
 
-                @include respond-below(sm) {
+                @include respond-below(xs) {
                     display: none;
                 }
             }
 
             &:hover {
-                background-color: rgba($-light, 0.1);
+                color: $-light !important;
+                background-color: rgba($-dark, 0.1);
+                box-shadow: $drop-shadow-inner;
             }
         }
 
-        a, button {
+        a,
+        button {
             @extend %button-blank;
 
             font-size: 1.5rem;
@@ -65,7 +68,7 @@
 
             span {
                 position: relative;
-                top: -4px;
+                top: -2px;
             }
         }
 
@@ -81,4 +84,87 @@
             }
         }
     }
+}
+
+.cta-button.cta-button {
+    @include transitions((box-shadow, background-color));
+    $this: ".cta-button";
+
+    border-radius: 768px;
+    padding: 0.3em 1.5em 0.5em;
+    font-size: 1.5em;
+    cursor: pointer;
+    user-select: none;
+
+    @include respond-above(md) {
+        // Restore vertical rhythm by offsetting border radius
+        margin-left: -8px;
+    }
+
+    @include respond-below(md) {
+        font-size: 1.2em !important;
+    }
+
+    #{$this}--content {
+        display: inline-flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #{$this}--icon {
+        margin-left: 1rem;
+    }
+
+    &#{$this}__animated {
+        #{$this}--icon {
+            @include transitions((margin-left, margin-right, opacity, width));
+            opacity: 1;
+            width: 0;
+        }
+
+        &:not(:hover) {
+            #{$this}--icon {
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                width: 0 !important;
+                opacity: 0;
+                overflow: hidden;
+            }
+        }
+    }
+
+    &#{$this}__reversed {
+        flex-direction: row-reverse;
+
+        #{$this}--icon {
+            margin-left: 0;
+            margin-right: 1rem;
+        }
+    }
+
+    &#{$this}__glowing {
+        @each $name, $color in $theme-colors {
+            $base-drop-shadow: 0 6px 16px rgba($color, 0.3);
+
+            &.btn-#{$name} {
+                box-shadow: $base-drop-shadow;
+
+                &:not(:disabled):not(.disabled):focus {
+                    box-shadow: highlight-shadow-value($color, 0.2),
+                        $base-drop-shadow;
+                }
+
+                &:not(:disabled):not(.disabled):active {
+                    box-shadow: highlight-shadow-value($color, 0.2),
+                        inset 0 3px 5px rgba(0, 0, 0, 0.125), $base-drop-shadow;
+                }
+            }
+        }
+    }
+}
+
+.lead {
+    margin-bottom: 2rem;
 }

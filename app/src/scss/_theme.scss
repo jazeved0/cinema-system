@@ -10,6 +10,7 @@ $drop-shadow: $drop-shadow-0;
 $drop-shadow-light: 0 3px 8px 0 rgba(black, 0.05);
 $drop-shadow-slight: 0 2px 8px 0 rgba(black, 0.3);
 
+$drop-shadow-inner: inset 0 0 8px rgba(0, 0, 0, 0.1);
 $drop-shadow-inner-top: inset 0px 11px 8px -10px rgba(black, 0.125);
 
 $border-radius: 8px;
@@ -58,6 +59,9 @@ $scrollbar-width: 12px;
     }
 
     @include dark {
-        @include scrollbar(blend($dark-main-bg, $-light, 0.4), $scrollbar-width);
+        @include scrollbar(
+            blend($dark-main-bg, $-light, 0.4),
+            $scrollbar-width
+        );
     }
 }

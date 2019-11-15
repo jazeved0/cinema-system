@@ -1,7 +1,8 @@
 import React from "react";
-import { Navbar } from "react-bootstrap";
-import { Icon } from "components";
 import useDarkMode from "use-dark-mode";
+
+import { Navbar } from "react-bootstrap";
+import { Icon, Link } from "Components";
 
 export default function Layout({ children }) {
   // Dark/light theme selection
@@ -15,15 +16,18 @@ export default function Layout({ children }) {
           <h1 className="brand--text">Cinema System</h1>
         </Navbar.Brand>
         <div className="right-buttons">
-          <a
+          <Link
             href="https://github.com/jazevedo620/cs4400-team20"
-            rel="noopener noreferrer"
-            target="blank"
+            ariaLabel="Github"
           >
             <Icon name="github" />
-          </a>
+          </Link>
           <span className="nav-divider" />
-          <button className="dark-mode-button" onClick={toggle}>
+          <button
+            className="dark-mode-button"
+            onClick={toggle}
+            aria-label="Toggle dark mode"
+          >
             {!value && <Icon name="sun" />}
             {value && <Icon name="moon" />}
           </button>

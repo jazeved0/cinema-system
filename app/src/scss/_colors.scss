@@ -14,7 +14,7 @@ $gray-900: #212529 !default;
 $black: #000 !default;
 
 // Theme colors
-$hint-of-red: #F8F6F6 !default;
+$hint-of-blue: rgb(246, 246, 248) !default;
 $lynch: #6D8397 !default;
 $hibiscus: #B63769 !default;
 $lombolly: #BCC3CA !default;
@@ -45,7 +45,7 @@ $theme-colors: (
     info: $steel-gray,
     warning: $brady-punch,
     danger: $pomegranate,
-    light: $hint-of-red,
+    light: $hint-of-blue,
     dark: $shark
 ) !default;
 

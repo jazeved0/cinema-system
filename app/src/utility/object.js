@@ -17,3 +17,7 @@ export function isDefined(object) {
 export function isIterable(obj) {
   return isDefined(obj) && typeof obj[Symbol.iterator] === "function";
 }
+
+export function createObject() {
+  return Object.create(null);
+}

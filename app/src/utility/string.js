@@ -2,6 +2,17 @@ import { isNil, isDefined } from "./object";
 import zip from "lodash/zip";
 import flatten from "lodash/flatten";
 
+const domain = "cinema-system.ga";
+const externalRegex = new RegExp(`^(?:(?:http|https):\\/\\/(?!(?:www\\.)?${domain})[\\w./=?#-_]+)|(?:mailto:.+)$`);
+export function isExternal(href) {
+  return externalRegex.test(href);
+}
+
+const fileRegex = /^[\w./=:?#-]+[.]\w+$/;
+export function isFile(href) {
+  return fileRegex.test(href);
+}
+
 export function isEmptyOrNil(string) {
   if (typeof string !== "string") return true;
   return isNil(string) || string.trim().length === 0;
