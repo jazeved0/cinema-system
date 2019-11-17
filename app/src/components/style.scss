@@ -38,7 +38,8 @@
                 font-weight: 400;
                 color: inherit;
 
-                @include respond-below(xs) {
+
+                @media (max-width: 400px) {
                     display: none;
                 }
             }

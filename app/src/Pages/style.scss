@@ -20,6 +20,7 @@ $line-width: 225px;
     position: relative;
     max-width: 100%;
     border: none !important;
+    margin-bottom: 2rem;
 
     .login-wrapper {
         @include transitions("width", 0.4s);

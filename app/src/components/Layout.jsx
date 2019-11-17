@@ -15,6 +15,7 @@ export default function Layout({ children }) {
           <Icon name="film" className="brand--icon" />
           <h1 className="brand--text">Cinema System</h1>
         </Navbar.Brand>
+
         <div className="right-buttons">
           <Link
             href="https://github.com/jazevedo620/cs4400-team20"

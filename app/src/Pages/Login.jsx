@@ -7,14 +7,6 @@ import AnimateHeight from "react-animate-height";
 
 import "./style.scss";
 
-document.addEventListener(
-  "focusin",
-  function() {
-    console.log("focused: ", document.activeElement);
-  },
-  true
-);
-
 export default function Login() {
   const [activeLogin, setActiveLogin] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
