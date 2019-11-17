@@ -6,7 +6,7 @@ import { Icon, Link } from "Components";
 
 export default function Layout({ children }) {
   // Dark/light theme selection
-  const { value, toggle } = useDarkMode(true);
+  const { value, toggle } = useDarkMode();
 
   return (
     <div className="layout">
