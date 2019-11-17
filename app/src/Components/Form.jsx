@@ -243,11 +243,7 @@ Form.SmartSetInput = React.forwardRef((props, ref) => {
     ...rest
   } = props;
   const [currentText, setCurrentText] = useState("");
-  const onRemove = index => {
-    console.log("????");
-    console.log(new Error().stack);
-    onChange(value.filter((_o, i) => i !== index));
-  };
+  const onRemove = index => onChange(value.filter((_o, i) => i !== index));
   const onAdd = () => {
     if (currentText.trim() === "") return;
     if (passes) {

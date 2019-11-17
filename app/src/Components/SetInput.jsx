@@ -81,7 +81,6 @@ SetInput.Item = function({ index, onRemove, children }) {
       className="set-input--item"
       type="button"
       onClick={useCallback(() => {
-        console.log("____");
         onRemove(index);
       }, [index, onRemove])}
     >
