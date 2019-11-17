@@ -12,10 +12,6 @@ import { ReactComponent as maestro } from "payment-icons/min/single/maestro.svg"
 import { ReactComponent as mastercard } from "payment-icons/min/single/mastercard.svg";
 import { ReactComponent as unionpay } from "payment-icons/min/single/unionpay.svg";
 
-// ? ==============
-// ? Sub-components
-// ? ==============
-
 const ccTypes = {
   visa,
   mastercard,
