@@ -240,6 +240,7 @@ Form.SmartSetInput = React.forwardRef((props, ref) => {
     disabled,
     onKeyDown,
     renderItem,
+    className,
     ...rest
   } = props;
   const [currentText, setCurrentText] = useState("");
@@ -310,6 +311,7 @@ Form.SmartSetInput = React.forwardRef((props, ref) => {
         disabled={disabled}
         addDisabled={currentText.trim() === "" || !passes}
         renderItem={renderItem}
+        className={className}
       >
         <BootstrapForm.Control
           {...rest}

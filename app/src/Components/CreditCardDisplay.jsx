@@ -1,16 +1,16 @@
 import React from "react";
 import creditCardType from "credit-card-type";
 
-import visa from "payment-icons/min/single/visa.svg";
-import amex from "payment-icons/min/single/amex.svg";
-import diners from "payment-icons/min/single/diners.svg";
-import discover from "payment-icons/min/single/discover.svg";
-import elo from "payment-icons/min/single/elo.svg";
-import hipercard from "payment-icons/min/single/hipercard.svg";
-import jcb from "payment-icons/min/single/jcb.svg";
-import maestro from "payment-icons/min/single/maestro.svg";
-import mastercard from "payment-icons/min/single/mastercard.svg";
-import unionpay from "payment-icons/min/single/unionpay.svg";
+import { ReactComponent as visa } from "payment-icons/min/flat/visa.svg";
+import { ReactComponent as amex } from "payment-icons/min/flat/amex.svg";
+import { ReactComponent as diners } from "payment-icons/min/single/diners.svg";
+import { ReactComponent as discover } from "payment-icons/min/single/discover.svg";
+import { ReactComponent as elo } from "payment-icons/min/single/elo.svg";
+import { ReactComponent as hipercard } from "payment-icons/min/flat/hipercard.svg";
+import { ReactComponent as jcb } from "payment-icons/min/single/jcb.svg";
+import { ReactComponent as maestro } from "payment-icons/min/single/maestro.svg";
+import { ReactComponent as mastercard } from "payment-icons/min/single/mastercard.svg";
+import { ReactComponent as unionpay } from "payment-icons/min/single/unionpay.svg";
 
 // ? ==============
 // ? Sub-components
@@ -38,21 +38,21 @@ export default function CreditCardDisplay(props) {
     label = match[0].niceType;
   }
 
-  let icon = null;
+  let Icon = null;
   const isSupported = ccTypes.hasOwnProperty(ccType);
-  if (isSupported) icon = ccTypes[ccType];
+  if (isSupported) Icon = ccTypes[ccType];
 
   return (
     <div className="credit-card-display">
       {isSupported && (
-        <img
+        <span
           className="credit-card-display--icon"
           aria-label={label}
           alt={label}
-          src={icon}
+          children={<Icon />}
         />
       )}
-      {text}
+      <span className="credit-card-display--text">{text}</span>
     </div>
   );
 }

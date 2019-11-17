@@ -1,5 +1,6 @@
 import React, { useCallback } from "react";
 import PropTypes from "prop-types";
+import classNames from "classnames";
 
 import { Button } from "react-bootstrap";
 import { Icon } from "Components";
@@ -11,11 +12,13 @@ export default function SetInput(props) {
     removeItem,
     renderItem,
     children,
-    addDisabled
+    addDisabled,
+    disabled,
+    className
   } = props;
 
   return (
-    <div className="set-input">
+    <div className={classNames("set-input", className, { disabled })}>
       <div className="set-input--items-pane">
         {items.map((item, i) => (
           <SetInput.Item
@@ -58,13 +61,19 @@ SetInput.propTypes = {
   children: PropTypes.oneOfType([
     PropTypes.node,
     PropTypes.arrayOf(PropTypes.node)
-  ])
+  ]),
+  disabled: PropTypes.bool,
+  addDisabled: PropTypes.bool,
+  className: PropTypes.string
 };
 SetInput.defaultProps = {
   items: [],
   addItem() {},
   removeItem() {},
-  renderItem: item => <div>{String(item)}</div>
+  renderItem: item => <div>{String(item)}</div>,
+  disabled: false,
+  addDisabled: false,
+  className: ""
 };
 SetInput.displayName = "SetInput";
 

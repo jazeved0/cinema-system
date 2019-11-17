@@ -79,7 +79,8 @@ export default function RegisterCustomer() {
                   } else return trimmed;
                 },
                 max: 5,
-                renderItem: item => <CreditCardDisplay text={item} />
+                renderItem: item => <CreditCardDisplay text={item} />,
+                className: "credit-card-input"
               }
             }
           ]}

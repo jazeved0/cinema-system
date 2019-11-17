@@ -290,19 +290,47 @@
 }
 
 .set-input {
+    $this: &;
     @include transitions("box-shadow");
 
     border-radius: 8px;
     border: 1px solid rgba(#ced4da, 0.5);
 
+    @include light {
+        &.disabled {
+            color: rgba($-dark, 0.8) !important;
+        }
+    }
+
     @include dark {
         border-color: transparent;
+
+        &.disabled {
+            color: rgba($-light, 0.8) !important;
+            border-color: $dark-200;
+            cursor: not-allowed;
+        }
+    }
+
+    &.disabled {
+        #{$this}--item {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        #{$this}--add {
+            opacity: 0.6;
+            pointer-events: none;
+            cursor: not-allowed;
+        }
     }
 
     &--items-pane {
         position: relative;
         min-height: 38px;
         padding: 0.5rem 0.5rem 0.05rem;
+        display: flex;
+        flex-wrap: wrap;
 
         border-bottom: 1px solid rgba(#ced4da, 0.5);
         border-top-left-radius: 8px;
@@ -550,8 +578,14 @@
 
 .credit-card-display {
     &--icon {
-        position: relative;
-        width: 3rem;
-        height: auto;
+        svg {
+            position: relative;
+            width: auto;
+            height: 2rem;
+        }
+    }
+
+    &--text {
+        margin-left: 0.5rem;
     }
 }
