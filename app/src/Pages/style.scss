@@ -231,44 +231,4 @@ $line-width: 225px;
             top: -4px;
         }
     }
-
-    #{$this}--buttons {
-        display: flex;
-        flex-direction: row;
-        justify-content: flex-end;
-
-        .btn {
-            padding-left: 1.5rem;
-            padding-right: 1.5rem;
-            flex-grow: 1;
-            flex-shrink: 1;
-            max-width: 130px;
-
-            &:not(:last-child) {
-                margin-right: 1.25rem;
-            }
-        }
-
-        #{$this}--login-button {
-            #{$this}--login-button-spinner {
-                @include transitions((width, opacity, margin-left));
-                margin-left: 0;
-                opacity: 0;
-                position: relative;
-                top: -1px;
-                display: inline-block;
-                width: 0;
-            }
-
-            &#{$this}--login-button__loading {
-                cursor: not-allowed;
-
-                #{$this}--login-button-spinner {
-                    opacity: 1;
-                    margin-left: 0.75rem;
-                    width: 1rem;
-                }
-            }
-        }
-    }
 }
