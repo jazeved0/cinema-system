@@ -5,7 +5,13 @@ import React, {
   useMemo,
   useRef
 } from "react";
-import { createObject, isDefined, isNil, identity } from "Utility";
+import {
+  createObject,
+  isDefined,
+  isNil,
+  identity,
+  isEmptyOrNil
+} from "Utility";
 import classNames from "classnames";
 
 import {
@@ -15,6 +21,7 @@ import {
   Row,
   Col
 } from "react-bootstrap";
+import { SetInput } from "Components";
 
 export default function Form(props) {
   const {
@@ -23,7 +30,9 @@ export default function Form(props) {
     submit: { variant, text },
     onSubmit,
     buttons,
-    isShown
+    isShown,
+    focusDelay,
+    collapse
   } = props;
 
   // Key => Entry map
@@ -35,7 +44,7 @@ export default function Form(props) {
     (key, event) => {
       let processFunc = entriesMap[key].processValue;
       if (isNil(processFunc)) processFunc = identity;
-      const newValue = isDefined(event.target) ? event.target.value : "";
+      const newValue = isDefined(event.target) ? event.target.value : event;
       setValues({
         ...values,
         [key]: processFunc(newValue)
@@ -49,26 +58,29 @@ export default function Form(props) {
   useEffect(() => {
     if (isShown && isDefined(firstInput.current)) {
       // Select after animation completes
-      const timer = setTimeout(() => firstInput.current.focus(), 700);
+      const timer = setTimeout(() => firstInput.current.focus(), focusDelay);
       return () => clearTimeout(timer);
     }
-  }, [isShown]);
+  }, [isShown, focusDelay]);
 
   // Input validation calculation & status
   const [showValidation, setShowValidation] = useState(false);
-  const [validationStatus, isValid] = useMemo(() => validate(entries, values), [
-    entries,
-    values
-  ]);
+  // eslint-disable-next-line no-unused-vars
+  const [validationStatus, _] = useMemo(
+    () => validate(entries, values, showValidation),
+    [entries, values, showValidation]
+  );
 
   // Button press callbacks
   const tryLogin = useCallback(() => {
+    /* eslint-disable no-unused-vars */
+    const [_, isValid] = validate(entries, values, true);
     if (isValid) {
       onSubmit(values);
     } else {
       setShowValidation(true);
     }
-  }, [values, onSubmit, isValid]);
+  }, [values, onSubmit, entries]);
 
   useEffect(() => {
     if (!isShown) {
@@ -89,11 +101,6 @@ export default function Form(props) {
     },
     [tryLogin]
   );
-  useEffect(() => {
-    document.addEventListener("keydown", handleKeyPressed, false);
-    return () =>
-      document.removeEventListener("keydown", handleKeyPressed, false);
-  }, [handleKeyPressed]);
 
   // Validate upon lost focus
   const [finishedInputs, setFinishedInputs] = useState(
@@ -122,16 +129,17 @@ export default function Form(props) {
           as={Row}
           controlId={`loginPane-${entry.key}`}
         >
-          <BootstrapForm.Label column sm={2}>
+          <BootstrapForm.Label column {...{ [collapse]: 2 }}>
             {entry.name}
           </BootstrapForm.Label>
-          <Col sm={10}>
+          <Col {...{ [collapse]: 10 }}>
             <Form.Input
               type={entry.type || "text"}
               inputKey={entry.key}
               placeholder={`Enter ${entry.name.toLowerCase()}`}
               onChange={onChange}
               onBlur={onBlur}
+              onKeyDown={handleKeyPressed}
               value={values[entry.key]}
               isValid={
                 validated(entry) &&
@@ -143,10 +151,9 @@ export default function Form(props) {
               }
               ref={i === 0 ? firstInput : undefined}
               disabled={isLoading}
+              {...entry.props}
+              message={validationStatus[entry.key].message}
             />
-            <BootstrapForm.Control.Feedback type="invalid">
-              {validationStatus[entry.key].message}
-            </BootstrapForm.Control.Feedback>
             {isDefined(entry.info) ? (
               <BootstrapForm.Text className="text-muted">
                 {entry.info}
@@ -180,18 +187,156 @@ export default function Form(props) {
   );
 }
 Form.displayName = "Form";
+Form.defaultProps = {
+  collapse: "sm"
+};
 
 Form.Input = React.forwardRef(
-  ({ onChange, onBlur, inputKey, ...rest }, ref) => (
-    <BootstrapForm.Control
-      onChange={useCallback(e => onChange(inputKey, e), [onChange, inputKey])}
-      onBlur={useCallback(() => onBlur(inputKey), [onBlur, inputKey])}
-      ref={ref}
-      {...rest}
-    />
-  )
+  ({ onChange, onBlur, inputKey, type, message, ...rest }, ref) => {
+    if (type === "text" || type === "password") {
+      return (
+        <>
+          <BootstrapForm.Control
+            onChange={useCallback(e => onChange(inputKey, e), [
+              onChange,
+              inputKey
+            ])}
+            onBlur={useCallback(() => onBlur(inputKey), [onBlur, inputKey])}
+            ref={ref}
+            type={type}
+            {...rest}
+          />
+          <BootstrapForm.Control.Feedback type="invalid" children={message} />
+        </>
+      );
+    } else if (type === "set") {
+      return (
+        <Form.SmartSetInput
+          onBlur={useCallback(() => onBlur(inputKey), [onBlur, inputKey])}
+          onChange={useCallback(e => onChange(inputKey, e), [
+            onChange,
+            inputKey
+          ])}
+          ref={ref}
+          message={message}
+          {...rest}
+        />
+      );
+    } else return null;
+  }
 );
 Form.Input.displayName = "Form.Input";
+
+Form.SmartSetInput = React.forwardRef((props, ref) => {
+  const {
+    value,
+    onChange,
+    onBlur,
+    processValue,
+    setValidator,
+    max,
+    isInvalid,
+    message,
+    disabled,
+    onKeyDown,
+    renderItem,
+    className,
+    ...rest
+  } = props;
+  const [currentText, setCurrentText] = useState("");
+  const onRemove = index => onChange(value.filter((_o, i) => i !== index));
+  const onAdd = () => {
+    if (currentText.trim() === "") return;
+    if (passes) {
+      onChange([...value, currentText]);
+      setCurrentText("");
+      setShowValidation(false);
+    } else {
+      setShowValidation(true);
+    }
+  };
+  const onKeyPress = e => {
+    const code = e.keyCode || e.which;
+    // Enter keycode
+    if (code === 13) {
+      if (currentText.trim().length > 0) {
+        onAdd();
+        e.stopPropagation();
+      } else onKeyDown(e);
+    }
+  };
+
+  const setValue = newValue => {
+    const processed = processValue(newValue, currentText);
+    if (processed.length === 0) {
+      setShowValidation(false);
+    }
+    setCurrentText(processed);
+  };
+
+  const [result, passes] = applySteps({
+    steps: [
+      { canApply: () => true, apply: value => setValidator(value) },
+      {
+        canApply: () => isDefined(max),
+        apply: () => {
+          if (value.length >= max)
+            return {
+              result: false,
+              message: `Maximum ${max} already reached`
+            };
+        }
+      }
+    ],
+    value: currentText
+  });
+  const [showValidation, setShowValidation] = useState(false);
+  const derivedIsInvalid = isInvalid || (!passes && showValidation);
+  const derivedMessage = derivedIsInvalid
+    ? isEmptyOrNil(result.message)
+      ? message
+      : result.message
+    : null;
+  const onLostFocus = () => {
+    setShowValidation(false);
+    onBlur();
+  };
+
+  return (
+    <div className={classNames({ "is-invalid": derivedIsInvalid })}>
+      <SetInput
+        items={value}
+        addItem={onAdd}
+        removeItem={onRemove}
+        disabled={disabled}
+        addDisabled={currentText.trim() === "" || !passes}
+        renderItem={renderItem}
+        className={className}
+      >
+        <BootstrapForm.Control
+          {...rest}
+          type="text"
+          ref={ref}
+          value={currentText}
+          disabled={disabled}
+          isInvalid={derivedIsInvalid}
+          onBlur={onLostFocus}
+          onKeyDown={onKeyPress}
+          onChange={e => setValue(e.target.value)}
+        />
+      </SetInput>
+      <BootstrapForm.Control.Feedback
+        type="invalid"
+        children={derivedMessage}
+      />
+    </div>
+  );
+});
+Form.SmartSetInput.displayName = "Form.SmartSetInput";
+Form.SmartSetInput.defaultProps = {
+  setValidator: () => true,
+  processValue: a => a
+};
 
 // ? =================
 // ? Utility functions
@@ -200,7 +345,11 @@ Form.Input.displayName = "Form.Input";
 function calculateInitialState(entries) {
   const state = createObject();
   for (let i = 0; i < entries.length; ++i) {
-    state[entries[i].key] = "";
+    if (entries[i].type === "set") {
+      state[entries[i].key] = [];
+    } else {
+      state[entries[i].key] = "";
+    }
   }
   return state;
 }
@@ -220,14 +369,20 @@ function constructMap(array) {
   );
 }
 
-function validate(entries, values) {
+function validate(entries, values, hasSubmitted) {
   let allPass = true;
   let validationStatus = {};
 
   // Validate each entry separately
   for (const entry of entries) {
     const value = values[entry.key];
-    const [result, passes] = applySteps(steps, value, entry);
+    const [result, passes] = applySteps({
+      steps,
+      value,
+      entry,
+      values,
+      hasSubmitted
+    });
     allPass = allPass && passes;
     validationStatus[entry.key] = result;
   }
@@ -239,26 +394,35 @@ const steps = [
   // Required field validator
   {
     canApply: entry => !!entry.required,
-    apply: (value, entry) => {
-      if (value.trim().length === 0) {
-        return {
-          result: false,
-          message: `${entry.name} is a required field`
-        };
+    apply: ({ value, entry }) => {
+      if (typeof value === "string") {
+        if (value.trim().length === 0) {
+          return {
+            result: false,
+            message: `${entry.name} is a required field`
+          };
+        } else return null;
+      } else if (typeof value === "object" && Array.isArray(value)) {
+        if (value.length === 0) {
+          return {
+            result: false,
+            message: `${entry.name} is a required field`
+          };
+        } else return null;
       } else return null;
     }
   },
   // Custom validator function
   {
     canApply: entry => isDefined(entry.validator),
-    apply: (value, entry) => entry.validator(value)
+    apply: ({ entry, ...rest }) => entry.validator(rest)
   }
 ];
 
-function applySteps(steps, value, entry) {
+function applySteps({ steps, value, entry, values, hasSubmitted }) {
   for (const step of steps) {
     if (step.canApply(entry)) {
-      const result = step.apply(value, entry);
+      const result = step.apply({ value, entry, values, hasSubmitted });
       if (isDefined(result)) {
         let resultObject = result;
         if (typeof result === "boolean") {

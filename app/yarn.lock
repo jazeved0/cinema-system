@@ -2951,6 +2951,11 @@ create-react-context@^0.3.0:
     gud "^1.0.0"
     warning "^4.0.3"
 
+credit-card-type@^8.3.0:
+  version "8.3.0"
+  resolved "https://registry.yarnpkg.com/credit-card-type/-/credit-card-type-8.3.0.tgz#f93c187c9362411544158c91d552efcc443aa87a"
+  integrity sha512-czfZUpQ7W9CDxZL4yFLb1kFtM/q2lTOY975hL2aO+DC8+GRNDVSXVCHXhVFZPxiUKmQCZbFP8vIhxx5TBQaThw==
+
 cross-spawn@6.0.5, cross-spawn@^6.0.0, cross-spawn@^6.0.5:
   version "6.0.5"
   resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-6.0.5.tgz#4a5ec7c64dfae22c3a14124dbacdee846d80cbc4"
@@ -7468,6 +7473,11 @@ path-type@^3.0.0:
   integrity sha512-T2ZUsdZFHgA3u4e5PfPbjd7HDDpxPnQb5jN0SrDsjNSuVXHJqtwTnWqG0B1jZrgmJ/7lj1EmVIByWt1gxGkWvg==
   dependencies:
     pify "^3.0.0"
+
+payment-icons@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/payment-icons/-/payment-icons-1.2.1.tgz#7e4ea474a74fe320e0b57980db23c4db2bd42b04"
+  integrity sha512-nfIgiz/QoD63Gtv6VWYxJdUYDAJvh9B+MX3B2qJafVfyb4/Qx7O3K87pTJVeG1K0tOC+5eZPPnACVEaaQG7zxw==
 
 pbkdf2@^3.0.3:
   version "3.0.17"

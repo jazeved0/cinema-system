@@ -73,7 +73,7 @@ DROP PROCEDURE IF EXISTS `customer_add_creditcard`;
 DELIMITER $$
 CREATE PROCEDURE `customer_add_creditcard` (
     IN i_username varchar(240),
-    IN i_creditCardNum char(19)
+    IN i_creditCardNum char(16)
 )
 BEGIN
     INSERT INTO creditcard (owner, creditcardnum)
@@ -141,7 +141,7 @@ DROP PROCEDURE IF EXISTS `manager_customer_add_creditcard`;
 DELIMITER $$
 CREATE PROCEDURE `manager_customer_add_creditcard` (
     IN i_username varchar(240),
-    IN i_creditCardNum char(19)
+    IN i_creditCardNum char(16)
 )
 BEGIN
     INSERT INTO creditcard (owner, creditcardnum)
@@ -545,7 +545,7 @@ DELIMITER ;
 DROP PROCEDURE IF EXISTS `customer_view_mov`;
 DELIMITER $$
 CREATE PROCEDURE `customer_view_mov` (
-    IN i_creditCardNum char(19),
+    IN i_creditCardNum char(16),
     IN i_movName varchar(240),
     IN i_movReleaseDate date,
     IN i_thName varchar(240),

@@ -37,3 +37,4 @@ export default function CtaButton(props) {
     </Button>
   );
 }
+CtaButton.displayName = "CtaButton";

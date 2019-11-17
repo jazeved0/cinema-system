@@ -2,9 +2,15 @@
 @import "../scss/theme";
 @import "../scss/media";
 
+.nav {
+    padding-left: 1rem !important;
+}
+
 .layout {
     &--nav {
-        box-shadow: $drop-shadow;
+        @include dark(box-shadow, $drop-shadow);
+        position: relative;
+        z-index: 2;
 
         .right-buttons {
             display: flex;
@@ -22,6 +28,8 @@
             align-items: center;
             border-radius: 0.35rem;
             color: rgba($-light, 0.8) !important;
+            margin-left: -0.4rem;
+            margin-right: -0.4rem;
 
             .brand--icon {
                 font-size: 2.2rem;
@@ -38,7 +46,7 @@
                 font-weight: 400;
                 color: inherit;
 
-                @include respond-below(xs) {
+                @media (max-width: 400px) {
                     display: none;
                 }
             }
@@ -83,6 +91,60 @@
                 display: none;
             }
         }
+    }
+}
+
+.secondary-nav {
+    $breakpoint: sm;
+    $this: &;
+    @include dark-bg($-primary, -25%);
+    @include light-bg($-primary, 15%);
+    @include dark-border(transparent);
+    @include light-border(rgba($-primary, 0.8), -20%, $side: top);
+
+    position: relative;
+    z-index: 1;
+    box-shadow: $drop-shadow;
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+
+    @include respond-below($breakpoint) {
+        background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding-top: 1rem !important;
+        padding-left: 1rem !important;
+    }
+
+    &--back {
+        @include respond-above($breakpoint) {
+            @include dark-bg($-primary, 10%);
+
+            &:hover {
+                @include dark-bg($-primary, 15%);
+
+                #{$this}--back-text {
+                    @include dark-fg($-light);
+                    @include light-fg($-dark);
+                }
+            }
+
+            &:active {
+                @include dark-bg($-primary, 20%, $important: true);
+            }
+
+            #{$this}--back-text {
+                @include dark-fg(rgba($-light, 0.6));
+                @include light-fg(rgba($-dark, 0.6));
+                margin-left: 0.75rem;
+            }
+        }
+
+        color: $-light;
+    }
+
+    &--back-text {
+        margin-left: 0.75rem;
     }
 }
 
@@ -181,7 +243,7 @@
             padding-right: 1.5rem;
             flex-grow: 1;
             flex-shrink: 1;
-            max-width: 130px;
+            max-width: 140px;
 
             &:not(:last-child) {
                 margin-right: 1.25rem;
@@ -209,5 +271,321 @@
                 }
             }
         }
+    }
+
+    .form-group.row {
+        &:last-child {
+            margin-bottom: 0 !important;
+        }
+    }
+}
+
+.card {
+    @include dark-bg($dark-400);
+    @include light-bg($light-500);
+
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: $drop-shadow;
+}
+
+.set-input {
+    $this: &;
+    @include transitions("box-shadow");
+
+    border-radius: 8px;
+    border: 1px solid rgba(#ced4da, 0.5);
+
+    @include light {
+        &.disabled {
+            color: rgba($-dark, 0.8) !important;
+        }
+    }
+
+    @include dark {
+        border-color: transparent;
+
+        &.disabled {
+            color: rgba($-light, 0.8) !important;
+            border-color: $dark-200;
+            cursor: not-allowed;
+        }
+    }
+
+    &.disabled {
+        #{$this}--item {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        #{$this}--add {
+            opacity: 0.6;
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+    }
+
+    &--items-pane {
+        position: relative;
+        min-height: 38px;
+        padding: 0.5rem 0.5rem 0.05rem;
+        display: flex;
+        flex-wrap: wrap;
+
+        border-bottom: 1px solid rgba(#ced4da, 0.5);
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+
+        @include light {
+            background-color: $light-350 !important;
+            color: $-dark;
+        }
+
+        @include dark {
+            background-color: color-adjust($-dark, 2%) !important;
+            border-color: rgba($light-400, 0.1);
+            color: $-light;
+        }
+    }
+
+    &--input {
+        display: flex;
+        flex-direction: row;
+        position: relative;
+        z-index: 2;
+
+        .auto-complete-input {
+            &:not(.is-valid):not(.is-invalid) {
+                .react-autosuggest__suggestions-container {
+                    &::after {
+                        border: none !important;
+                    }
+                }
+            }
+
+            .react-autosuggest__suggestions-container {
+                &::after {
+                    // top: -36px !important;
+                    border-top-right-radius: 0 !important;
+                    border-top-left-radius: 0 !important;
+                }
+
+                &:not(.react-autosuggest__suggestions-container--open)::after {
+                    border-bottom-right-radius: 0 !important;
+                }
+            }
+        }
+
+        input {
+            border-radius: 0 !important;
+            border-bottom-left-radius: 8px !important;
+
+            &.form-control:not(.is-valid):not(.is-invalid) {
+                border: none !important;
+            }
+        }
+
+        button {
+            border-radius: 0;
+            border-bottom-right-radius: 8px;
+            border-right: none !important;
+            border-top: none !important;
+            border-bottom: none !important;
+            flex-grow: 0;
+
+            &::after {
+                display: none !important;
+            }
+        }
+
+        & > :not(button) {
+            flex-grow: 1;
+        }
+    }
+
+    &--item {
+        @include transitions("box-shadow, transform");
+        @extend %button-blank;
+        $this: &;
+
+        display: inline-flex;
+        position: relative;
+        flex-direction: row;
+        align-items: center;
+        padding: 0.25rem 0.25rem 0.25rem 0.5rem;
+        margin-bottom: 0.5rem;
+        margin-right: 0.5rem;
+        max-width: 100%;
+
+        border-radius: 6px;
+        color: $-light;
+        background-color: $-primary;
+        cursor: pointer;
+        will-change: transform;
+        transform: none;
+
+        @include light {
+            &:focus {
+                box-shadow: highlight-shadow-value($-primary) !important;
+
+                &:hover {
+                    box-shadow: highlight-shadow-value($-primary), $drop-shadow !important;
+                }
+            }
+        }
+
+        @include dark {
+            background-color: rgba($-light, 0.1) !important;
+
+            &:focus {
+                box-shadow: highlight-shadow-value($-light) !important;
+
+                &:hover {
+                    box-shadow: highlight-shadow-value($-light), $drop-shadow !important;
+                }
+            }
+        }
+
+        & > div:first-child {
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        &:hover {
+            box-shadow: $drop-shadow;
+        }
+
+        &:hover,
+        &:focus {
+            .set-input--remove {
+                color: rgba($-light, 0.75);
+            }
+        }
+
+        &:active {
+            .set-input--remove {
+                color: rgba($-light, 0.95);
+            }
+        }
+
+        .icon {
+            position: relative;
+            top: -2px;
+        }
+    }
+
+    &--remove {
+        @include transitions("color");
+        padding: 0 0.25rem 0 0.5rem;
+
+        color: rgba($-light, 0.4);
+        box-shadow: none !important;
+
+        @include dark {
+            color: rgba($-light, 0.25);
+        }
+    }
+}
+
+.btn-input-control {
+    @include light {
+        background-color: rgba($dark-000, 0.075);
+        color: rgba($-dark, 0.7) !important;
+        border-top: 1px solid #ced4da;
+        border-bottom: 1px solid #ced4da;
+
+        &:hover:not(:disabled) {
+            color: $-dark !important;
+            background-color: rgba($dark-000, 0.125);
+        }
+
+        &:active:not(:disabled) {
+            color: $-dark !important;
+            background-color: rgba($dark-000, 0.15);
+        }
+
+        &:focus {
+            @include highlight-shadow($-dark, 0.125);
+
+            &:active {
+                @include highlight-active-shadow(
+                    $-dark,
+                    0.125,
+                    $important: true
+                );
+            }
+        }
+    }
+
+    @include dark {
+        background-color: rgba($light-400, 0.05);
+        color: rgba($-light, 0.7) !important;
+
+        &:hover:not(:disabled) {
+            color: $-light !important;
+            background-color: rgba($light-400, 0.1);
+        }
+
+        &:active:not(:disabled) {
+            color: $-light !important;
+            background-color: rgba($light-400, 0.125);
+        }
+
+        &:focus {
+            @include highlight-shadow($-light, 0.125);
+
+            &:active {
+                @include highlight-active-shadow(
+                    $-light,
+                    0.125,
+                    $important: true
+                );
+            }
+        }
+    }
+
+    &:last-child {
+        margin-left: 0 !important;
+        position: relative;
+
+        @include light {
+            border-right: 1px solid #ced4da;
+
+            &::after {
+                background-color: $-dark;
+            }
+        }
+
+        &::after {
+            position: absolute;
+            content: " ";
+            top: 4px;
+            bottom: 4px;
+            left: -2px;
+            width: 2px;
+            opacity: 0.175;
+            background-color: $-light;
+        }
+    }
+
+    .icon {
+        position: relative;
+        top: -2px;
+    }
+}
+
+.credit-card-display {
+    &--icon {
+        svg {
+            position: relative;
+            width: auto;
+            height: 2rem;
+        }
+    }
+
+    &--text {
+        margin-left: 0.5rem;
     }
 }
