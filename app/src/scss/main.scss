@@ -71,7 +71,9 @@ button,
 .hr-short {
     width: 160px;
     border: none;
-    border-top: 2px solid $-secondary;
+    border-top-width: 2px !important;
+    text-align: left;
+    margin-left: 0;
 }
 
 #root {
@@ -225,6 +227,7 @@ input[type="text"], input[type="password"] {
     }
 }
 
-.invalid-feedback {
+.is-invalid .invalid-feedback {
+    display: block;
     @include dark-fg($-danger, 15%);
 }

@@ -78,7 +78,7 @@ CREATE TABLE `Manager` (
 
 DROP TABLE IF EXISTS `CreditCard`;
 CREATE TABLE `CreditCard` (
-  `CreditCardNum` char(19) NOT NULL,
+  `CreditCardNum` char(16) NOT NULL,
   `Owner` varchar(240) NOT NULL,
   PRIMARY KEY (`CreditCardNum`),
   CONSTRAINT FOREIGN KEY (`Owner`)
@@ -156,7 +156,7 @@ CREATE TABLE `Visit` (
 
 DROP TABLE IF EXISTS `Used`;
 CREATE TABLE `Used` (
-  `CreditCardNum` char(19) NOT NULL,
+  `CreditCardNum` char(16) NOT NULL,
   `PlayDate` date NOT NULL,
   `MovieName` varchar(240) NOT NULL,
   `ReleaseDate` date NOT NULL,

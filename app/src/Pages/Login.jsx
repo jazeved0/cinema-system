@@ -1,8 +1,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import classNames from "classnames";
 
-import { CtaButton, Form } from "Components";
-import { Button } from "react-bootstrap";
+import { CtaButton, Form, Link } from "Components";
 import AnimateHeight from "react-animate-height";
 
 import "./style.scss";
@@ -12,6 +11,10 @@ export default function Login() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isReverseTransitioning, setIsReverseTransitioning] = useState(false);
 
+  // TODO implement API functionality
+  // TODO implement session store as context
+  // TODO implement correct navigation upon successful login
+  // TODO implement shaking button upon incorrect login & error message
   const onPressLogin = useCallback(() => {
     if (!activeLogin) {
       setActiveLogin(true);
@@ -66,10 +69,7 @@ export default function Login() {
               duration={isReverseTransitioning ? 300 : 500}
               height={activeLogin && !isTransitioning ? "auto" : 0}
             >
-              <Login.PaneController
-                isShown={activeLogin}
-                onClose={onPressClose}
-              />
+              <Login.Pane isShown={activeLogin} onClose={onPressClose} />
             </AnimateHeight>
           </div>
         }
@@ -90,11 +90,12 @@ Login.displayName = "Login";
 // ? Sub-components
 // ? ==============
 
-Login.PaneController = function(props) {
+Login.Pane = function(props) {
   // CRA throws error due to "nested" component declaration
   /* eslint-disable react-hooks/rules-of-hooks */
 
   const { isShown, onClose } = props;
+  const [isLoading, setIsLoading] = useState(false);
 
   const close = () => {
     if (isLoading) {
@@ -103,31 +104,17 @@ Login.PaneController = function(props) {
     onClose();
   };
 
-  const [isLoading, setIsLoading] = useState(false);
-  return (
-    <Login.Pane
-      onRegister={() => null}
-      onLogin={() => setIsLoading(true)}
-      isLoading={isLoading}
-      isShown={isShown}
-      onClose={close}
-    />
-  );
-};
-
-Login.Pane = function(props) {
-  const { onRegister, onLogin, isLoading, isShown, onClose } = props;
-
   return (
     <div className="login-pane">
-      <button type="button" className="login-pane--close" onClick={onClose}>
+      <button type="button" className="login-pane--close" onClick={close}>
         <span aria-hidden="true">×</span>
         <span className="sr-only">Close</span>
       </button>
       <Form
-        onSubmit={onLogin}
+        onSubmit={() => setIsLoading(true)}
         isLoading={isLoading}
         isShown={isShown}
+        focusDelay={700}
         entries={[
           { key: "username", required: true, name: "Username" },
           {
@@ -138,9 +125,9 @@ Login.Pane = function(props) {
           }
         ]}
         buttons={
-          <Button variant="secondary" onClick={onRegister}>
+          <Link className="btn btn-secondary" href="/register">
             Register
-          </Button>
+          </Link>
         }
         submit={{
           variant: "primary",

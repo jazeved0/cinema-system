@@ -3,7 +3,9 @@ import zip from "lodash/zip";
 import flatten from "lodash/flatten";
 
 const domain = "cinema-system.ga";
-const externalRegex = new RegExp(`^(?:(?:http|https):\\/\\/(?!(?:www\\.)?${domain})[\\w./=?#-_]+)|(?:mailto:.+)$`);
+const externalRegex = new RegExp(
+  `^(?:(?:http|https):\\/\\/(?!(?:www\\.)?${domain})[\\w./=?#-_]+)|(?:mailto:.+)$`
+);
 export function isExternal(href) {
   return externalRegex.test(href);
 }
@@ -35,6 +37,14 @@ export const multiplyDimension = (dimension, scalar) => {
     }`;
   }
 };
+
+export function splitPath(path) {
+  const trimmedPath = path.charAt(0) === "/" ? path.substr(1) : path;
+  return (trimmedPath.slice(-1) === "/"
+    ? trimmedPath.slice(0, -1)
+    : trimmedPath
+  ).split("/");
+}
 
 // ? ===============
 // ? Regex functions

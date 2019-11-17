@@ -1,31 +1,42 @@
-import React from "react";
-import { Navbar } from "react-bootstrap";
-import { useRouteMatch } from "react-router-dom";
+import React, { useCallback, useContext } from "react";
+import { useRouteMatch, useHistory } from "react-router-dom";
+import { splitPath, isDefined } from "Utility";
+
+import { Navbar, Button } from "react-bootstrap";
+import { Icon, Layout } from "Components";
 
 export default function SecondaryNav() {
-  const rootMatch = useRouteMatch({
-    path: "/",
-    exact: true
-  });
-  const match = useRouteMatch({
-    path: "/",
-    exact: false
-  });
-  return match && !rootMatch ? (
-    <Navbar bg="primary" variant="dark" className="secondary-nav">
-      <Navbar.Brand href="/" className="brand">
-        <Icon name="film" className="brand--icon" />
-        <h1 className="brand--text">Cinema System</h1>
-      </Navbar.Brand>
+  // Exact & partial root match
+  const isRoot = isDefined(
+    useRouteMatch({
+      path: "/",
+      exact: true
+    })
+  );
 
-      <div className="right-buttons">
-        <Link
-          href="https://github.com/jazevedo620/cs4400-team20"
-          ariaLabel="Github"
-        >
-          <Icon name="github" />
-        </Link>
-      </div>
+  // Go up one level on back button press
+  const history = useHistory();
+  const onBack = useCallback(() => {
+    const splitUrl = splitPath(history.location.pathname);
+    const newUrl = `/${splitUrl.slice(0, -1).join("/")}`;
+    history.push(newUrl);
+  }, [history]);
+
+  // Get dark mode status
+  const isDarkMode = useContext(Layout.DarkMode);
+
+  return !isRoot ? (
+    <Navbar variant="dark" className="secondary-nav">
+      <Button
+        variant={isDarkMode ? "primary" : "light"}
+        ariaLabel="Go back"
+        className="secondary-nav--back"
+        onClick={onBack}
+      >
+        <Icon name="chevronLeft" />
+        <span className="secondary-nav--back-text">Back</span>
+      </Button>
     </Navbar>
   ) : null;
 }
+SecondaryNav.displayName = "SecondaryNav";

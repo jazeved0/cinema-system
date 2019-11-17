@@ -233,3 +233,40 @@ $line-width: 225px;
         }
     }
 }
+
+.register {
+    &--buttons {
+        $spacing: 0.9rem;
+        $negative-space: 1.5rem - $spacing;
+
+        display: flex;
+        flex-wrap: wrap;
+
+        margin: (-$negative-space) (-($spacing + $negative-space))
+            (-($spacing + $negative-space)) (-$negative-space);
+
+        .btn {
+            display: block;
+            margin-bottom: $spacing;
+            margin-right: $spacing;
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
+        }
+
+        & > div {
+            padding: 0 !important;
+        }
+    }
+}
+
+.register-customer {
+    .credit-card-display {
+        &--icon {
+            margin-right: 0.5rem;
+        }
+    }
+
+    .set-input--item {
+        height: 40px;
+    }
+}
