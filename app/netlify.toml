@@ -1,3 +1,8 @@
+[build]
+  base = "app"
+  command = "yarn build"
+  publish = "build/"
+
 # Reroute all App URLs under the dynamic path pattern to the React app
 [[redirects]]
   from = "/*"
