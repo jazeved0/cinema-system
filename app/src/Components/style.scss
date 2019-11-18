@@ -116,27 +116,51 @@
         padding-left: 1rem !important;
     }
 
-    &--back {
-        @include respond-above($breakpoint) {
-            @include dark-bg($-primary, 10%);
+    @mixin primary-style {
+        color: $-light !important;
+        background-color: color-adjust($-primary, 10%);
 
-            &:hover {
-                @include dark-bg($-primary, 15%);
+        &:hover {
+            background-color: color-adjust($-primary, 15%);
+        }
+
+        &:active {
+            background-color: color-adjust($-primary, 20%) !important;
+        }
+    }
+
+    @mixin light-style {
+        color: $-dark !important;
+    }
+
+    &--back {
+        &:hover {
+            #{$this}--back-text {
+                opacity: 1;
+            }
+        }
+
+        #{$this}--back-text {
+            opacity: 0.8;
+        }
+
+        @include respond-above($breakpoint) {
+            @include light {
+                @include light-style;
+            }
+
+            @include dark {
+                @include primary-style;
+            }
+        }
+
+        @include respond-below($breakpoint) {
+            @include light {
+                @include primary-style;
 
                 #{$this}--back-text {
-                    @include dark-fg($-light);
-                    @include light-fg($-dark);
+                    opacity: 1 !important;
                 }
-            }
-
-            &:active {
-                @include dark-bg($-primary, 20%, $important: true);
-            }
-
-            #{$this}--back-text {
-                @include dark-fg(rgba($-light, 0.6));
-                @include light-fg(rgba($-dark, 0.6));
-                margin-left: 0.75rem;
             }
         }
 

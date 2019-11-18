@@ -1,6 +1,7 @@
 import React from "react";
 import { isDefined } from "Utility";
 
+import { Container } from "react-bootstrap";
 import Helmet from "react-helmet";
 
 const siteTitle = "Cinema System";
@@ -18,7 +19,8 @@ export default function Page(props) {
           }
         ]}
       />
-      {children}
+
+      <Container>{children}</Container>
     </>
   );
 }
