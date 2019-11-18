@@ -1,12 +1,12 @@
 import React from "react";
-import useDarkMode from "use-dark-mode";
+import { useDarkMode } from "Utility";
 
 import { Navbar } from "react-bootstrap";
 import { Icon, Link } from "Components";
 
 export default function Layout({ children }) {
   // Dark/light theme selection
-  const { value, toggle } = useDarkMode();
+  const { value, toggle } = useDarkMode(true);
 
   return (
     <div className="layout">

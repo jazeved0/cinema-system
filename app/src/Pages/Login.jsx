@@ -3,6 +3,7 @@ import classNames from "classnames";
 
 import { CtaButton, Form, Link } from "Components";
 import AnimateHeight from "react-animate-height";
+import { Page } from "Components";
 
 import "./style.scss";
 
@@ -48,7 +49,7 @@ export default function Login() {
   }, [activeLogin]);
 
   return (
-    <>
+    <Page title={activeLogin ? "Login" : "Home"}>
       <h1 className="intro-space">Cinema System</h1>
       <p className="lead">
         This website is the result of a semester-long group project for CS 4400:
@@ -81,7 +82,7 @@ export default function Login() {
       >
         Login
       </CtaButton>
-    </>
+    </Page>
   );
 }
 Login.displayName = "Login";

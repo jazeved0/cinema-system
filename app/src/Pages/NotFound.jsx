@@ -1,8 +1,9 @@
 import React from "react";
+import { Page } from "Components";
 
 export default function NotFound(props) {
   return (
-    <>
+    <Page title="Not Found">
       <h1 className="intro-space">
         Page Not Found{" "}
         <span role="img" aria-label="">
@@ -15,7 +16,7 @@ export default function NotFound(props) {
         Sorry, we can’t find that page. It might be an old link or maybe it
         moved.
       </p>
-    </>
+    </Page>
   );
 }
 NotFound.displayName = "NotFound";
