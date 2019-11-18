@@ -1,0 +1,24 @@
+[build]
+  base = "app"
+  command = "yarn build"
+  publish = "build/"
+
+# Redirect default Netlify subdomain to primary domain
+[[redirects]]
+  from = "https://cinema-system.netlify.com/*"
+  to = "https://cinema-system.ga/:splat"
+  status = 301
+  force = true
+
+# Redirect default Netlify branch subdomain to primary domain
+[[redirects]]
+  from = "https://master--cinema-system.netlify.com/*"
+  to = "https://cinema-system.ga/:splat"
+  status = 301
+  force = true
+
+# Reroute all App URLs under the dynamic path pattern to the React app
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
