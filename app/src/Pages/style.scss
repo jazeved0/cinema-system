@@ -262,6 +262,7 @@ $line-width: 225px;
 
 .modal-dialog.register-modal {
     margin-top: 8rem !important;
+    margin-bottom: 1rem;
     @include make-container();
     @include make-container-max-widths();
 
@@ -314,7 +315,7 @@ $line-width: 225px;
     @include modal-padding(2rem);
 
     @include respond-below(xs) {
-        @include modal-padding(1rem, $top-adjust: -0.5rem);
+        @include modal-padding(1rem, $top-adjust: -1rem);
     }
 }
 
@@ -333,14 +334,17 @@ $line-width: 225px;
 
 .register-menu {
     &--buttons {
-        $spacing: 0.9rem;
+        $outside-spacing: 0.35rem;
+        $spacing: 1rem;
         $negative-space: 1.5rem - $spacing;
 
         display: flex;
         flex-wrap: wrap;
 
-        margin: (-$negative-space) (-($spacing + $negative-space))
-            (-($spacing + $negative-space)) (-$negative-space);
+        margin: ($outside-spacing - $negative-space)
+            ($outside-spacing - ($spacing + $negative-space))
+            ($outside-spacing - ($spacing + $negative-space))
+            ($outside-spacing - $negative-space);
 
         .btn {
             display: block;

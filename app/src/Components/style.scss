@@ -105,6 +105,7 @@
         }
     }
 }
+
 .cta-button.cta-button {
     @include transitions((box-shadow, background-color));
     $this: ".cta-button";
@@ -234,7 +235,7 @@
 
 .card {
     @include dark-bg($dark-400);
-    @include light-bg($light-500);
+    @include light-bg($light-450);
 
     padding: 1.5rem;
     border-radius: 8px;
@@ -609,6 +610,9 @@ $secondary-nav-breakpoint: sm;
 
     &.primary {
         color: $-light !important;
+        #{$this}--text {
+            opacity: 1 !important;
+        }
     }
 
     &:not(.responsive) {
