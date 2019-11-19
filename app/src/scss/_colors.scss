@@ -15,9 +15,9 @@ $black: #000 !default;
 
 // Theme colors
 $hint-of-blue: rgb(236, 238, 240) !default;
-$lynch: #6D8397 !default;
-$hibiscus: #B63769 !default;
-$lombolly: #BCC3CA !default;
+$lynch: #6d8397 !default;
+$hibiscus: #b63769 !default;
+$lombolly: #bcc3ca !default;
 $shark: #282c34 !default;
 $steel-gray: #272134 !default;
 $brady-punch: #d3912e !default;
@@ -116,6 +116,8 @@ $light-shades: (
 );
 
 // Additional colors
+$input-border-color: rgba(color-adjust($-primary, -10%), 0.25) !default;
+$active-input-border-color: rgba(color-adjust($-primary, -10%), 0.5);
 
 // ? =======================
 // ? Dark/light theme mixins
@@ -140,34 +142,70 @@ $light-main-bg: $light-400;
     @include theme-fg(light, $color, $adjust, $important);
 }
 
-@mixin dark-fade-fg($color: rgba($-light, 0.6), $adjust: 0%, $important: false) {
+@mixin dark-fade-fg(
+    $color: rgba($-light, 0.6),
+    $adjust: 0%,
+    $important: false
+) {
     @include theme-fg(dark, $color, $adjust, $important);
 }
 
-@mixin light-fade-fg($color: rgba($-dark, 0.6), $adjust: 0%, $important: false) {
+@mixin light-fade-fg(
+    $color: rgba($-dark, 0.6),
+    $adjust: 0%,
+    $important: false
+) {
     @include theme-fg(light, $color, $adjust, $important);
 }
 
-@mixin dark-semi-fade-fg($color: rgba($-light, 0.775), $adjust: 0%, $important: false) {
+@mixin dark-semi-fade-fg(
+    $color: rgba($-light, 0.775),
+    $adjust: 0%,
+    $important: false
+) {
     @include theme-fg(dark, $color, $adjust, $important);
 }
 
-@mixin light-semi-fade-fg($color: rgba($-dark, 0.775), $adjust: 0%, $important: false) {
+@mixin light-semi-fade-fg(
+    $color: rgba($-dark, 0.775),
+    $adjust: 0%,
+    $important: false
+) {
     @include theme-fg(light, $color, $adjust, $important);
 }
 
-@mixin dark-very-fade-fg($color: rgba($-light, 0.45), $adjust: 0%, $important: false) {
+@mixin dark-very-fade-fg(
+    $color: rgba($-light, 0.45),
+    $adjust: 0%,
+    $important: false
+) {
     @include theme-fg(dark, $color, $adjust, $important);
 }
 
-@mixin light-very-fade-fg($color: rgba($-dark, 0.45), $adjust: 0%, $important: false) {
+@mixin light-very-fade-fg(
+    $color: rgba($-dark, 0.45),
+    $adjust: 0%,
+    $important: false
+) {
     @include theme-fg(light, $color, $adjust, $important);
 }
 
-@mixin dark-border($color, $adjust: 0%, $border: 1px solid, $side: null, $important: false) {
+@mixin dark-border(
+    $color,
+    $adjust: 0%,
+    $border: 1px solid,
+    $side: null,
+    $important: false
+) {
     @include theme-border(dark, $color, $adjust, $border, $side, $important);
 }
 
-@mixin light-border($color, $adjust: 0%, $border: 1px solid, $side: null, $important: false) {
+@mixin light-border(
+    $color,
+    $adjust: 0%,
+    $border: 1px solid,
+    $side: null,
+    $important: false
+) {
     @include theme-border(light, $color, $adjust, $border, $side, $important);
 }

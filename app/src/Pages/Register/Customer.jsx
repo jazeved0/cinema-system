@@ -22,9 +22,9 @@ export default function RegisterCustomer() {
           collapse="md"
           blocking
           entries={[
-            { key: "first_name", required: true, name: "First Name" },
-            { key: "last_name", required: true, name: "Last Name" },
-            { key: "username", required: true, name: "Username" },
+            { key: "first_name", required: true, name: "First Name", width: 6 },
+            { key: "last_name", required: true, name: "Last Name", width: 6 },
+            { key: "username", required: true, name: "Username", prefix: "@" },
             {
               key: "password",
               required: true,
@@ -90,7 +90,7 @@ export default function RegisterCustomer() {
             variant: "secondary",
             text: "Register"
           }}
-        ></Form>
+        />
       </Card>
     </RegisterBase>
   );

@@ -185,12 +185,12 @@ input[type="text"], input[type="password"] {
     box-shadow: none;
 
     @include dark {
-        background-color: rgba($dark-000, 0.425) !important;
+        background-color: blend($dark-000, $dark-400, 0.575) !important;
         color: $-light !important;
         border-color: transparent;
 
         &:disabled {
-            background-color: rgba($dark-000, 0.2) !important;
+            background-color: blend($dark-000, $dark-400, 0.8) !important;
             color: rgba($-light, 0.8) !important;
             border-color: $dark-200;
             cursor: not-allowed;
@@ -228,4 +228,8 @@ input[type="text"], input[type="password"] {
 .is-invalid .invalid-feedback {
     display: block;
     @include dark-fg($-danger, 15%);
+}
+
+.modal.show {
+    padding-left: 0 !important;
 }

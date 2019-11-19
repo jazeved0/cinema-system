@@ -167,6 +167,7 @@ LoginRegister.Pane = function(props) {
         isLoading={isLoading}
         isShown={isShown}
         focusDelay={700}
+        horizontal
         entries={[
           { key: "username", required: true, name: "Username" },
           {

@@ -11,7 +11,8 @@ import {
   isNil,
   identity,
   isEmptyOrNil,
-  equal
+  equal,
+  capitalize
 } from "Utility";
 import hash from "object-hash";
 import classNames from "classnames";
@@ -21,10 +22,12 @@ import {
   Spinner,
   Form as BootstrapForm,
   Row,
-  Col
+  Col,
+  InputGroup
 } from "react-bootstrap";
 import { Prompt } from "react-router-dom";
 import { SetInput } from "Components";
+import Select from "react-select";
 
 export default function Form(props) {
   const {
@@ -37,7 +40,8 @@ export default function Form(props) {
     focusDelay,
     collapse,
     blocking,
-    blockingMessage
+    blockingMessage,
+    horizontal
   } = props;
 
   // Key => Entry map
@@ -133,50 +137,87 @@ export default function Form(props) {
   // "unique" form hash
   const formHash = useMemo(() => hash(entries), [entries]);
 
+  const inputs = entries.map((entry, i) => (
+    <>
+      <Form.Input
+        type={entry.type || "text"}
+        inputKey={entry.key}
+        placeholder={placeholderFormats[entry.type || "text"](entry)}
+        onChange={onChange}
+        onBlur={onBlur}
+        onKeyDown={handleKeyPressed}
+        value={values[entry.key]}
+        isValid={
+          validated(entry) &&
+          validationStatus[entry.key].result &&
+          entry.showValid
+        }
+        isInvalid={validated(entry) && !validationStatus[entry.key].result}
+        ref={i === 0 ? firstInput : undefined}
+        disabled={isLoading}
+        {...entry.props}
+        message={validationStatus[entry.key].message}
+      />
+      {isDefined(entry.info) ? (
+        <BootstrapForm.Text className="text-muted">
+          {entry.info}
+        </BootstrapForm.Text>
+      ) : null}
+    </>
+  ));
+
+  const wrappedInputs = entries.map((entry, i) =>
+    isDefined(entry.prefix) ? (
+      <InputGroup>
+        <InputGroup.Prepend>
+          <InputGroup.Text>{entry.prefix}</InputGroup.Text>
+        </InputGroup.Prepend>
+        {inputs[i]}
+      </InputGroup>
+    ) : (
+      inputs[i]
+    )
+  );
+
+  const aggregatedEntries = useMemo(
+    () => (horizontal ? [] : aggregateEntries(entries)),
+    [entries, horizontal]
+  );
+  const formGroups = horizontal
+    ? entries.map((entry, i) => (
+        <BootstrapForm.Group
+          key={entry.key}
+          as={Row}
+          controlId={`form-${formHash}-${entry.key}`}
+        >
+          <BootstrapForm.Label column {...{ [collapse]: 2 }}>
+            {entry.name}
+          </BootstrapForm.Label>
+          <Col {...{ [collapse]: 10 }}>{wrappedInputs[i]}</Col>
+        </BootstrapForm.Group>
+      ))
+    : aggregatedEntries.map((group, i) => (
+        <BootstrapForm.Row key={i}>
+          {group.map(entry => (
+            <BootstrapForm.Group
+              as={Col}
+              {...{ [collapse]: entry.width }}
+              key={entry.key}
+              controlId={`form-${formHash}-${entry.key}`}
+            >
+              <BootstrapForm.Label>{entry.name}</BootstrapForm.Label>
+              {wrappedInputs[entry.index]}
+            </BootstrapForm.Group>
+          ))}
+        </BootstrapForm.Row>
+      ));
+
   return (
     <>
       {blocking && !isEmpty && <Prompt message={blockingMessage} />}
       <BootstrapForm noValidate className="_form">
         {/* Input rows */}
-        {entries.map((entry, i) => (
-          <BootstrapForm.Group
-            key={entry.key}
-            as={Row}
-            controlId={`form-${formHash}-${entry.key}`}
-          >
-            <BootstrapForm.Label column {...{ [collapse]: 2 }}>
-              {entry.name}
-            </BootstrapForm.Label>
-            <Col {...{ [collapse]: 10 }}>
-              <Form.Input
-                type={entry.type || "text"}
-                inputKey={entry.key}
-                placeholder={`Enter ${entry.name.toLowerCase()}`}
-                onChange={onChange}
-                onBlur={onBlur}
-                onKeyDown={handleKeyPressed}
-                value={values[entry.key]}
-                isValid={
-                  validated(entry) &&
-                  validationStatus[entry.key].result &&
-                  entry.showValid
-                }
-                isInvalid={
-                  validated(entry) && !validationStatus[entry.key].result
-                }
-                ref={i === 0 ? firstInput : undefined}
-                disabled={isLoading}
-                {...entry.props}
-                message={validationStatus[entry.key].message}
-              />
-              {isDefined(entry.info) ? (
-                <BootstrapForm.Text className="text-muted">
-                  {entry.info}
-                </BootstrapForm.Text>
-              ) : null}
-            </Col>
-          </BootstrapForm.Group>
-        ))}
+        {formGroups}
         {/* Submit row */}
         <BootstrapForm.Group as={Row}>
           <Col sm={{ span: 10, offset: 2 }}>
@@ -209,41 +250,105 @@ Form.defaultProps = {
     "Are you sure you want to exit? Your information will not be saved."
 };
 
-Form.Input = React.forwardRef(
-  ({ onChange, onBlur, inputKey, type, message, ...rest }, ref) => {
-    if (type === "text" || type === "password") {
-      return (
-        <>
-          <BootstrapForm.Control
-            onChange={useCallback(e => onChange(inputKey, e), [
-              onChange,
-              inputKey
-            ])}
-            onBlur={useCallback(() => onBlur(inputKey), [onBlur, inputKey])}
-            ref={ref}
-            type={type}
-            {...rest}
-          />
-          <BootstrapForm.Control.Feedback type="invalid" children={message} />
-        </>
-      );
-    } else if (type === "set") {
-      return (
-        <Form.SmartSetInput
-          onBlur={useCallback(() => onBlur(inputKey), [onBlur, inputKey])}
-          onChange={useCallback(e => onChange(inputKey, e), [
-            onChange,
-            inputKey
-          ])}
-          ref={ref}
-          message={message}
-          {...rest}
-        />
-      );
-    } else return null;
-  }
-);
+Form.Input = React.forwardRef(({ type, ...props }, ref) => {
+  const resolvedType = isDefined(type) ? type : "text";
+  const handler = formInputs[resolvedType];
+  return handler(props, ref);
+});
 Form.Input.displayName = "Form.Input";
+
+Form.TextInput = function(props, ref) {
+  // Eslint complains because of the way this component was declared
+  /* eslint-disable react-hooks/rules-of-hooks */
+
+  const { inputKey, onBlur, message, onChange, type, ...rest } = props;
+  return (
+    <>
+      <BootstrapForm.Control
+        onChange={useCallback(e => onChange(inputKey, e), [onChange, inputKey])}
+        onBlur={useCallback(() => onBlur(inputKey), [onBlur, inputKey])}
+        ref={ref}
+        type={type}
+        {...rest}
+      />
+      <BootstrapForm.Control.Feedback type="invalid" children={message} />
+    </>
+  );
+};
+
+Form.SetInput = function(props, ref) {
+  // Eslint complains because of the way this component was declared
+  /* eslint-disable react-hooks/rules-of-hooks */
+
+  const { inputKey, onBlur, message, onChange, ...rest } = props;
+
+  return (
+    <Form.SmartSetInput
+      onBlur={useCallback(() => onBlur(inputKey), [onBlur, inputKey])}
+      onChange={useCallback(e => onChange(inputKey, e), [onChange, inputKey])}
+      ref={ref}
+      message={message}
+      {...rest}
+    />
+  );
+};
+
+Form.ComboInput = function(props, ref) {
+  const {
+    inputKey,
+    onBlur,
+    message,
+    onChange,
+    options,
+    isInvalid,
+    disabled,
+    onKeyDown,
+    ...rest
+  } = props;
+  const derivedOptions = options.map(o =>
+    typeof o === "string" ? { value: o, label: capitalize(o) } : o
+  );
+
+  const onKeyPress = e => {
+    const code = e.keyCode || e.which;
+    // Enter keycode
+    if (code === 13) {
+      e.stopPropagation();
+    } else onKeyDown(e);
+  };
+
+  return (
+    <>
+      <Select
+        className={classNames("combo-input", { "is-invalid": isInvalid })}
+        classNamePrefix="combo-input"
+        onChange={useCallback(e => onChange(inputKey, e), [onChange, inputKey])}
+        onBlur={useCallback(() => onBlur(inputKey), [onBlur, inputKey])}
+        onKeyDown={onKeyPress}
+        isSearchable
+        options={derivedOptions}
+        isDisabled={disabled}
+        ref={ref}
+        {...rest}
+      />
+      <BootstrapForm.Control.Feedback type="invalid" children={message} />
+    </>
+  );
+};
+
+const formInputs = {
+  set: Form.SetInput,
+  combo: Form.ComboInput,
+  text: (p, r) => Form.TextInput({ ...p, type: "text" }, r),
+  password: (p, r) => Form.TextInput({ ...p, type: "password" }, r)
+};
+
+const placeholderFormats = {
+  combo: entry => `Select ${entry.name.toLowerCase()}`,
+  set: entry => `Add ${entry.name.toLowerCase()}`,
+  text: entry => `Enter ${entry.name.toLowerCase()}`,
+  password: entry => `Enter ${entry.name.toLowerCase()}`
+};
 
 Form.SmartSetInput = React.forwardRef((props, ref) => {
   const {
@@ -466,4 +571,45 @@ function applySteps({ steps, value, entry, values, hasSubmitted }) {
     },
     true
   ];
+}
+
+const COLUMN_TOTAL = 12;
+function aggregateEntries(entries) {
+  let groups = [];
+  let currentGroup = [];
+  let currentWidth = 0;
+  for (let i = 0; i < entries.length; ++i) {
+    const entry = entries[i];
+    const { width } = entry;
+    if (isDefined(width)) {
+      if (currentWidth + width > COLUMN_TOTAL) {
+        // Evict current group and start new one
+        groups.push(currentGroup);
+        currentWidth = 0;
+        currentGroup = [];
+      }
+      currentGroup.push({ ...entry, index: i });
+      currentWidth += entry.width;
+    } else {
+      if (COLUMN_TOTAL - currentWidth < 2) {
+        // Evict current group and start new one
+        groups.push(currentGroup);
+        currentWidth = 0;
+        currentGroup = [];
+      }
+      currentGroup.push({
+        ...entry,
+        index: i,
+        width: COLUMN_TOTAL - currentWidth
+      });
+      groups.push(currentGroup);
+      currentWidth = 0;
+      currentGroup = [];
+    }
+  }
+  // Add trailing groups
+  if (currentGroup.length > 0) {
+    groups.push(currentGroup);
+  }
+  return groups;
 }
