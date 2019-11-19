@@ -21,3 +21,17 @@ export function isIterable(obj) {
 export function createObject() {
   return Object.create(null);
 }
+
+export function equal(a, b) {
+  if (a instanceof Array && b instanceof Array) {
+    if (a.length !== b.length) return false;
+    else {
+      for (let i = 0; i < a.length; i++) {
+        if (!equal(a[i], b[i])) return false;
+      }
+      return true;
+    }
+  } else {
+    return a === b;
+  }
+}

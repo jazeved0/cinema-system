@@ -11,6 +11,7 @@
     "bootstrap": "^4.3.1",
     "classnames": "^2.2.6",
     "credit-card-type": "^8.3.0",
+    "object-hash": "^2.0.0",
     "payment-icons": "^1.2.1",
     "react": "^16.11.0",
     "react-animate-height": "^2.0.17",

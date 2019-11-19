@@ -2,14 +2,14 @@ import React from "react";
 
 import { Col } from "react-bootstrap";
 import { Card, Link } from "Components";
+import { RegisterBase } from "Pages";
 
 export default function Menu() {
   return (
-    <div className="register">
-      <h1 className="intro-space">Register</h1>
+    <RegisterBase title="Register" name="menu">
       <p className="lead">Select registration type</p>
       <Card style={{ maxWidth: 600 }}>
-        <div className="register--buttons">
+        <div className="register-menu--buttons">
           <Col sm={6}>
             <Link className="btn btn-primary" href="/register/user">
               User Only
@@ -32,7 +32,7 @@ export default function Menu() {
           </Col>
         </div>
       </Card>
-    </div>
+    </RegisterBase>
   );
 }
 Menu.displayName = "Menu";

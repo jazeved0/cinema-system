@@ -1,17 +1,18 @@
 import React, { useState } from "react";
 
-import { Card, Form } from "Components";
+import { Card, Form, CreditCardDisplay } from "Components";
 import { RegisterBase } from "Pages";
 
-export default function RegisterUser() {
+export default function RegisterManager() {
   const [isLoading, setIsLoading] = useState(false);
 
   // TODO implement API functionality
   // TODO display non-unique username error
+  // TODO display non-unique cc number error
   return (
-    <RegisterBase title="User Registration" name="user">
+    <RegisterBase title="Manager Registration" name="manager">
       <p className="lead">
-        Register a new user. <em>Note: all fields are required.</em>
+        Register a new manager. <em>Note: all fields are required.</em>
       </p>
       <Card>
         <Form
@@ -58,6 +59,31 @@ export default function RegisterUser() {
                   };
                 }
               }
+            },
+            {
+              key: "credit_cards",
+              required: true,
+              name: "Credit Cards",
+              type: "set",
+              props: {
+                setValidator: ({ value }) => {
+                  return {
+                    result: value.length === 19,
+                    message: "Credit card must be 16 characters long"
+                  };
+                },
+                processValue: value => {
+                  const numeric = value.replace(/\D/g, "");
+                  const formatted = numeric.replace(/(.{4})/g, "$1 ");
+                  const trimmed = formatted.substring(0, 20);
+                  if (trimmed.charAt(trimmed.length - 1) === " ") {
+                    return trimmed.slice(0, -1);
+                  } else return trimmed;
+                },
+                max: 5,
+                renderItem: item => <CreditCardDisplay text={item} />,
+                className: "credit-card-input"
+              }
             }
           ]}
           submit={{
@@ -69,4 +95,4 @@ export default function RegisterUser() {
     </RegisterBase>
   );
 }
-RegisterUser.displayName = "RegisterUser";
+RegisterManager.displayName = "RegisterManager";
