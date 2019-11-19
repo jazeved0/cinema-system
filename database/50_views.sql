@@ -1,14 +1,14 @@
-USE `Team20`;
+--USE Team20;
 
 --
 -- Derived attributes for User such as CC Count & Type string
 --
 
-DROP VIEW IF EXISTS `UserDerived`;
-CREATE VIEW `UserDerived` AS
+DROP VIEW IF EXISTS UserDerived;
+CREATE VIEW UserDerived AS
     SELECT Username, Status, Password, Firstname, Lastname,
     -- CC Count
-    IFNULL(COUNT(creditcard.Owner), 0) AS CreditCardCount,
+    COALESCE(COUNT(creditcard.Owner), 0) AS CreditCardCount,
     -- User type assignment
     CASE
         WHEN NOT admin     IS NULL AND NOT customer IS NULL THEN 'CustomerAdmin'
@@ -20,27 +20,27 @@ CREATE VIEW `UserDerived` AS
     -- Temporary tagged table
     END AS UserType FROM (
         SELECT *
-        FROM user
+        FROM "User"
         LEFT JOIN (SELECT admin.Username    as admin    FROM admin)    AS t1 ON Username = admin
         LEFT JOIN (SELECT customer.Username as customer FROM customer) AS t2 ON Username = customer
         LEFT JOIN (SELECT manager.Username  as manager  FROM manager)  AS t3 ON Username = manager
     ) as t2
     LEFT JOIN creditcard ON Username = Owner
-    GROUP BY t2.Username;
+    GROUP BY t2.Username, t2.Status, t2.Password, t2.Firstname, t2.Lastname, t2.admin, t2.customer, t2.manager;
 
 --
 -- Derived attributes for Comapany such as cities covered, number of theaters, and number of employees
 --
 
-DROP VIEW IF EXISTS `CompanyDerived`;
-CREATE VIEW `CompanyDerived` AS
+DROP VIEW IF EXISTS CompanyDerived;
+CREATE VIEW CompanyDerived AS
     SELECT Name, (
         -- Select number of distinct city, state pairs
         SELECT COUNT(*) FROM (
             SELECT *
             FROM theater
             WHERE CompanyName = Name
-            GROUP BY State, City
+            GROUP BY State, City, theater.theatername, theater.companyname
         ) AS T1
     ) AS NumCityCover, (
         -- Select number of theaters

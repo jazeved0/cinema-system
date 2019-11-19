@@ -1,77 +1,77 @@
-USE `Team20`;
+--USE Team20;
 
 --
 -- Screen 1: User login
 --
 
-DROP procedure IF EXISTS `user_login`;
-DELIMITER $$
-CREATE PROCEDURE `user_login`(
-    IN `i_username` varchar(240),
-    IN `i_password` varchar(240)
+DROP procedure IF EXISTS user_login;
+--DELIMITER $$
+CREATE PROCEDURE user_login(
+    IN i_username varchar(240),
+    IN i_password varchar(240)
 )
 BEGIN
     DROP TABLE IF EXISTS UserLogin;
     CREATE TABLE UserLogin
-        SELECT user.Username, Status, Password, case WHEN EXISTS (
+        SELECT "User".Username, Status, Password, case WHEN EXISTS (
             SELECT employee.Username FROM employee
-            WHERE employee.Username = user.Username
+            WHERE employee.Username = "User".Username
         ) THEN 1 ELSE 0 END AS isEmployee, case WHEN EXISTS (
             SELECT admin.Username FROM admin
-            WHERE admin.Username = user.Username
+            WHERE admin.Username = "User".Username
         ) THEN 1 ELSE 0 END AS isAdmin, case WHEN EXISTS (
             SELECT manager.Username FROM manager
-            WHERE manager.Username = user.Username
-        ) THEN 1 ELSE 0 END AS isManager from user
+            WHERE manager.Username = "User".Username
+        ) THEN 1 ELSE 0 END AS isManager from "User"
         WHERE Username = i_username AND Password = MD5(i_password);
 END$$
-DELIMITER ;
+--DELIMITER ;
 
 --
 -- [PROVIDED] Screen 3: User register
 --
 
-DROP PROCEDURE IF EXISTS `user_register`;
-DELIMITER $$
-CREATE PROCEDURE `user_register` (
+DROP PROCEDURE IF EXISTS user_register;
+--DELIMITER $$
+CREATE PROCEDURE user_register (
     IN i_username varchar(240),
     IN i_password varchar(240),
     IN i_firstname varchar(240),
     IN i_lastname varchar(240)
 )
 BEGIN
-    INSERT INTO user (username, password, firstname, lastname)
+    INSERT INTO "User" (username, password, firstname, lastname)
     VALUES (i_username, MD5(i_password), i_firstname, i_lastname);
 END$$
-DELIMITER ;
+--DELIMITER ;
 
 --
 -- Screen 4: Customer-only register
 --
 
-DROP PROCEDURE IF EXISTS `customer_only_register`;
-DELIMITER $$
-CREATE PROCEDURE `customer_only_register` (
+DROP PROCEDURE IF EXISTS customer_only_register;
+--DELIMITER $$
+CREATE PROCEDURE customer_only_register (
     IN i_username varchar(240),
     IN i_password varchar(240),
     IN i_firstname varchar(240),
     IN i_lastname varchar(240)
 )
 BEGIN
-    INSERT INTO user (username, password, firstname, lastname)
+    INSERT INTO "User" (username, password, firstname, lastname)
     VALUES (i_username, MD5(i_password), i_firstname, i_lastname);
     INSERT INTO customer (username)
     VALUES (i_username);
 END$$
-DELIMITER ;
+--DELIMITER ;
 
 --
 -- Screen 4: Customer add credit card
 --
 
-DROP PROCEDURE IF EXISTS `customer_add_creditcard`;
-DELIMITER $$
-CREATE PROCEDURE `customer_add_creditcard` (
+DROP PROCEDURE IF EXISTS customer_add_creditcard;
+--DELIMITER $$
+CREATE PROCEDURE customer_add_creditcard (
     IN i_username varchar(240),
     IN i_creditCardNum char(16)
 )
@@ -79,15 +79,15 @@ BEGIN
     INSERT INTO creditcard (owner, creditcardnum)
     VALUES (i_username, i_creditCardNum);
 END$$
-DELIMITER ;
+--DELIMITER ;
 
 --
 -- Screen 5: Manager-only register
 --
 
-DROP PROCEDURE IF EXISTS `manager_only_register`;
-DELIMITER $$
-CREATE PROCEDURE `manager_only_register` (
+DROP PROCEDURE IF EXISTS manager_only_register;
+--DELIMITER $$
+CREATE PROCEDURE manager_only_register (
     IN i_username varchar(240),
     IN i_password varchar(240),
     IN i_firstname varchar(240),
@@ -99,20 +99,20 @@ CREATE PROCEDURE `manager_only_register` (
     IN i_empZipcode char(5)
 )
 BEGIN
-    INSERT INTO user (username, password, firstname, lastname)
+    INSERT INTO "User" (username, password, firstname, lastname)
     VALUES (i_username, MD5(i_password), i_firstname, i_lastname);
     INSERT INTO manager (username, state, city, zipcode, street, companyname)
     VALUES (i_username, i_empState, i_empCity, i_empZipcode, i_empStreet, i_comName);
 END$$
-DELIMITER ;
+--DELIMITER ;
 
 --
 -- Screen 6: Manager-Customer register
 --
 
-DROP PROCEDURE IF EXISTS `manager_customer_register`;
-DELIMITER $$
-CREATE PROCEDURE `manager_customer_register` (
+DROP PROCEDURE IF EXISTS manager_customer_register;
+--DELIMITER $$
+CREATE PROCEDURE manager_customer_register (
     IN i_username varchar(240),
     IN i_password varchar(240),
     IN i_firstname varchar(240),
@@ -124,22 +124,22 @@ CREATE PROCEDURE `manager_customer_register` (
     IN i_empZipcode char(5)
 )
 BEGIN
-    INSERT INTO user (username, password, firstname, lastname)
+    INSERT INTO "User" (username, password, firstname, lastname)
     VALUES (i_username, MD5(i_password), i_firstname, i_lastname);
     INSERT INTO manager (username, state, city, zipcode, street, companyname)
     VALUES (i_username, i_empState, i_empCity, i_empZipcode, i_empStreet, i_comName);
     INSERT INTO customer (username)
     VALUES (i_username);
 END$$
-DELIMITER ;
+--DELIMITER ;
 
 --
 -- Screen 6: Manager-Customer add credit card
 --
 
-DROP PROCEDURE IF EXISTS `manager_customer_add_creditcard`;
-DELIMITER $$
-CREATE PROCEDURE `manager_customer_add_creditcard` (
+DROP PROCEDURE IF EXISTS manager_customer_add_creditcard;
+--DELIMITER $$
+CREATE PROCEDURE manager_customer_add_creditcard (
     IN i_username varchar(240),
     IN i_creditCardNum char(16)
 )
@@ -147,74 +147,74 @@ BEGIN
     INSERT INTO creditcard (owner, creditcardnum)
     VALUES (i_username, i_creditCardNum);
 END$$
-DELIMITER ;
+--DELIMITER ;
 
 --
 -- Screen 13: Admin approve user
 --
 
-DROP PROCEDURE IF EXISTS `admin_approve_user`;
-DELIMITER $$
-CREATE PROCEDURE `admin_approve_user` (
+DROP PROCEDURE IF EXISTS admin_approve_user;
+--DELIMITER $$
+CREATE PROCEDURE admin_approve_user (
     IN i_username varchar(240)
 )
 BEGIN
     IF NOT EXISTS (
-        SELECT Username from user WHERE Username = i_username
+        SELECT Username from "User" WHERE Username = i_username
     ) THEN SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'User does not exist';
     ELSEIF EXISTS (
-        SELECT Status from user
+        SELECT Status from "User"
         WHERE Username = i_username and Status = "Approved"
     ) THEN SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Can not approve already approved user';
     ELSE
-        UPDATE user
+        UPDATE "User"
         SET Status = "Approved"
         WHERE Username = i_username;
     END IF;
 END$$
-DELIMITER ;
+--DELIMITER ;
 
 --
 -- Screen 13: Admin decline user
 --
 
-DROP PROCEDURE IF EXISTS `admin_decline_user`;
-DELIMITER $$
-CREATE PROCEDURE `admin_decline_user` (
+DROP PROCEDURE IF EXISTS admin_decline_user;
+--DELIMITER $$
+CREATE PROCEDURE admin_decline_user (
     IN i_username varchar(240)
 )
 BEGIN
     IF NOT EXISTS (
-        SELECT Username from user WHERE Username = i_username
+        SELECT Username from "user" WHERE Username = i_username
     ) THEN SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'User does not exist';
     ELSEIF EXISTS (
-        SELECT Status from user
+        SELECT Status from "User"
         WHERE Username = i_username and Status = "Approved"
     ) THEN SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Can not decline already approved user';
     ELSEIF EXISTS (
-        SELECT Status from user
+        SELECT Status from "User"
         WHERE Username = i_username and Status = "Declined"
     ) THEN SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Can not decline already declined user';
     ELSE
-        UPDATE user
+        UPDATE "User"
         SET Status = "Declined"
         WHERE Username = i_username;
     END IF;
 END$$
-DELIMITER ;
+--DELIMITER ;
 
 --
 -- Screen 13: Admin filter user
 --
 
-DROP PROCEDURE IF EXISTS `admin_filter_user`;
-DELIMITER $$
-CREATE PROCEDURE `admin_filter_user` (
+DROP PROCEDURE IF EXISTS admin_filter_user;
+--DELIMITER $$
+CREATE PROCEDURE admin_filter_user (
     IN i_username varchar(240),
     IN i_status char(8),
     IN i_sortDirection char(4),
@@ -273,15 +273,15 @@ BEGIN
         END;
     END IF;
 END$$
-DELIMITER ;
+--DELIMITER ;
 
 --
 -- Screen 14: Admin filter company
 --
 
-DROP PROCEDURE IF EXISTS `admin_filter_company`;
-DELIMITER $$
-CREATE PROCEDURE `admin_filter_company` (
+DROP PROCEDURE IF EXISTS admin_filter_company;
+--DELIMITER $$
+CREATE PROCEDURE admin_filter_company (
     IN i_comName varchar(240),
     IN i_minCity int unsigned,
     IN i_maxCity int unsigned,
@@ -344,15 +344,15 @@ BEGIN
         END;
     END IF;
 END$$
-DELIMITER ;
+--DELIMITER ;
 
 --
 -- Screen 15: Admin create theater
 --
 
-DROP PROCEDURE IF EXISTS `admin_create_theater`;
-DELIMITER $$
-CREATE PROCEDURE `admin_create_theater` (
+DROP PROCEDURE IF EXISTS admin_create_theater;
+--DELIMITER $$
+CREATE PROCEDURE admin_create_theater (
     IN i_thName varchar(240),
     IN i_comName varchar(240),
     IN i_thStreet varchar(240),
@@ -372,33 +372,33 @@ BEGIN
         i_managerUsername
     );
 END$$
-DELIMITER ;
+--DELIMITER ;
 
 --
 -- Screen 16: Admin view company detail (Employee)
 --
 
-DROP PROCEDURE IF EXISTS `admin_view_comDetail_emp`;
-DELIMITER $$
-CREATE PROCEDURE `admin_view_comDetail_emp` (
+DROP PROCEDURE IF EXISTS admin_view_comDetail_emp;
+--DELIMITER $$
+CREATE PROCEDURE admin_view_comDetail_emp (
     IN i_comName varchar(240)
 )
 BEGIN
     DROP TABLE IF EXISTS AdComDetailEmp;
     CREATE TABLE AdComDetailEmp
-        SELECT user.Firstname as empFirstname, user.Lastname as empLastname FROM manager
-        INNER JOIN user ON manager.Username = user.Username
+        SELECT "User".Firstname as empFirstname, "user".Lastname as empLastname FROM manager
+        INNER JOIN "User" ON manager.Username = "User".Username
         WHERE CompanyName <=> i_comName;
 END$$
-DELIMITER ;
+--DELIMITER ;
 
 --
 -- Screen 16: Admin view company detail (Theater)
 --
 
-DROP PROCEDURE IF EXISTS `admin_view_comDetail_th`;
-DELIMITER $$
-CREATE PROCEDURE `admin_view_comDetail_th` (
+DROP PROCEDURE IF EXISTS admin_view_comDetail_th;
+--DELIMITER $$
+CREATE PROCEDURE admin_view_comDetail_th (
     IN i_comName varchar(240)
 )
 BEGIN
@@ -412,15 +412,15 @@ BEGIN
         FROM theater
         WHERE CompanyName <=> i_comName;
 END$$
-DELIMITER ;
+--DELIMITER ;
 
 --
 -- Screen 17: Admin create movie
 --
 
-DROP PROCEDURE IF EXISTS `admin_create_mov`;
-DELIMITER $$
-CREATE PROCEDURE `admin_create_mov` (
+DROP PROCEDURE IF EXISTS admin_create_mov;
+--DELIMITER $$
+CREATE PROCEDURE admin_create_mov (
     IN i_movName varchar(240),
     IN i_movDuration int unsigned,
     IN i_movReleaseDate date
@@ -429,15 +429,15 @@ BEGIN
     INSERT INTO movie (Name, ReleaseDate, Duration)
     VALUES (i_movName, i_movReleaseDate, i_movDuration);
 END$$
-DELIMITER ;
+--DELIMITER ;
 
 --
 -- Screen 18: Manager filter theater
 --
 
-DROP PROCEDURE IF EXISTS `manager_filter_th`;
-DELIMITER $$
-CREATE PROCEDURE `manager_filter_th` (
+DROP PROCEDURE IF EXISTS manager_filter_th;
+--DELIMITER $$
+CREATE PROCEDURE manager_filter_th (
     IN i_manUsername varchar(240),
     IN i_movName varchar(240),
     IN i_minMovDuration int unsigned,
@@ -473,15 +473,15 @@ BEGIN
         -- Perform include not played
         AND IFNULL(i_includeNotPlayed, FALSE) OR movieplay.Date <= CURDATE();
 END$$
-DELIMITER ;
+--DELIMITER ;
 
 --
 -- Screen 19: Manager schedule movie
 --
 
-DROP PROCEDURE IF EXISTS `manager_schedule_mov`;
-DELIMITER $$
-CREATE PROCEDURE `manager_schedule_mov` (
+DROP PROCEDURE IF EXISTS manager_schedule_mov;
+--DELIMITER $$
+CREATE PROCEDURE manager_schedule_mov (
     IN i_manUsername varchar(240),
     IN i_movName varchar(240),
     IN i_movReleaseDate date,
@@ -495,15 +495,15 @@ BEGIN
     INSERT INTO movieplay (Date, MovieName, ReleaseDate, TheaterName, CompanyName)
     VALUES (i_movPlayDate, i_movName, i_movReleaseDate, @theater_name, @company_name );
 END$$
-DELIMITER ;
+--DELIMITER ;
 
 --
 -- Screen 20: Customer filter movie
 --
 
-DROP PROCEDURE IF EXISTS `customer_filter_mov`;
-DELIMITER $$
-CREATE PROCEDURE `customer_filter_mov` (
+DROP PROCEDURE IF EXISTS customer_filter_mov;
+--DELIMITER $$
+CREATE PROCEDURE customer_filter_mov (
     IN i_movName varchar(240),
     IN i_comName varchar(240),
     IN i_city varchar(240),
@@ -536,15 +536,15 @@ BEGIN
         AND (i_minMovPlayDate IS NULL OR movieplay.Date >= i_minMovPlayDate)
         AND (i_maxMovPlayDate IS NULL OR movieplay.Date <= i_maxMovPlayDate);
 END$$
-DELIMITER ;
+--DELIMITER ;
 
 --
 -- Screen 20: Customer view movie
 --
 
-DROP PROCEDURE IF EXISTS `customer_view_mov`;
-DELIMITER $$
-CREATE PROCEDURE `customer_view_mov` (
+DROP PROCEDURE IF EXISTS customer_view_mov;
+--DELIMITER $$
+CREATE PROCEDURE customer_view_mov (
     IN i_creditCardNum char(16),
     IN i_movName varchar(240),
     IN i_movReleaseDate date,
@@ -561,15 +561,15 @@ BEGIN
         i_movReleaseDate, i_thName, i_comName
     );
 END$$
-DELIMITER ;
+--DELIMITER ;
 
 --
 -- Screen 21: Customer view history
 --
 
-DROP PROCEDURE IF EXISTS `customer_view_history`;
-DELIMITER $$
-CREATE PROCEDURE `customer_view_history` (
+DROP PROCEDURE IF EXISTS customer_view_history;
+--DELIMITER $$
+CREATE PROCEDURE customer_view_history (
     IN i_cusUsername varchar(240)
 )
 BEGIN
@@ -583,15 +583,15 @@ BEGIN
         FROM used NATURAL JOIN CreditCard
         WHERE Owner = i_cusUsername;
 END$$
-DELIMITER ;
+--DELIMITER ;
 
 --
 -- [PROVIDED] Screen 22: User filter theater
 --
 
-DROP PROCEDURE IF EXISTS `user_filter_th`;
-DELIMITER $$
-CREATE PROCEDURE `user_filter_th` (
+DROP PROCEDURE IF EXISTS user_filter_th;
+--DELIMITER $$
+CREATE PROCEDURE user_filter_th (
     IN i_thName VARCHAR(240),
     IN i_comName VARCHAR(240),
     IN i_city VARCHAR(240),
@@ -608,15 +608,15 @@ BEGIN
             (thCity = i_city OR i_city = "") AND
             (thState = i_state OR i_state = "ALL");
 END$$
-DELIMITER ;
+--DELIMITER ;
 
 --
 -- [PROVIDED] Screen 22: User visit theater
 --
 
-DROP PROCEDURE IF EXISTS `user_visit_th`;
-DELIMITER $$
-CREATE PROCEDURE `user_visit_th` (
+DROP PROCEDURE IF EXISTS user_visit_th;
+--DELIMITER $$
+CREATE PROCEDURE user_visit_th (
     IN i_thName VARCHAR(240),
     IN i_comName VARCHAR(240),
     IN i_visitDate DATE,
@@ -626,15 +626,15 @@ BEGIN
     INSERT INTO UserVisitTheater (thName, comName, visitDate, username)
     VALUES (i_thName, i_comName, i_visitDate, i_username);
 END$$
-DELIMITER ;
+--DELIMITER ;
 
 --
 -- [PROVIDED] Screen 23: User filter visit history
 --
 
-DROP PROCEDURE IF EXISTS `user_filter_visitHistory`;
-DELIMITER $$
-CREATE PROCEDURE `user_filter_visitHistory` (
+DROP PROCEDURE IF EXISTS user_filter_visitHistory;
+--DELIMITER $$
+CREATE PROCEDURE user_filter_visitHistory (
     IN i_username VARCHAR(240), 
     IN i_minVisitDate DATE,
     IN i_maxVisitDate DATE
@@ -649,4 +649,4 @@ BEGIN
             (i_minVisitDate IS NULL OR visitDate >= i_minVisitDate) AND
             (i_maxVisitDate IS NULL OR visitDate <= i_maxVisitDate);
 END$$
-DELIMITER ;
+--DELIMITER ;
