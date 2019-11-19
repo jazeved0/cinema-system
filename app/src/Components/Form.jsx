@@ -10,8 +10,10 @@ import {
   isDefined,
   isNil,
   identity,
-  isEmptyOrNil
+  isEmptyOrNil,
+  equal
 } from "Utility";
+import hash from "object-hash";
 import classNames from "classnames";
 
 import {
@@ -21,6 +23,7 @@ import {
   Row,
   Col
 } from "react-bootstrap";
+import { Prompt } from "react-router-dom";
 import { SetInput } from "Components";
 
 export default function Form(props) {
@@ -32,7 +35,9 @@ export default function Form(props) {
     buttons,
     isShown,
     focusDelay,
-    collapse
+    collapse,
+    blocking,
+    blockingMessage
   } = props;
 
   // Key => Entry map
@@ -40,6 +45,11 @@ export default function Form(props) {
 
   // Controlled input values
   const [values, setValues] = useState(() => calculateInitialState(entries));
+  const isEmpty = useMemo(
+    () =>
+      entries.every(entry => equal(values[entry.key], getDefaultValue(entry))),
+    [entries, values]
+  );
   const onChange = useCallback(
     (key, event) => {
       let processFunc = entriesMap[key].processValue;
@@ -120,75 +130,83 @@ export default function Form(props) {
     [showValidation, finishedInputs]
   );
 
+  // "unique" form hash
+  const formHash = useMemo(() => hash(entries), [entries]);
+
   return (
-    <BootstrapForm noValidate className="_form">
-      {/* Input rows */}
-      {entries.map((entry, i) => (
-        <BootstrapForm.Group
-          key={entry.key}
-          as={Row}
-          controlId={`loginPane-${entry.key}`}
-        >
-          <BootstrapForm.Label column {...{ [collapse]: 2 }}>
-            {entry.name}
-          </BootstrapForm.Label>
-          <Col {...{ [collapse]: 10 }}>
-            <Form.Input
-              type={entry.type || "text"}
-              inputKey={entry.key}
-              placeholder={`Enter ${entry.name.toLowerCase()}`}
-              onChange={onChange}
-              onBlur={onBlur}
-              onKeyDown={handleKeyPressed}
-              value={values[entry.key]}
-              isValid={
-                validated(entry) &&
-                validationStatus[entry.key].result &&
-                entry.showValid
-              }
-              isInvalid={
-                validated(entry) && !validationStatus[entry.key].result
-              }
-              ref={i === 0 ? firstInput : undefined}
-              disabled={isLoading}
-              {...entry.props}
-              message={validationStatus[entry.key].message}
-            />
-            {isDefined(entry.info) ? (
-              <BootstrapForm.Text className="text-muted">
-                {entry.info}
-              </BootstrapForm.Text>
-            ) : null}
+    <>
+      {blocking && !isEmpty && <Prompt message={blockingMessage} />}
+      <BootstrapForm noValidate className="_form">
+        {/* Input rows */}
+        {entries.map((entry, i) => (
+          <BootstrapForm.Group
+            key={entry.key}
+            as={Row}
+            controlId={`form-${formHash}-${entry.key}`}
+          >
+            <BootstrapForm.Label column {...{ [collapse]: 2 }}>
+              {entry.name}
+            </BootstrapForm.Label>
+            <Col {...{ [collapse]: 10 }}>
+              <Form.Input
+                type={entry.type || "text"}
+                inputKey={entry.key}
+                placeholder={`Enter ${entry.name.toLowerCase()}`}
+                onChange={onChange}
+                onBlur={onBlur}
+                onKeyDown={handleKeyPressed}
+                value={values[entry.key]}
+                isValid={
+                  validated(entry) &&
+                  validationStatus[entry.key].result &&
+                  entry.showValid
+                }
+                isInvalid={
+                  validated(entry) && !validationStatus[entry.key].result
+                }
+                ref={i === 0 ? firstInput : undefined}
+                disabled={isLoading}
+                {...entry.props}
+                message={validationStatus[entry.key].message}
+              />
+              {isDefined(entry.info) ? (
+                <BootstrapForm.Text className="text-muted">
+                  {entry.info}
+                </BootstrapForm.Text>
+              ) : null}
+            </Col>
+          </BootstrapForm.Group>
+        ))}
+        {/* Submit row */}
+        <BootstrapForm.Group as={Row}>
+          <Col sm={{ span: 10, offset: 2 }}>
+            <div className="_form--buttons">
+              <Button
+                className={classNames("_form--submit-button", {
+                  "_form--submit-button__loading": isLoading
+                })}
+                variant={variant}
+                onClick={tryLogin}
+                disabled={isLoading}
+              >
+                {text}
+                <div className="_form--submit-button-spinner">
+                  <Spinner animation="border" size="sm" variant="light" />
+                </div>
+              </Button>
+              {buttons}
+            </div>
           </Col>
         </BootstrapForm.Group>
-      ))}
-      {/* Submit row */}
-      <BootstrapForm.Group as={Row}>
-        <Col sm={{ span: 10, offset: 2 }}>
-          <div className="_form--buttons">
-            <Button
-              className={classNames("_form--submit-button", {
-                "_form--submit-button__loading": isLoading
-              })}
-              variant={variant}
-              onClick={tryLogin}
-              disabled={isLoading}
-            >
-              {text}
-              <div className="_form--submit-button-spinner">
-                <Spinner animation="border" size="sm" variant="light" />
-              </div>
-            </Button>
-            {buttons}
-          </div>
-        </Col>
-      </BootstrapForm.Group>
-    </BootstrapForm>
+      </BootstrapForm>
+    </>
   );
 }
 Form.displayName = "Form";
 Form.defaultProps = {
-  collapse: "sm"
+  collapse: "sm",
+  blockingMessage:
+    "Are you sure you want to exit? Your information will not be saved."
 };
 
 Form.Input = React.forwardRef(
@@ -342,22 +360,23 @@ Form.SmartSetInput.defaultProps = {
 // ? Utility functions
 // ? =================
 
+function getDefaultValue(entry) {
+  if (entry.type === "set") return [];
+  else return "";
+}
+
 function calculateInitialState(entries) {
   const state = createObject();
-  for (let i = 0; i < entries.length; ++i) {
-    if (entries[i].type === "set") {
-      state[entries[i].key] = [];
-    } else {
-      state[entries[i].key] = "";
-    }
+  for (const entry of entries) {
+    state[entry.key] = getDefaultValue(entry);
   }
   return state;
 }
 
 function calculateInitialFocusState(entries) {
   const state = createObject();
-  for (let i = 0; i < entries.length; ++i) {
-    state[entries[i].key] = false;
+  for (const entry of entries) {
+    state[entry.key] = false;
   }
   return state;
 }

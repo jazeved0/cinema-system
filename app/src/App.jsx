@@ -15,7 +15,7 @@ function App() {
             path={[
               "/",
               "/register",
-              ...registerScreens.map(c => `$/register/${c}`)
+              ...registerScreens.map(c => `/register/${c}`)
             ]}
           >
             <LoginRegister />

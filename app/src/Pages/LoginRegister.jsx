@@ -1,11 +1,18 @@
 import React, { useState, useCallback, useEffect } from "react";
 import classNames from "classnames";
 import { isDefined } from "Utility";
-import { useRouteMatch, useHistory } from "react-router-dom";
+import { useRouteMatch, useHistory, Switch, Route } from "react-router-dom";
 
 import { CtaButton, Form, Link, Page } from "Components";
+import {
+  RegisterMenu,
+  RegisterCustomer,
+  RegisterUser,
+  RegisterManager,
+  RegisterManagerCustomer
+} from "Pages";
 import AnimateHeight from "react-animate-height";
-import { Modal, Button } from "react-bootstrap";
+import { Modal } from "react-bootstrap";
 
 import "./style.scss";
 
@@ -36,16 +43,28 @@ export default function LoginRegister() {
         have developed a movie system using relational database concepts and
         developed an application layer/frontend with Python Flask and React.
       </p>
-      <LoginRegister.LoginButton
-        activeLogin={activeLogin}
-        isLoading={isLoading}
-        onSubmit={() => setIsLoading(true)}
-        onOpen={() => setActiveLogin(true)}
-        onClose={() => {
-          if (isLoading) setIsLoading(false);
-          setActiveLogin(false);
-        }}
-      />
+      <div className="login-register">
+        <LoginRegister.LoginButton
+          activeLogin={activeLogin}
+          isLoading={isLoading}
+          onSubmit={() => setIsLoading(true)}
+          onOpen={() => setActiveLogin(true)}
+          onClose={() => {
+            if (isLoading) setIsLoading(false);
+            setActiveLogin(false);
+          }}
+        />
+        <CtaButton
+          variant="primary"
+          icon="asterisk"
+          className={classNames("register", { active: activeLogin })}
+          animated
+          glowing
+          onClick={() => history.push("/register")}
+        >
+          Register
+        </CtaButton>
+      </div>
       <LoginRegister.RegisterModal
         show={registerOpen}
         onHide={() => history.push("/")}
@@ -174,20 +193,27 @@ LoginRegister.Pane.displayName = "LoginRegister.Pane";
 
 LoginRegister.RegisterModal = function(props) {
   const { show, onHide } = props;
+  const base = "/register";
   return (
     <Modal show={show} onHide={onHide} dialogClassName="register-modal">
-      <Modal.Header closeButton>
-        <Modal.Title>Modal heading</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>Woohoo, you're reading this text in a modal!</Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={null}>
-          Close
-        </Button>
-        <Button variant="primary" onClick={null}>
-          Save Changes
-        </Button>
-      </Modal.Footer>
+      <Modal.Header closeButton />
+      <div className="content">
+        <Switch>
+          <Route path={`${base}/user`}>
+            <RegisterUser />
+          </Route>
+          <Route path={`${base}/customer`}>
+            <RegisterCustomer />
+          </Route>
+          <Route path={`${base}/manager`}>
+            <RegisterManager /></Route>
+          <Route path={`${base}/manager-customer`}>
+            <RegisterManagerCustomer /></Route>
+          <Route path="*">
+            <RegisterMenu />
+          </Route>
+        </Switch>
+      </div>
     </Modal>
   );
 };

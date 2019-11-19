@@ -6,7 +6,7 @@ import Helmet from "react-helmet";
 
 const siteTitle = "Cinema System";
 export default function Page(props) {
-  const { title, children } = props;
+  const { title, children, noContainer } = props;
   const fullTitle = isDefined(title) ? `${title} | ${siteTitle}` : siteTitle;
   return (
     <>
@@ -19,8 +19,7 @@ export default function Page(props) {
           }
         ]}
       />
-
-      <Container>{children}</Container>
+      {noContainer ? children : <Container>{children}</Container>}
     </>
   );
 }

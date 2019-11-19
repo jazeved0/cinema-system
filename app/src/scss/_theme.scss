@@ -20,6 +20,12 @@ $window-padding: 1.25rem;
 $window-padding-bottom: 0.5rem;
 $window-border-radius: 8px;
 $ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+$container-max-widths: (
+    sm: 540px,
+    md: 640px,
+    lg: 960px,
+    xl: 1140px
+) !default;
 
 @mixin scrollbar($color, $width) {
     scrollbar-face-color: #646464;

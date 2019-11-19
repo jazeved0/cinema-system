@@ -3,6 +3,11 @@
 @import "../scss/util";
 @import "../scss/theme";
 
+@import "node_modules/bootstrap/scss/functions";
+@import "node_modules/bootstrap/scss/variables";
+@import "node_modules/bootstrap/scss/mixins";
+@import "node_modules/bootstrap/scss/utilities";
+
 .intro-space {
     margin-top: 2.5rem;
 
@@ -20,11 +25,15 @@ $line-width: 225px;
     position: relative;
     max-width: 100%;
     border: none !important;
-    margin-bottom: 2rem;
 
     .login-wrapper {
         @include transitions("width", 0.4s);
         width: 0;
+    }
+
+    @include respond-above(md) {
+        // Restore vertical rhythm by offsetting border radius
+        margin-left: -8px;
     }
 
     .cta-button--content-wrapper {
@@ -178,6 +187,23 @@ $line-width: 225px;
     }
 }
 
+.cta-button.register {
+    @include transitions((max-width, opacity, box-shadow, padding), 0.5s);
+    transition-delay: 0.35s !important;
+    max-width: 220px;
+    opacity: 1;
+    vertical-align: top;
+    overflow: hidden;
+
+    &.active {
+        max-width: 0;
+        opacity: 0;
+        padding-left: 0;
+        padding-right: 0;
+        transition-delay: 0s !important;
+    }
+}
+
 .login-pane {
     $this: &;
 
@@ -234,7 +260,78 @@ $line-width: 225px;
     }
 }
 
+.modal-dialog.register-modal {
+    margin-top: 8rem !important;
+    @include make-container();
+    @include make-container-max-widths();
+
+    @include respond-below(md) {
+        margin-top: 6rem !important;
+    }
+
+    @include respond-below(sm) {
+        margin-top: 5.35rem !important;
+    }
+
+    // Header collapse breakpoint
+    @media (max-width: 400px) {
+        margin-top: 5rem !important;
+    }
+
+    .modal-content {
+        box-shadow: $drop-shadow;
+        border: none !important;
+
+        @include dark-fg;
+        @include dark-bg;
+        @include light-fg;
+        @include light-bg;
+    }
+
+    @include dark {
+        .close {
+            color: white;
+            text-shadow: 0 1px 0 black;
+        }
+    }
+
+    .modal-header {
+        border: none !important;
+    }
+
+    @mixin modal-padding($padding, $top-adjust: -0.25rem) {
+        .close {
+            padding-right: $padding;
+            padding-top: $padding;
+        }
+
+        .content {
+            margin-top: -$padding + $top-adjust;
+            padding: 0 $padding $padding;
+        }
+    }
+
+    @include modal-padding(2rem);
+
+    @include respond-below(xs) {
+        @include modal-padding(1rem, $top-adjust: -0.5rem);
+    }
+}
+
+.login-register {
+    .cta-button {
+        margin-bottom: 1rem;
+        margin-right: 1rem;
+    }
+}
+
 .register {
+    .back-button {
+        margin-bottom: 1.5rem;
+    }
+}
+
+.register-menu {
     &--buttons {
         $spacing: 0.9rem;
         $negative-space: 1.5rem - $spacing;
