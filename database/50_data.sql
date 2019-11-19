@@ -1,13 +1,15 @@
-USE `Team20`;
-SET FOREIGN_KEY_CHECKS = 0; 
+--USE Team20;
+--SET FOREIGN_KEY_CHECKS = 0; 
+SET session_replication_role = 'replica';
+
 
 --
--- Dumping data for table `user`
+-- Dumping data for table user
 --
 
-LOCK TABLES `user` WRITE;
-/*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES 
+--LOCK TABLE "User";
+/*!40000 ALTER TABLE "User" DISABLE KEYS */;
+INSERT INTO "User" VALUES 
     ('calcultron','Approved','77C9749B451AB8C713C48037DDFBB2C4','Dwight','Schrute'),
     ('calcultron2','Approved','8792B8CF71D27DC96173B2AC79B96E0D','Jim','Halpert'),
     ('calcwizard','Approved','0D777E9E30B918E9034AB610712C90CF','Issac','Newton'),
@@ -38,40 +40,39 @@ INSERT INTO `user` VALUES
     ('texasStarKarate','Declined','7C5858F7FCF63EC268F42565BE3ABB95','Sandy','Cheeks'),
     ('thePiGuy3.14','Approved','E11170B8CBD2D74102651CB967FA28E5','Archimedes','Syracuse'),
     ('theScienceGuy','Approved','C8C605999F3D8352D7BB792CF3FDB25B','Bill','Nye');
-/*!40000 ALTER TABLE `user` ENABLE KEYS */;
-UNLOCK TABLES;
+/*!40000 ALTER TABLE "User" ENABLE KEYS */;
+--UNLOCK TABLES;
 
 --
--- Dumping data for table `admin`
+-- Dumping data for table admin
 --
 
-LOCK TABLES `admin` WRITE;
-/*!40000 ALTER TABLE `admin` DISABLE KEYS */;
-INSERT INTO `admin` VALUES ('cool_class4400');
-/*!40000 ALTER TABLE `admin` ENABLE KEYS */;
-UNLOCK TABLES;
+--LOCK TABLE admin WRITE;
+/*!40000 ALTER TABLE admin DISABLE KEYS */;
+INSERT INTO admin VALUES ('cool_class4400');
+/*!40000 ALTER TABLE admin ENABLE KEYS */;
 
 --
--- Dumping data for table `company`
+-- Dumping data for table company
 --
 
-LOCK TABLES `company` WRITE;
-/*!40000 ALTER TABLE `company` DISABLE KEYS */;
-INSERT INTO `company` VALUES 
+--LOCK TABLE company WRITE;
+/*!40000 ALTER TABLE company DISABLE KEYS */;
+INSERT INTO company VALUES 
     ('4400 Theater Company'),
     ('AI Theater Company'),
     ('Awesome Theater Company'),
     ('EZ Theater Company');
-/*!40000 ALTER TABLE `company` ENABLE KEYS */;
-UNLOCK TABLES;
+/*!40000 ALTER TABLE company ENABLE KEYS */;
+--UNLOCK TABLES;
 
 --
--- Dumping data for table `creditcard`
+-- Dumping data for table creditcard
 --
 
-LOCK TABLES `creditcard` WRITE;
-/*!40000 ALTER TABLE `creditcard` DISABLE KEYS */;
-INSERT INTO `creditcard` VALUES
+--LOCK TABLE creditcard WRITE;
+/*!40000 ALTER TABLE creditcard DISABLE KEYS */;
+INSERT INTO creditcard VALUES
     ('1111111111000000','calcultron'),
     ('1111111100000000','calcultron2'),
     ('1111111110000000','calcultron2'),
@@ -100,16 +101,16 @@ INSERT INTO `creditcard` VALUES
     ('3333333333333300','RitzLover28'),
     ('2222222220000000','thePiGuy3.14'),
     ('2222222222222000','theScienceGuy');
-/*!40000 ALTER TABLE `creditcard` ENABLE KEYS */;
-UNLOCK TABLES;
+/*!40000 ALTER TABLE creditcard ENABLE KEYS */;
+--UNLOCK TABLES;
 
 --
--- Dumping data for table `customer`
+-- Dumping data for table customer
 --
 
-LOCK TABLES `customer` WRITE;
-/*!40000 ALTER TABLE `customer` DISABLE KEYS */;
-INSERT INTO `customer` VALUES
+--LOCK TABLE customer WRITE;
+/*!40000 ALTER TABLE customer DISABLE KEYS */;
+INSERT INTO customer VALUES
     ('calcultron'),
     ('calcultron2'),
     ('calcwizard'),
@@ -129,16 +130,16 @@ INSERT INTO `customer` VALUES
     ('RitzLover28'),
     ('thePiGuy3.14'),
     ('theScienceGuy');
-/*!40000 ALTER TABLE `customer` ENABLE KEYS */;
-UNLOCK TABLES;
+/*!40000 ALTER TABLE customer ENABLE KEYS */;
+--UNLOCK TABLES;
 
 --
--- Dumping data for table `employee`
+-- Dumping data for table employee
 --
 
-LOCK TABLES `employee` WRITE;
-/*!40000 ALTER TABLE `employee` DISABLE KEYS */;
-INSERT INTO `employee` VALUES
+--LOCK TABLE employee WRITE;
+/*!40000 ALTER TABLE employee DISABLE KEYS */;
+INSERT INTO employee VALUES
     ('calcultron'),
     ('cool_class4400'),
     ('entropyRox'),
@@ -151,16 +152,16 @@ INSERT INTO `employee` VALUES
     ('manager3'),
     ('manager4'),
     ('radioactivePoRa');
-/*!40000 ALTER TABLE `employee` ENABLE KEYS */;
-UNLOCK TABLES;
+/*!40000 ALTER TABLE employee ENABLE KEYS */;
+--UNLOCK TABLES;
 
 --
--- Dumping data for table `manager`
+-- Dumping data for table manager
 --
 
-LOCK TABLES `manager` WRITE;
-/*!40000 ALTER TABLE `manager` DISABLE KEYS */;
-INSERT INTO `manager` VALUES
+--LOCK TABLE manager WRITE;
+/*!40000 ALTER TABLE manager DISABLE KEYS */;
+INSERT INTO manager VALUES
     ('calcultron','GA','Atlanta','30308','123 Peachtree St','EZ Theater Company'),
     ('entropyRox','CA','San Francisco','94016','200 Cool Place','4400 Theater Company'),
     ('fatherAI','NY','New York','10001','456 Main St','EZ Theater Company'),
@@ -172,44 +173,44 @@ INSERT INTO `manager` VALUES
     ('manager3','GA','Atlanta','30332','789 Ferst Drive','4400 Theater Company'),
     ('manager4','GA','Atlanta','30332','000 Ferst Drive','4400 Theater Company'),
     ('radioactivePoRa','CA','Sunnyvale','94088','100 Blu St','4400 Theater Company');
-/*!40000 ALTER TABLE `manager` ENABLE KEYS */;
-UNLOCK TABLES;
+/*!40000 ALTER TABLE manager ENABLE KEYS */;
+--UNLOCK TABLES;
 
 --
--- Dumping data for table `movie`
+-- Dumping data for table movie
 --
 
-LOCK TABLES `movie` WRITE;
-/*!40000 ALTER TABLE `movie` DISABLE KEYS */;
-INSERT INTO `movie` VALUES
+--LOCK TABLE movie WRITE;
+/*!40000 ALTER TABLE movie DISABLE KEYS */;
+INSERT INTO movie VALUES
     ('4400 The Movie','2019-08-12',130),
     ('Avengers: Endgame','2019-04-26',181),
     ('Calculus Returns: A ML Story','2019-09-19',314),
-    ('George P Burdell\'s Life Story','1927-08-12',100),
+    ('George P Burdell''s Life Story','1927-08-12',100),
     ('Georgia Tech The Movie','1985-08-13',100),
     ('How to Train Your Dragon','2010-03-21',98),
     ('Spaceballs','1987-06-24',96),
     ('Spider-Man: Into the Spider-Verse','2018-12-01',117),
     ('The First Pokemon Movie','1998-07-19',75),
-    ('The King\'s Speech','2010-11-26',119);
-/*!40000 ALTER TABLE `movie` ENABLE KEYS */;
-UNLOCK TABLES;
+    ('The King''s Speech','2010-11-26',119);
+/*!40000 ALTER TABLE movie ENABLE KEYS */;
+--UNLOCK TABLES;
 
 --
--- Dumping data for table `movieplay`
+-- Dumping data for table movieplay
 --
 
-LOCK TABLES `movieplay` WRITE;
-/*!40000 ALTER TABLE `movieplay` DISABLE KEYS */;
-INSERT INTO `movieplay` VALUES
+--LOCK TABLE movieplay WRITE;
+/*!40000 ALTER TABLE movieplay DISABLE KEYS */;
+INSERT INTO movieplay VALUES
     ('2019-08-12','4400 The Movie','2019-08-12','Star Movies','EZ Theater Company'),
     ('2019-09-12','4400 The Movie','2019-08-12','Cinema Star','4400 Theater Company'),
     ('2019-10-12','4400 The Movie','2019-08-12','ABC Theater','Awesome Theater Company'),
     ('2019-10-10','Calculus Returns: A ML Story','2019-09-19','ML Movies','AI Theater Company'),
     ('2019-12-30','Calculus Returns: A ML Story','2019-09-19','ML Movies','AI Theater Company'),
-    ('2010-05-20','George P Burdell\'s Life Story','1927-08-12','Cinema Star','4400 Theater Company'),
-    ('2019-07-14','George P Burdell\'s Life Story','1927-08-12','Main Movies','EZ Theater Company'),
-    ('2019-10-22','George P Burdell\'s Life Story','1927-08-12','Main Movies','EZ Theater Company'),
+    ('2010-05-20','George P Burdell''s Life Story','1927-08-12','Cinema Star','4400 Theater Company'),
+    ('2019-07-14','George P Burdell''s Life Story','1927-08-12','Main Movies','EZ Theater Company'),
+    ('2019-10-22','George P Burdell''s Life Story','1927-08-12','Main Movies','EZ Theater Company'),
     ('1985-08-13','Georgia Tech The Movie','1985-08-13','ABC Theater','Awesome Theater Company'),
     ('2019-09-30','Georgia Tech The Movie','1985-08-13','Cinema Star','4400 Theater Company'),
     ('2010-03-22','How to Train Your Dragon','2010-03-21','Main Movies','EZ Theater Company'),
@@ -222,55 +223,56 @@ INSERT INTO `movieplay` VALUES
     ('2023-01-23','Spaceballs','1987-06-24','ML Movies','AI Theater Company'),
     ('2019-09-30','Spider-Man: Into the Spider-Verse','2018-12-01','ML Movies','AI Theater Company'),
     ('2018-07-19','The First Pokemon Movie','1998-07-19','ABC Theater','Awesome Theater Company'),
-    ('2019-12-20','The King\'s Speech','2010-11-26','Cinema Star','4400 Theater Company'),
-    ('2019-12-20','The King\'s Speech','2010-11-26','Main Movies','EZ Theater Company');
-/*!40000 ALTER TABLE `movieplay` ENABLE KEYS */;
-UNLOCK TABLES;
+    ('2019-12-20','The King''s Speech','2010-11-26','Cinema Star','4400 Theater Company'),
+    ('2019-12-20','The King''s Speech','2010-11-26','Main Movies','EZ Theater Company');
+/*!40000 ALTER TABLE movieplay ENABLE KEYS */;
+--UNLOCK TABLES;
 
 --
--- Dumping data for table `theater`
+-- Dumping data for table theater
 --
 
-LOCK TABLES `theater` WRITE;
-/*!40000 ALTER TABLE `theater` DISABLE KEYS */;
-INSERT INTO `theater` VALUES
+--LOCK TABLE theater WRITE;
+/*!40000 ALTER TABLE theater DISABLE KEYS */;
+INSERT INTO theater VALUES
     ('ABC Theater','Awesome Theater Company','TX','Austin','73301',5,'imbatman','880 Color Dr'),
     ('Cinema Star','4400 Theater Company','CA','San Francisco','94016',4,'entropyRox','100 Cool Place'),
-    ('Jonathan\'s Movies','4400 Theater Company','WA','Seattle','98101',2,'georgep','67 Pearl Dr'),
+    ('Jonathan''s Movies','4400 Theater Company','WA','Seattle','98101',2,'georgep','67 Pearl Dr'),
     ('Main Movies','EZ Theater Company','NY','New York','10001',3,'fatherAI','123 Main St'),
     ('ML Movies','AI Theater Company','KS','Pallet Town','31415',3,'ghcghc','314 Pi St'),
     ('Star Movies','4400 Theater Company','CA','Boulder','80301',5,'radioactivePoRa','4400 Rocks Ave'),
     ('Star Movies','EZ Theater Company','GA','Atlanta','30332',2,'calcultron','745 GT St');
-/*!40000 ALTER TABLE `theater` ENABLE KEYS */;
-UNLOCK TABLES;
+/*!40000 ALTER TABLE theater ENABLE KEYS */;
+--UNLOCK TABLES;
 
 --
--- Dumping data for table `used`
+-- Dumping data for table used
 --
 
-LOCK TABLES `used` WRITE;
-/*!40000 ALTER TABLE `used` DISABLE KEYS */;
-INSERT INTO `used` VALUES
+--LOCK TABLE used WRITE;
+/*!40000 ALTER TABLE used DISABLE KEYS */;
+INSERT INTO used VALUES
     ('1111111111111111','2010-03-22','How to Train Your Dragon','2010-03-21','Main Movies','EZ Theater Company'),
     ('1111111111111111','2010-03-23','How to Train Your Dragon','2010-03-21','Main Movies','EZ Theater Company'),
     ('1111111111111100','2010-03-25','How to Train Your Dragon','2010-03-21','Star Movies','EZ Theater Company'),
     ('1111111111111111','2010-04-02','How to Train Your Dragon','2010-03-21','Cinema Star','4400 Theater Company');
-/*!40000 ALTER TABLE `used` ENABLE KEYS */;
-UNLOCK TABLES;
+/*!40000 ALTER TABLE used ENABLE KEYS */;
+--UNLOCK TABLES;
 
 --
--- Dumping data for table `visit`
+-- Dumping data for table visit
 --
 
-LOCK TABLES `visit` WRITE;
-/*!40000 ALTER TABLE `visit` DISABLE KEYS */;
-INSERT INTO `visit` VALUES
+--LOCK TABLE visit WRITE;
+/*!40000 ALTER TABLE visit DISABLE KEYS */;
+INSERT INTO visit VALUES
     (1,'2010-03-22','georgep','Main Movies','EZ Theater Company'),
     (2,'2010-03-22','calcwizard','Main Movies','EZ Theater Company'),
     (3,'2010-03-25','calcwizard','Star Movies','EZ Theater Company'),
     (4,'2010-03-25','imready','Star Movies','EZ Theater Company'),
     (5,'2010-03-20','calcwizard','ML Movies','AI Theater Company');
-/*!40000 ALTER TABLE `visit` ENABLE KEYS */;
-UNLOCK TABLES;
+/*!40000 ALTER TABLE visit ENABLE KEYS */;
+--UNLOCK TABLES;
 
-SET FOREIGN_KEY_CHECKS = 1;
+--SET FOREIGN_KEY_CHECKS = 1;
+SET session_replication_role = 'origin';
