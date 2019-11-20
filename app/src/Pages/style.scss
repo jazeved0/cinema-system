@@ -324,39 +324,17 @@ $line-width: 225px;
         margin-bottom: 1rem;
         margin-right: 1rem;
     }
+
+    &__welcome {
+        max-width: 600px;
+        margin: 1rem 0;
+        padding-bottom: 1.5rem - 1rem;
+    }
 }
 
 .register {
     .back-button {
         margin-bottom: 1.5rem;
-    }
-}
-
-.register-menu {
-    &--buttons {
-        $outside-spacing: 0.35rem;
-        $spacing: 1rem;
-        $negative-space: 1.5rem - $spacing;
-
-        display: flex;
-        flex-wrap: wrap;
-
-        margin: ($outside-spacing - $negative-space)
-            ($outside-spacing - ($spacing + $negative-space))
-            ($outside-spacing - ($spacing + $negative-space))
-            ($outside-spacing - $negative-space);
-
-        .btn {
-            display: block;
-            margin-bottom: $spacing;
-            margin-right: $spacing;
-            padding-top: 0.75rem;
-            padding-bottom: 0.75rem;
-        }
-
-        & > div {
-            padding: 0 !important;
-        }
     }
 }
 

@@ -1,12 +1,14 @@
 import React from "react";
 import { useDarkMode } from "Utility";
+import { useAuth } from "Authentication";
 
 import { Navbar } from "react-bootstrap";
-import { Icon, Link } from "Components";
+import { Icon, Link, SessionButton } from "Components";
 
 export default function Layout({ children }) {
   // Dark/light theme selection
   const { value, toggle } = useDarkMode(true);
+  const { isAuthenticated } = useAuth();
 
   return (
     <div className="layout">
@@ -18,6 +20,12 @@ export default function Layout({ children }) {
           </Navbar.Brand>
 
           <div className="right-buttons">
+            {isAuthenticated ? (
+              <>
+                <SessionButton />
+                <span className="nav-divider" />
+              </>
+            ) : null}
             <Link
               href="https://github.com/jazevedo620/cs4400-team20"
               ariaLabel="Github"

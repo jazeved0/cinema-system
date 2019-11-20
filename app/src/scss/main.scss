@@ -233,3 +233,27 @@ input[type="text"], input[type="password"] {
 .modal.show {
     padding-left: 0 !important;
 }
+
+.dropdown-menu {
+    @include dark-bg($dark-400);
+    @include dark-border(transparent);
+
+    .dropdown-item {
+        @include dark-fg;
+        @include dark {
+            @include transitions("background-color");
+
+            &:hover {
+                background-color: rgba(blend($-light, $-primary), 0.1);
+            }
+
+            &:focus {
+                background-color: rgba(blend($-light, $-primary), 0.15);
+            }
+
+            &:active {
+                background-color: blend($-dark, $-primary);
+            }
+        }
+    }
+}

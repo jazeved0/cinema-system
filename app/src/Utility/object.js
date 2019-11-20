@@ -18,6 +18,10 @@ export function isIterable(obj) {
   return isDefined(obj) && typeof obj[Symbol.iterator] === "function";
 }
 
+export function isArray(obj) {
+  return isDefined(obj) && typeof obj === "object" && Array.isArray(obj);
+}
+
 export function createObject() {
   return Object.create(null);
 }

@@ -2,8 +2,9 @@ import React, { useState, useCallback, useEffect } from "react";
 import classNames from "classnames";
 import { isDefined } from "Utility";
 import { useRouteMatch, useHistory, Switch, Route } from "react-router-dom";
+import { useAuth } from "Authentication";
 
-import { CtaButton, Form, Link, Page } from "Components";
+import { CtaButton, Form, Link, Page, Card } from "Components";
 import {
   RegisterMenu,
   RegisterCustomer,
@@ -34,6 +35,8 @@ export default function LoginRegister() {
     }
   }, [isLoading, registerOpen]);
 
+  const { isAuthenticated, firstName } = useAuth();
+
   return (
     <Page title={title}>
       <h1 className="intro-space">Cinema System</h1>
@@ -44,26 +47,43 @@ export default function LoginRegister() {
         developed an application layer/frontend with Python Flask and React.
       </p>
       <div className="login-register">
-        <LoginRegister.LoginButton
-          activeLogin={activeLogin}
-          isLoading={isLoading}
-          onSubmit={() => setIsLoading(true)}
-          onOpen={() => setActiveLogin(true)}
-          onClose={() => {
-            if (isLoading) setIsLoading(false);
-            setActiveLogin(false);
-          }}
-        />
-        <CtaButton
-          variant="primary"
-          icon="asterisk"
-          className={classNames("register", { active: activeLogin })}
-          animated
-          glowing
-          onClick={() => history.push("/register")}
-        >
-          Register
-        </CtaButton>
+        {isAuthenticated ? (
+          <Card className="login-register__welcome">
+            <h4>Welcome back, {firstName}</h4>
+            <CtaButton
+              variant="primary"
+              icon="chevronDoubleRight"
+              animated
+              glowing
+              onClick={() => history.push("/app")}
+            >
+              Go to App
+            </CtaButton>
+          </Card>
+        ) : (
+          <>
+            <LoginRegister.LoginButton
+              activeLogin={activeLogin}
+              isLoading={isLoading}
+              onSubmit={() => setIsLoading(true)}
+              onOpen={() => setActiveLogin(true)}
+              onClose={() => {
+                if (isLoading) setIsLoading(false);
+                setActiveLogin(false);
+              }}
+            />
+            <CtaButton
+              variant="primary"
+              icon="asterisk"
+              className={classNames("register", { active: activeLogin })}
+              animated
+              glowing
+              onClick={() => history.push("/register")}
+            >
+              Register
+            </CtaButton>
+          </>
+        )}
       </div>
       <LoginRegister.RegisterModal
         show={registerOpen}
@@ -207,9 +227,11 @@ LoginRegister.RegisterModal = function(props) {
             <RegisterCustomer />
           </Route>
           <Route path={`${base}/manager`}>
-            <RegisterManager /></Route>
+            <RegisterManager />
+          </Route>
           <Route path={`${base}/manager-customer`}>
-            <RegisterManagerCustomer /></Route>
+            <RegisterManagerCustomer />
+          </Route>
           <Route path="*">
             <RegisterMenu />
           </Route>

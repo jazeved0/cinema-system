@@ -70,7 +70,7 @@
             }
         }
 
-        a,
+        a:not(.dropdown-item),
         button {
             @extend %button-blank;
 
@@ -788,5 +788,76 @@ $secondary-nav-breakpoint: sm;
     &--text {
         margin-left: 0.75rem;
         opacity: 0.8;
+    }
+}
+
+.menu {
+    $outside-spacing: 0.35rem;
+    $spacing: 1rem;
+    $negative-space: 1.5rem - $spacing;
+
+    display: flex;
+    flex-wrap: wrap;
+
+    margin: ($outside-spacing - $negative-space)
+        ($outside-spacing - ($spacing + $negative-space))
+        ($outside-spacing - ($spacing + $negative-space))
+        ($outside-spacing - $negative-space);
+
+    .btn {
+        display: block;
+        margin-bottom: $spacing;
+        margin-right: $spacing;
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+    }
+
+    & > div {
+        padding: 0 !important;
+    }
+}
+
+.session-button {
+    font-size: 1.15rem !important;
+    line-height: 0 !important;
+    font-weight: 500 !important;
+    display: flex !important;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    padding-right: 0.75rem !important;
+
+    & > span {
+        display: block;
+        top: 0 !important;
+    }
+
+    @include respond-below(md) {
+        &__at, &__username {
+            display: none !important;
+        }
+    }
+
+    &__at {
+        opacity: 0.5;
+        margin-right: 0.25rem;
+    }
+
+    &__username {
+        margin-right: 1rem;
+    }
+
+    &__icon {
+        color: $-light !important;
+    }
+
+    &__logout-icon {
+        margin-right: 0.5rem;
+        position: relative;
+        top: -2px;
+    }
+
+    &::after {
+        content: none !important;
     }
 }
