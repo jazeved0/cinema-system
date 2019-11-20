@@ -45,6 +45,7 @@ const debugUser = {
   onLogout: () => null
 };
 
+// TODO remove debug user line once API is implemented
 export function useAuthStore() {
   // const [authState, setAuthState] = useState(() => getDefaultAuthState());
   const [authState, setAuthState] = useState(debugUser);
