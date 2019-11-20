@@ -35,7 +35,23 @@ export default function LoginRegister() {
     }
   }, [isLoading, registerOpen]);
 
-  const { isAuthenticated, firstName } = useAuth();
+  const { isAuthenticated, firstName, loadAuth } = useAuth();
+  const onLogin = () => {
+    setIsLoading(true);
+    // TODO remove debug user and add API call
+    const debugUser = {
+      token: "aaaaaa",
+      isAdmin: false,
+      isManager: true,
+      isCustomer: true,
+      username: "jdoe3",
+      firstName: "John",
+      lastName: "Doe",
+      loadAuth: () => null,
+      onLogout: () => null
+    };
+    loadAuth(debugUser);
+  };
 
   return (
     <Page title={title}>
@@ -65,7 +81,7 @@ export default function LoginRegister() {
             <LoginRegister.LoginButton
               activeLogin={activeLogin}
               isLoading={isLoading}
-              onSubmit={() => setIsLoading(true)}
+              onSubmit={onLogin}
               onOpen={() => setActiveLogin(true)}
               onClose={() => {
                 if (isLoading) setIsLoading(false);

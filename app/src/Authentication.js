@@ -1,6 +1,8 @@
 import React, { useContext, useState } from "react";
 import { isDefined } from "Utility";
 
+const LOCAL_STORAGE_KEY = "session";
+
 export const AuthContext = React.createContext(getDefaultAuthState());
 
 export function useAuth() {
@@ -15,9 +17,7 @@ export function getDefaultAuthState() {
     isCustomer: false,
     username: null,
     firstName: null,
-    lastName: null,
-    loadAuth: () => null,
-    onLogout: () => null
+    lastName: null
   };
 }
 
@@ -33,28 +33,32 @@ function getUserType({ isAdmin, isCustomer, isManager }) {
     : "User";
 }
 
-const debugUser = {
-  token: "aaaaaa",
-  isAdmin: false,
-  isManager: true,
-  isCustomer: true,
-  username: "jdoe3",
-  firstName: "John",
-  lastName: "Doe",
-  loadAuth: () => null,
-  onLogout: () => null
-};
+function getInitialAuthState() {
+  const storedSession = window.localStorage.getItem(LOCAL_STORAGE_KEY);
+  if (isDefined(storedSession)) {
+    return JSON.parse(storedSession);
+  } else {
+    return getDefaultAuthState();
+  }
+}
 
-// TODO remove debug user line once API is implemented
 export function useAuthStore() {
-  // const [authState, setAuthState] = useState(() => getDefaultAuthState());
-  const [authState, setAuthState] = useState(debugUser);
+  function store(session) {
+    setAuthState(session);
+    // Persist session in local storage
+    window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(session));
+  }
+
+  const login = session => store({ ...authState, ...session });
+  const logout = () => store(getDefaultAuthState());
+
+  const [authState, setAuthState] = useState(getInitialAuthState);
   console.log(authState);
   return {
     ...authState,
     isAuthenticated: isDefined(authState.token),
     userType: getUserType(authState),
-    loadAuth: session => setAuthState({ ...authState, ...session }),
-    onLogout: () => setAuthState(getDefaultAuthState())
+    loadAuth: login,
+    onLogout: logout
   };
 }
