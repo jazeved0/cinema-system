@@ -14,7 +14,7 @@ export default function Layout({ children }) {
     <div className="layout">
       <Layout.DarkMode.Provider value={value}>
         <Navbar bg="primary" variant="dark" className="layout--nav">
-          <Navbar.Brand href="/" className="brand">
+          <Navbar.Brand as={Link} href="/" className="brand">
             <Icon name="film" className="brand--icon" />
             <h1 className="brand--text">Cinema System</h1>
           </Navbar.Brand>
