@@ -66,5 +66,42 @@ def register_customer(first_name, last_name, username, password, credit_cards):
     return "not implemented", 400
 
 
+@app.route('/admin/users', methods=['GET'])
+def get_users():
+    return "not implemented", 400
+
+
+@app.route('/admin/users/approve', methods=['POST'])
+@route(params=("username"))
+def approve(usernames):
+    return "not implemented", 400
+
+
+@app.route('/admin/users/decline', methods=['POST'])
+@route(params=("username"))
+def decline(usernames):
+    return "not implemented", 400
+
+
+@app.route('/admin/companies', methods=['GET'])
+def get_users():
+    return "not implemented", 400
+
+
+@app.route('/admin/companies/create', methods=['POST'])
+@route(params=("username"))
+def create_theather():
+    return "not implemented", 400
+
+
+@app.route('/admin/companies/detail', methods=['GET'])
+@route(params=("theather"))
+def approve(usernames):
+    return "not implemented", 400
+
+
+
+
+
 if __name__ == '__main__':
     app.run()
