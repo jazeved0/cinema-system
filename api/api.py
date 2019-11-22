@@ -169,13 +169,6 @@ def get_theater_details(usernames):
 
 
 def app_factory():
-    api = Api(app)
-    api.add_resource(User, "/user/<string:name>")
-    api.add_resource(Settings, "/settings/<int:guild_id>/<string:setting>", "/settings/<int:guild_id>")
-    api.add_resource(Identify, "/identify")
-    api.add_resource(ListGuilds, "/guilds")
-    api.add_resource(Stats, "/stats/<int:guild_id>/<string:stat>")
-    api.add_resource(Login, "/login")
     return app
     
 if __name__ == '__main__':
