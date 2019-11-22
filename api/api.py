@@ -1,5 +1,5 @@
 from flask import Flask, redirect, request, g
-from flask_restful import Api, Resource, reqparse
+from flask_restful import reqparse
 from flask_cors import CORS
 import functools
 import requests
@@ -22,28 +22,6 @@ def teardown_db():
     db = g.pop('db', None)
     if db is not None:
         db.close()
-
-
-class CustomResource(Resource):
-    """Default flask Resource but contains tools to talk to the shard nodes and the db"""
-    def __init__(self):
-        self._session = None
-        self.topic = (getnode() << 15) | os.getpid()
-        self.client = get_rpc_client(self.topic)
-
-    @property
-    def session(self):
-        if self._session is None:
-            self._session = get_db()
-        return self._session
-
-    def shard_call(self, method, *args, routing_guild=None, **kwargs):
-        return self.client.call(
-            method,
-            *args,
-            routing_key=f"shard_rpc_{which_shard(routing_guild)}",
-            **kwargs
-        )
 
 
 def with_db(fn):
