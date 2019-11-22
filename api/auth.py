@@ -2,12 +2,11 @@ import jwt as pyjwt
 import os
 import functools
 from flask import request
+from config import JWT_SECRET
 
-
-JWT_SECRET = os.getenv('JWT_SECRET')
-if JWT_SECRET is None:
-    print("A JWT secret is not configured. Falling back to default value.")
-    JWT_SECRET = "secret"
+"""
+Handles JWT-based authentication & provdes a validation route decorator
+"""
 
 
 def authenticated(fn):
@@ -29,6 +28,11 @@ def authenticated(fn):
 
 
 class JWT:
+    """
+    Represents a single JWT that exists decoded by default, but can be
+    encoded at any time
+    """
+
     def __init__(self, data=None, token=None):
         assert data is not None or token is not None
 

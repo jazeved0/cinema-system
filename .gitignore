@@ -27,9 +27,6 @@ node_modules/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
-.env
-
 # ==============
 # General ignore
 # ==============
@@ -37,3 +34,6 @@ node_modules/
 # Editor files
 .vscode
 tags
+
+
+__pycache__

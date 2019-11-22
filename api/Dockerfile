@@ -15,10 +15,8 @@ RUN pip3 install --trusted-host pypi.python.org -r requirements.txt
 RUN apk del build-base musl-dev python3-dev
 
 COPY ./api/ /app/
-#COPY ./lib /app/lib
 
 EXPOSE 5000
-
 
 
 # Run app.py when the container launches
