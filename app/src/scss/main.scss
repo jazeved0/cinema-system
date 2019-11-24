@@ -172,7 +172,8 @@ input[type="text"] {
     background-position: calc(100% - 8px) calc(0.375em + 0.1875rem);
 }
 
-input[type="text"], input[type="password"] {
+input[type="text"],
+input[type="password"] {
     outline: none;
     padding: {
         top: 6px;

@@ -1,5 +1,6 @@
 import React, { useContext, useState } from "react";
-import { isDefined } from "Utility";
+import { isDefined, log } from "Utility";
+import jwt_decode from "jwt-decode";
 
 const LOCAL_STORAGE_KEY = "session";
 
@@ -17,7 +18,9 @@ export function getDefaultAuthState() {
     isCustomer: false,
     username: null,
     firstName: null,
-    lastName: null
+    lastName: null,
+    status: null,
+    ccCount: null
   };
 }
 
@@ -36,24 +39,30 @@ function getUserType({ isAdmin, isCustomer, isManager }) {
 function getInitialAuthState() {
   const storedSession = window.localStorage.getItem(LOCAL_STORAGE_KEY);
   if (isDefined(storedSession)) {
+    log("Loaded session data from localstorage");
     return JSON.parse(storedSession);
   } else {
     return getDefaultAuthState();
   }
 }
 
-export function useAuthStore() {
-  function store(session) {
-    setAuthState(session);
-    // Persist session in local storage
-    window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(session));
-  }
+export function decodeJWT(jwt) {
+  return jwt_decode(jwt);
+}
 
-  const login = session => store({ ...authState, ...session });
-  const logout = () => store(getDefaultAuthState());
+export function useAuthStore() {
+  const login = session => {
+    const newSession = { ...authState, ...session };
+    setAuthState(newSession);
+    window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newSession));
+  };
+
+  const logout = () => {
+    setAuthState(getDefaultAuthState());
+    window.localStorage.removeItem(LOCAL_STORAGE_KEY);
+  };
 
   const [authState, setAuthState] = useState(getInitialAuthState);
-  console.log(authState);
   return {
     ...authState,
     isAuthenticated: isDefined(authState.token),

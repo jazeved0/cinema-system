@@ -11,7 +11,7 @@ export default function AppMenu(props) {
   const { userType } = useAuth();
   return (
     <AppBase title="Menu" heading={`${userType} Functionality`}>
-      <Card style={{ maxWidth: 600 }}>
+      <Card style={{ maxWidth: 600, marginBottom: "1rem" }}>
         <Menu buttons={buttons} />
       </Card>
     </AppBase>

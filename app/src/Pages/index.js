@@ -1,7 +1,3 @@
-// General pages
-export { default as NotFound } from "./NotFound";
-export { default as LoginRegister } from "./LoginRegister";
-
 // Register pages
 export { default as RegisterMenu } from "./Register/Menu";
 export { default as RegisterUser } from "./Register/User";
@@ -23,3 +19,8 @@ export { default as AppManageCustomer } from "./App/ManageCustomer";
 export { default as AppTheaterOverview } from "./App/TheaterOverview";
 export { default as AppRoot } from "./App/Root";
 export { default as AppMenu } from "./App/Menu";
+
+// General pages
+export { default as NotFound } from "./NotFound";
+export { default as LoginRegister } from "./LoginRegister";
+

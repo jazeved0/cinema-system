@@ -1,10 +1,18 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useContext } from "react";
 import classNames from "classnames";
-import { isDefined } from "Utility";
+import { isDefined, useApiForm } from "Utility";
 import { useRouteMatch, useHistory, Switch, Route } from "react-router-dom";
-import { useAuth } from "Authentication";
+import { useAuth, decodeJWT } from "Authentication";
 
-import { CtaButton, Form, Link, Page, Card } from "Components";
+import {
+  CtaButton,
+  Form,
+  Link,
+  Page,
+  Card,
+  NotificationList,
+  Redirect
+} from "Components";
 import {
   RegisterMenu,
   RegisterCustomer,
@@ -13,48 +21,35 @@ import {
   RegisterManagerCustomer
 } from "Pages";
 import AnimateHeight from "react-animate-height";
+import { CSSTransition } from "react-transition-group";
 import { Modal } from "react-bootstrap";
 
 import "./style.scss";
 
-export default function LoginRegister() {
-  // TODO implement API functionality
-  // TODO implement session store as context
-  // TODO implement correct navigation upon successful login
-  // TODO implement shaking button upon incorrect login & error message
+// Context for passing error state information down the tree
+const LoginErrorContext = React.createContext({
+  errors: [],
+  onDismiss: () => null
+});
 
-  const [isLoading, setIsLoading] = useState(false);
+export default function LoginRegister() {
   const [activeLogin, setActiveLogin] = useState(false);
   const registerOpen = isDefined(useRouteMatch({ path: "/register" }));
   const history = useHistory();
-  const title = activeLogin ? "Login" : "Home";
 
-  useEffect(() => {
-    if (isLoading && registerOpen) {
-      setIsLoading(false);
-    }
-  }, [isLoading, registerOpen]);
-
+  // Form submission
   const { isAuthenticated, firstName, loadAuth } = useAuth();
-  const onLogin = () => {
-    setIsLoading(true);
-    // TODO remove debug user and add API call
-    const debugUser = {
-      token: "aaaaaa",
-      isAdmin: false,
-      isManager: true,
-      isCustomer: true,
-      username: "jdoe3",
-      firstName: "John",
-      lastName: "Doe",
-      loadAuth: () => null,
-      onLogout: () => null
-    };
-    loadAuth(debugUser);
-  };
+  const { errorContext, isLoading, onSubmit } = useApiForm({
+    show: activeLogin && !registerOpen,
+    path: "/login",
+    onSuccess: data => {
+      const session = decodeJWT(data);
+      loadAuth({ ...session, token: data });
+    }
+  });
 
   return (
-    <Page title={title}>
+    <Page title={activeLogin ? "Login" : "Home"}>
       <h1 className="intro-space">Cinema System</h1>
       <p className="lead">
         This website is the result of a semester-long group project for CS 4400:
@@ -77,16 +72,13 @@ export default function LoginRegister() {
             </CtaButton>
           </Card>
         ) : (
-          <>
+          <LoginErrorContext.Provider value={errorContext}>
             <LoginRegister.LoginButton
               activeLogin={activeLogin}
               isLoading={isLoading}
-              onSubmit={onLogin}
+              onSubmit={onSubmit}
               onOpen={() => setActiveLogin(true)}
-              onClose={() => {
-                if (isLoading) setIsLoading(false);
-                setActiveLogin(false);
-              }}
+              onClose={() => setActiveLogin(false)}
             />
             <CtaButton
               variant="primary"
@@ -98,7 +90,7 @@ export default function LoginRegister() {
             >
               Register
             </CtaButton>
-          </>
+          </LoginErrorContext.Provider>
         )}
       </div>
       <LoginRegister.RegisterModal
@@ -192,12 +184,19 @@ LoginRegister.LoginButton.displayName = "LoginRegister.LoginButton";
 
 LoginRegister.Pane = function(props) {
   const { isShown, onClose, isLoading, onSubmit } = props;
+  const { errors, onDismiss } = useContext(LoginErrorContext);
   return (
     <div className="login-pane">
       <button type="button" className="login-pane--close" onClick={onClose}>
         <span aria-hidden="true">×</span>
         <span className="sr-only">Close</span>
       </button>
+      <NotificationList
+        type="toast"
+        items={errors}
+        onDismiss={onDismiss}
+        transitionLength={750}
+      />
       <Form
         onSubmit={onSubmit}
         isLoading={isLoading}
@@ -228,32 +227,63 @@ LoginRegister.Pane = function(props) {
 };
 LoginRegister.Pane.displayName = "LoginRegister.Pane";
 
+const registerPanes = {
+  user: RegisterUser,
+  customer: RegisterCustomer,
+  manager: RegisterManager,
+  "manager-customer": RegisterManagerCustomer
+};
 LoginRegister.RegisterModal = function(props) {
   const { show, onHide } = props;
   const base = "/register";
+  const panes = Object.keys(registerPanes);
+  const { isAuthenticated } = useAuth();
   return (
-    <Modal show={show} onHide={onHide} dialogClassName="register-modal">
-      <Modal.Header closeButton />
-      <div className="content">
-        <Switch>
-          <Route path={`${base}/user`}>
-            <RegisterUser />
+    <>
+      {Redirect({
+        when: isAuthenticated,
+        from: [base, ...panes.map(k => `${base}/${k}`)],
+        to: "/"
+      })}
+      <Modal show={show} onHide={onHide} dialogClassName="register-modal">
+        <Modal.Header closeButton />
+        <div className="content">
+          {panes.map(k => {
+            const PaneComponent = registerPanes[k];
+            return (
+              <Route path={`${base}/${k}`} exact key={k}>
+                {({ match }) => (
+                  <CSSTransition
+                    in={match != null}
+                    timeout={300}
+                    classNames="register-pane"
+                    unmountOnExit
+                  >
+                    <div className="register-pane">
+                      <PaneComponent />
+                    </div>
+                  </CSSTransition>
+                )}
+              </Route>
+            );
+          })}
+          <Route path={base} exact>
+            {({ match }) => (
+              <CSSTransition
+                in={match != null}
+                timeout={300}
+                classNames="register-pane"
+                unmountOnExit
+              >
+                <div className="register-pane">
+                  <RegisterMenu />
+                </div>
+              </CSSTransition>
+            )}
           </Route>
-          <Route path={`${base}/customer`}>
-            <RegisterCustomer />
-          </Route>
-          <Route path={`${base}/manager`}>
-            <RegisterManager />
-          </Route>
-          <Route path={`${base}/manager-customer`}>
-            <RegisterManagerCustomer />
-          </Route>
-          <Route path="*">
-            <RegisterMenu />
-          </Route>
-        </Switch>
-      </div>
-    </Modal>
+        </div>
+      </Modal>
+    </>
   );
 };
 LoginRegister.RegisterModal.displayName = "LoginRegister.RegisterModal";

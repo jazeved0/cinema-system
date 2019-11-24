@@ -46,9 +46,30 @@ export function splitPath(path) {
   ).split("/");
 }
 
+const BUILD_PATH_START_REGEX = /[/]*$/g;
+const BUILD_PATH_REGEX = /(^[/]*|[/]*$)/g;
+export function buildPath(...args) {
+  return args
+    .map((part, i) =>
+      part
+        .trim()
+        .replace(i === 0 ? BUILD_PATH_START_REGEX : BUILD_PATH_REGEX, "")
+    )
+    .filter(x => x.length)
+    .join("/");
+}
+
 export function capitalize(s) {
   if (typeof s !== "string") return "";
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+export const API_ROOT =
+  process.env.NODE_ENV === "development"
+    ? "http://localhost:5000/"
+    : "https://api.cinema-system.ga/";
+export function api(path) {
+  return buildPath(API_ROOT, path);
 }
 
 // ? ===============

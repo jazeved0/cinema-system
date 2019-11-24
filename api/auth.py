@@ -14,7 +14,7 @@ Also handles password hashing code
 """
 
 
-def hash_password(user, password):
+def hash_password(password, user):
     """
     Hashes the given password using the user's username to generate a salt
     """
@@ -31,19 +31,27 @@ def hash_password(user, password):
     return base64.b64encode(hashed_bytes).decode()
 
 
-def provision_jwt(user):
+def provision_jwt(user, is_admin=None, is_manager=None, is_customer=None, cc_count=None):
     """"
     Provisions a new JWT for the given user upon successful authentication
     """
 
+    # Whether to use named arguments to define authorization/cc
+    flag = is_admin is not None or is_manager is not None or is_customer is not None or cc_count is not None
+    is_admin = is_admin or False if flag else user.isadmin
+    is_manager = is_manager or False if flag else user.ismanager
+    is_customer = is_customer or False if flag else user.iscustomer
+    cc_count = cc_count if flag else user.creditcardcount
+
     payload = {
-        'first_name': user.firstname,
-        'last_name': user.lastname,
-        'is_admin': user.isadmin,
-        'is_manager': user.ismanager,
-        'is_customer': user.iscustomer,
+        'firstName': user.firstname,
+        'lastName': user.lastname,
+        'isAdmin': is_admin,
+        'isManager': is_manager,
+        'isCustomer': is_customer,
         'status': user.status,
-        'cc_count': user.creditcardcount
+        'ccCount': cc_count,
+        'username': user.username
     }
 
     return JWT(data=payload)

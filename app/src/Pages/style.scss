@@ -289,19 +289,18 @@ $line-width: 225px;
         @include light-bg;
     }
 
-    @include dark {
-        .close {
-            color: white;
-            text-shadow: 0 1px 0 black;
+    .modal-header {
+        border: none !important;
+
+        @include dark {
+            .close {
+                @extend %close-dark;
+            }
         }
     }
 
-    .modal-header {
-        border: none !important;
-    }
-
     @mixin modal-padding($padding, $top-adjust: -0.25rem) {
-        .close {
+        .modal-header .close {
             padding-right: $padding;
             padding-top: $padding;
         }
@@ -316,6 +315,10 @@ $line-width: 225px;
 
     @include respond-below(xs) {
         @include modal-padding(1rem, $top-adjust: -1rem);
+    }
+
+    .content {
+        position: relative;
     }
 }
 
@@ -367,5 +370,34 @@ $line-width: 225px;
                 align-items: center;
             }
         }
+    }
+}
+
+.register-pane {
+    $speed: 300ms;
+    &-enter {
+        opacity: 0;
+        transform: scale(1.08);
+    }
+
+    &-enter-active {
+        opacity: 1;
+        transform: scale(1);
+        transition: transform $speed, transform $speed;
+    }
+
+    &-exit {
+        position: absolute;
+        top: 0;
+        display: block;
+        width: 100%;
+        opacity: 0.4;
+        transform: scale(1);
+    }
+
+    &-exit-active {
+        opacity: 0;
+        transform: scale(0.9);
+        transition: opacity $speed, transform $speed;
     }
 }

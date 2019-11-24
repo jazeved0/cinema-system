@@ -6,8 +6,6 @@ import { Icon } from "Components";
 
 export default function SessionButton() {
   const { username, onLogout } = useAuth();
-  console.log(onLogout);
-
   return (
     <Dropdown>
       <Dropdown.Toggle as={Button} className="session-button">

@@ -10,6 +10,8 @@ export { default as SetInput } from "./SetInput";
 export { default as Redirect } from "./Redirect";
 export { default as CtaButton } from "./CtaButton";
 export { default as BackButton } from "./BackButton";
+export { default as Notification } from "./Notification";
 export { default as SecondaryNav } from "./SecondaryNav";
 export { default as SessionButton } from "./SessionButton";
+export { default as NotificationList } from "./NotificationList";
 export { default as CreditCardDisplay } from "./CreditCardDisplay";

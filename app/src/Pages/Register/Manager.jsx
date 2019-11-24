@@ -1,15 +1,25 @@
 import React, { useState } from "react";
-import { states } from "Utility";
+import { states, useApiForm } from "Utility";
+import { useAuth, decodeJWT } from "Authentication";
 
-import { Card, Form } from "Components";
+import { Card, Form, NotificationList } from "Components";
 import { RegisterBase } from "Pages";
 
 export default function RegisterManager() {
-  const [isLoading, setIsLoading] = useState(false);
-
-  // TODO implement API functionality
-  // TODO display non-unique username error
-  // TODO display non-unique cc number error
+  const [isBlocking, setIsBlocking] = useState(true);
+  const { loadAuth } = useAuth();
+  const {
+    errorContext: { errors, onDismiss },
+    isLoading,
+    onSubmit
+  } = useApiForm({
+    path: "/register/manager",
+    onSuccess: data => {
+      setIsBlocking(false);
+      const session = decodeJWT(data);
+      loadAuth({ ...session, token: data });
+    }
+  });
 
   // TODO load companies through API
   const companies = ["AMC", "Test 2", "Test 3"];
@@ -20,12 +30,18 @@ export default function RegisterManager() {
         Register a new manager. <em>Note: all fields are required.</em>
       </p>
       <Card>
+        <NotificationList
+          type="toast"
+          items={errors}
+          onDismiss={onDismiss}
+          transitionLength={750}
+        />
         <Form
-          onSubmit={() => setIsLoading(true)}
+          onSubmit={onSubmit}
           isLoading={isLoading}
+          blocking={isBlocking}
           isShown={true}
           collapse="md"
-          blocking
           entries={[
             { key: "first_name", required: true, name: "First Name", width: 6 },
             { key: "last_name", required: true, name: "Last Name", width: 6 },

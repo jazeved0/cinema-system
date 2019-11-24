@@ -39,3 +39,27 @@ export function equal(a, b) {
     return a === b;
   }
 }
+
+const SNAKE_CASE_REGEX = /([-_][a-z])/gi;
+export function snakeToCamelCase(a) {
+  if (isDefined(a)) {
+    if (typeof a === "object") {
+      let built = {};
+      for (const key in a) {
+        if (a.hasOwnProperty(key)) {
+          built[snakeToCamelCase(key)] = a[key];
+        }
+      }
+      return built;
+    } else if (typeof a === "string") {
+      return a.replace(SNAKE_CASE_REGEX, $1 => {
+        return $1
+          .toUpperCase()
+          .replace("-", "")
+          .replace("_", "");
+      });
+    }
+  }
+
+  return a;
+}
