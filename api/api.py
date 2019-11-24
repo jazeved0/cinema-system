@@ -18,7 +18,7 @@ def get_db():
 
 
 @app.teardown_appcontext
-def teardown_db():
+def teardown_db(exec):
     db = g.pop('db', None)
     if db is not None:
         db.close()
@@ -26,21 +26,26 @@ def teardown_db():
 
 def with_db(fn):
     """
-    Introduces a get_session function which obtains a connection to the database
+    Introduces a database object which has a session attribute that
+    lazily obtains a connection to the database
     """
 
     @functools.wraps(fn)
     def wrapped(*args, **kwargs):
-        # Create lazy session getter with session closure
-        session = None
-        def get_session():
-            nonlocal session
-            if session is None:
-                session = get_db()
-            return session
+        # Create lazy session getter with database class wrapper
+        class Database:
+            def __init__(self):
+                self._session = None
+            
+            @property
+            def session(self):
+                if self._session is None:
+                    self._session = get_db()
+                return self._session
 
         # Call the function with the parameters
-        return fn(*args, get_session=get_session, **kwargs)
+        return fn(*args, database=Database(), **kwargs)
+    return wrapped
 
 
 def params(*param_list):
@@ -71,9 +76,8 @@ def params(*param_list):
 
 @app.route('/', methods=['GET'])
 @with_db
-def test():
-    a = get_session()
-    print(a)
+def test(database):
+    print(database.session)
     
     return "not implemented", 400
 
@@ -81,8 +85,8 @@ def test():
 @app.route('/login', methods=['POST'])
 @params("username", "password")
 @with_db
-def login(username, password, get_session):
-    a = get_session()
+def login(username, password, database):
+    a = database.session
     print(a)
 
     return "not implemented", 400

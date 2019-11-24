@@ -16,8 +16,8 @@ RUN apk del build-base musl-dev python3-dev libffi-dev
 
 COPY ./api/ /app/
 
+# Use 5000 as wsgi port
 EXPOSE 5000
-
 
 # Run app.py when the container launches
 CMD ["uwsgi", "--ini", "config_uwsgi.ini"]

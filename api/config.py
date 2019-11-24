@@ -49,7 +49,7 @@ def get_session():
 
 DB_HOST = 'postgres'
 DB_PORT = 5432
-JWT_SECRET = load_environment('JWT_SECRET', default='secrest')
+JWT_SECRET = load_environment('JWT_SECRET', default='secret')
 DB_USER = load_environment('DB_USER')
-DB_PASS = load_environment('DB_PASS')
+DB_PASS = load_environment('DB_PASSWORD')
 engine = initialize_engine()
