@@ -1,13 +1,13 @@
-from flask import Flask, redirect, request, g
+from flask import Flask, redirect, request, g, jsonify
 from flask_restful import reqparse
 from flask_cors import CORS
+from sqlalchemy.exc import SQLAlchemyError
 import functools
-import requests
-import json
 
 from auth import JWT, authenticated, get_failed_auth_resp, hash_password, provision_jwt
-from config import get_session, states
-from models import TUserDerived, User, Company, Manager, Customer, Creditcard
+from config import get_session
+from models import TUserDerived, Company
+from register import r_user, r_customer, r_manager, r_manager_customer
 
 """
 Contains the core of the API logic, including RESTful endpoints and custom
@@ -35,7 +35,8 @@ def teardown_db(exec):
 def with_db(fn):
     """
     Introduces a database object which has a session attribute that
-    lazily obtains a connection to the database
+    lazily obtains a connection to the database. Additionally, wraps database
+    execution errors
     """
 
     @functools.wraps(fn)
@@ -51,8 +52,13 @@ def with_db(fn):
                     self._session = get_db()
                 return self._session
 
-        # Call the function with the parameters
-        return fn(*args, database=Database(), **kwargs)
+        try:
+            # Call the function with the parameters
+            return fn(*args, database=Database(), **kwargs)
+        except SQLAlchemyError as e:
+            print(e)
+            return "A database error ocurred. Check input parameters", 400
+
     return wrapped
 
 
@@ -94,89 +100,6 @@ def params(*param_list):
     return _decorate
 
 
-def validate_user(fn):
-    """
-    Validates that usernames are unique and passwords are >= 8 chars long
-    """
-
-    @functools.wraps(fn)
-    def wrapped(*args, **kwargs):
-        # Validate password length
-        if len(kwargs.get("password")) < 8:
-            return "Password must be at least 8 characters long", 400
-
-        # Validate unique username
-        dup_user = kwargs.get("database").session.query(TUserDerived).filter(
-            TUserDerived.c.username == kwargs.get("username")).first()
-        if dup_user is not None:
-            return "Username must be unique", 400
-
-        # If passed, continue with registration
-        return fn(*args, **kwargs)
-    return wrapped
-
-
-def validate_customer(fn):
-    """
-    Validates that credit cards are between 1 and 5 and that each is 16 chars long
-    """
-
-    @functools.wraps(fn)
-    def wrapped(*args, **kwargs):
-        # Validate credit card length
-        cc_list = kwargs.get("credit_cards")
-        trimmed_cc = [cc.replace(' ', '') for cc in cc_list]
-        num_credit_cards = len(trimmed_cc)
-        if num_credit_cards < 1 or num_credit_cards > 5:
-            return "Number of credit cards must be between 1 and 5, inclusive", 400
-
-        # Validate credit card composition
-        for cc in trimmed_cc:
-            if len(cc) != 16 or not cc.isdigit():
-                return f"Credit card {cc} must be 16 digits long", 400
-
-        # If passed, continue with registration
-        kwargs.setdefault("credit_cards", trimmed_cc)
-        return fn(*args, **kwargs)
-    return wrapped
-
-
-def validate_manager(fn):
-    """
-    Validates that manager addresses are unique and are formatted correctly.
-    Also makes sure the company is valid
-    """
-
-    @functools.wraps(fn)
-    def wrapped(*args, **kwargs):
-        # Validate state
-        if kwargs.get("state").upper() not in states:
-            return "State must be a valid two-letter state", 400
-
-        # Validate address uniqueness
-        manager_dup = kwargs.get("database").session.query(
-            Manager).filter(Manager.state == kwargs.get("state") and Manager.city == kwargs.get("city") and Manager.zipcode == kwargs.get("zipcode") and Manager.street == kwargs.get("street")).first()
-        if manager_dup is not None:
-            return "Address must be unique", 400
-
-        # Validate company
-        company = kwargs.get("database").session.query(Company).filter(
-            Company.name == kwargs.get("company")).first()
-        if company is None:
-            return "Company must be an existing company in the system", 400
-
-        # If passed, continue with registration
-        return fn(*args, **kwargs)
-    return wrapped
-
-
-def create_user(username, password, first_name, last_name):
-    new_user = User(username=username, password=None,
-                    firstname=first_name, lastname=last_name, status="Pending")
-    new_user.password = hash_password(password, new_user)
-    return new_user
-
-
 @app.route('/login', methods=['POST'])
 @params("username", "password")
 @with_db
@@ -199,81 +122,37 @@ def login(username, password, database):
 @app.route('/register/user', methods=['POST'])
 @params("first_name", "last_name", "username", "password")
 @with_db
-@validate_user
-def register_user(first_name, last_name, username, password, database):
-    # Add new user to the database
-    new_user = create_user(username, password, first_name, last_name)
-    database.session.add(new_user)
-    database.session.commit()
-    return provision_jwt(new_user, cc_count=0).get_token(), 200
+def register_user(*args, **kwargs):
+    return r_user(*args, **kwargs)
 
 
 @app.route('/register/manager', methods=['POST'])
 @params("first_name", "last_name", "username", "password", "company", "street_address", "city", "state", "zipcode")
 @with_db
-@validate_user
-@validate_manager
-def register_manager(first_name, last_name, username, password, company, street_address, city, state, zipcode, database):
-    # Generate User row
-    new_user = create_user(username, password, first_name, last_name)
-
-    # Generate Manager row
-    new_manager = Manager(username=username, state=state, city=city,
-                          zipcode=zipcode, street=street_address, companyname=company)
-
-    database.session.add(new_user)
-    database.session.add(new_manager)
-    database.session.commit()
-    return provision_jwt(new_user, is_manager=True, cc_count=0).get_token(), 200
+def register_manager(*args, **kwargs):
+    return r_manager(*args, **kwargs)
 
 
 @app.route('/register/manager-customer', methods=['POST'])
 @params("first_name", "last_name", "username", "password", "company", "street_address", "city", "state", "zipcode", ("credit_cards", list))
 @with_db
-@validate_user
-@validate_customer
-@validate_manager
-def register_manager_customer(first_name, last_name, username, password, company, street_address, city, state, zipcode, credit_cards, database):
-    # Generate User row
-    new_user = create_user(username, password, first_name, last_name)
-
-    # Generate Manager row
-    new_manager = Manager(username=username, state=state, city=city,
-                          zipcode=zipcode, street=street_address, companyname=company)
-
-    # Generate Customer row
-    new_customer = Customer(username=username)
-    new_credit_cards = [Creditcard(creditcardnum=cc, owner=username) for cc in credit_cards]
-
-    database.session.add(new_user)
-    database.session.add(new_customer)
-    database.session.add(new_manager)
-    database.session.add_all(new_credit_cards)
-    database.session.commit()
-    return provision_jwt(new_user, is_manager=True, is_customer=True, cc_count=len(credit_cards)).get_token(), 200
+def register_manager_customer(*args, **kwargs):
+    return r_manager_customer(*args, **kwargs)
 
 
 @app.route('/register/customer', methods=['POST'])
 @params("first_name", "last_name", "username", "password", ("credit_cards", list))
 @with_db
-@validate_user
-@validate_customer
-def register_customer(first_name, last_name, username, password, credit_cards, database):
-    # Generate User row
-    new_user = create_user(username, password, first_name, last_name)
+def register_customer(*args, **kwargs):
+    return r_customer(*args, **kwargs)
 
-    # Generate Customer row
-    new_customer = Customer(new_user)
-    new_credit_cards = [Creditcard(
-        creditcardnum=cc, owner=username) for cc in credit_cards]
 
-    database.session.add(new_user)
-    database.session.commit()
-    database.session.add(new_customer)
-    database.session.commit()
-    database.session.add_all(new_credit_cards)
-    database.session.commit()
-    return provision_jwt(new_user, is_customer=True, cc_count=len(credit_cards)).get_token(), 200
+@app.route('/companies', methods=['GET'])
+@with_db
+def get_companies(database):
+    companies = database.session.query(Company).all()
+    names = [company.name for company in companies]
+    return jsonify(names), 200
 
 
 @app.route('/admin/users', methods=['GET'])
@@ -293,19 +172,14 @@ def decline(usernames):
     return "not implemented", 400
 
 
-@app.route('/admin/companies', methods=['GET'])
-def get_companies():
-    return "not implemented", 400
-
-
 @app.route('/admin/companies/create', methods=['POST'])
 @params("username")
-def create_theather():
+def create_theater():
     return "not implemented", 400
 
 
 @app.route('/admin/companies/detail', methods=['GET'])
-@params("theather")
+@params("theater")
 def get_theater_details(usernames):
     return "not implemented", 400
 

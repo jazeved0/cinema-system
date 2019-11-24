@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { states, useApiForm } from "Utility";
+import { states } from "Utility";
+import { useApiForm, useCompanies } from "Api";
 import { useAuth, decodeJWT } from "Authentication";
 
 import { Card, Form, NotificationList } from "Components";
@@ -8,6 +9,7 @@ import { RegisterBase } from "Pages";
 export default function RegisterManager() {
   const [isBlocking, setIsBlocking] = useState(true);
   const { loadAuth } = useAuth();
+  const companies = useCompanies();
   const {
     errorContext: { errors, onDismiss },
     isLoading,
@@ -20,9 +22,6 @@ export default function RegisterManager() {
       loadAuth({ ...session, token: data });
     }
   });
-
-  // TODO load companies through API
-  const companies = ["AMC", "Test 2", "Test 3"];
 
   return (
     <RegisterBase title="Manager Registration" name="manager">
@@ -40,7 +39,6 @@ export default function RegisterManager() {
           onSubmit={onSubmit}
           isLoading={isLoading}
           blocking={isBlocking}
-          isShown={true}
           collapse="md"
           entries={[
             { key: "first_name", required: true, name: "First Name", width: 6 },

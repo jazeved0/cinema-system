@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useApiForm } from "Utility";
+import { useApiForm } from "Api";
 import { useAuth, decodeJWT } from "Authentication";
 
 import { Card, Form, NotificationList } from "Components";
@@ -37,7 +37,6 @@ export default function RegisterUser() {
           onSubmit={onSubmit}
           isLoading={isLoading}
           blocking={isBlocking}
-          isShown={true}
           collapse="md"
           entries={[
             { key: "first_name", required: true, name: "First Name", width: 6 },

@@ -1,8 +1,9 @@
 import React, { useState, useCallback, useEffect, useContext } from "react";
 import classNames from "classnames";
-import { isDefined, useApiForm } from "Utility";
-import { useRouteMatch, useHistory, Switch, Route } from "react-router-dom";
+import { isDefined } from "Utility";
+import { useRouteMatch, useHistory, Route } from "react-router-dom";
 import { useAuth, decodeJWT } from "Authentication";
+import { useApiForm } from "Api";
 
 import {
   CtaButton,

@@ -86,15 +86,23 @@ export default function Form(props) {
   );
 
   // Button press callbacks
-  const tryLogin = useCallback(() => {
+  const trySubmit = useCallback(() => {
     /* eslint-disable no-unused-vars */
     const [_, isValid] = validate(entries, values, true);
     if (isValid) {
-      onSubmit(values);
+      const resolvedValues = {};
+      for (const key in values) {
+        let val = values[key];
+        if (entriesMap[key].type === "combo") {
+          val = values[key].value;
+        }
+        resolvedValues[key] = val;
+      }
+      onSubmit(resolvedValues);
     } else {
       setShowValidation(true);
     }
-  }, [values, onSubmit, entries]);
+  }, [values, onSubmit, entries, entriesMap]);
 
   useEffect(() => {
     if (!isShown) {
@@ -110,10 +118,10 @@ export default function Form(props) {
       var code = e.keyCode || e.which;
       // Enter keycode
       if (code === 13) {
-        tryLogin();
+        trySubmit();
       }
     },
-    [tryLogin]
+    [trySubmit]
   );
 
   // Validate upon lost focus
@@ -227,7 +235,7 @@ export default function Form(props) {
                   "_form--submit-button__loading": isLoading
                 })}
                 variant={variant}
-                onClick={tryLogin}
+                onClick={trySubmit}
                 disabled={isLoading}
               >
                 {text}
@@ -247,7 +255,8 @@ Form.displayName = "Form";
 Form.defaultProps = {
   collapse: "sm",
   blockingMessage:
-    "Are you sure you want to exit? Your information will not be saved."
+    "Are you sure you want to exit? Your information will not be saved.",
+  isShown: true
 };
 
 Form.Input = React.forwardRef(({ type, ...props }, ref) => {

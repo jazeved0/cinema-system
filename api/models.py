@@ -19,7 +19,7 @@ class User(Base):
     )
 
     username = Column(String(240), primary_key=True)
-    status = Column(CHAR(8), nullable=False)
+    status = Column(CHAR(8), nullable=False, default="Pending")
     password = Column(CHAR(44), nullable=False)
     firstname = Column(String(240), nullable=False)
     lastname = Column(String(240), nullable=False)

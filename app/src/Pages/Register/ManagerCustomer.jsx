@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { states, useApiForm } from "Utility";
+import { states } from "Utility";
+import { useApiForm, useCompanies } from "Api";
 import { useAuth, decodeJWT } from "Authentication";
 
 import { Card, Form, CreditCardDisplay, NotificationList } from "Components";
@@ -8,6 +9,7 @@ import { RegisterBase } from "Pages";
 export default function ManagerCustomer() {
   const [isBlocking, setIsBlocking] = useState(true);
   const { loadAuth } = useAuth();
+  const companies = useCompanies();
   const {
     errorContext: { errors, onDismiss },
     isLoading,
@@ -20,9 +22,6 @@ export default function ManagerCustomer() {
       loadAuth({ ...session, token: data });
     }
   });
-
-  // TODO load companies through API
-  const companies = ["AMC", "Test 2", "Test 3"];
 
   return (
     <RegisterBase title="Manager-Customer Registration" name="manager-customer">
