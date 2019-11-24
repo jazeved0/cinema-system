@@ -4,11 +4,13 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 
 """
-This file loads the environment secrets into memory and also manages database connections
+Loads the environment secrets into memory and manages database connections
 """
 
 
 SENTINEL = object()
+
+
 def load_environment(key, default=SENTINEL):
     """
     Loads an environment variable, and if not found, then defaults to the specified
@@ -47,9 +49,11 @@ def get_session():
     return Session()
 
 
-DB_HOST = 'postgres'
-DB_PORT = 5432
 JWT_SECRET = load_environment('JWT_SECRET', default='secret')
 DB_USER = load_environment('DB_USER')
 DB_PASS = load_environment('DB_PASSWORD')
+DB_HOST = load_environment('DB_HOST')
+DB_PORT = load_environment('DB_PORT')
+LOGIN_URL = load_environment('LOGIN_URL', default='/login')
+SALT_FORMAT = load_environment('SALT_FORMAT', default='#~{}')
 engine = initialize_engine()

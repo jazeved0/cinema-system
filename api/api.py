@@ -4,8 +4,16 @@ from flask_cors import CORS
 import functools
 import requests
 import json
-from auth import JWT, authenticated
+
+from auth import JWT, authenticated, get_failed_auth_resp, hash_password, provision_jwt
 from config import get_session
+from models import TUserDerived
+
+"""
+Contains the core of the API logic, including RESTful endpoints and custom
+decorator functions
+"""
+
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -36,7 +44,7 @@ def with_db(fn):
         class Database:
             def __init__(self):
                 self._session = None
-            
+
             @property
             def session(self):
                 if self._session is None:
@@ -69,27 +77,27 @@ def params(*param_list):
                     return "Malformed request", 400
 
             # Call the function with the parameters
-            fn(*args, **param_values, **kwargs)
+            return fn(*args, **param_values, **kwargs)
         return wrapped
     return _decorate
-
-
-@app.route('/', methods=['GET'])
-@with_db
-def test(database):
-    print(database.session)
-    
-    return "not implemented", 400
 
 
 @app.route('/login', methods=['POST'])
 @params("username", "password")
 @with_db
 def login(username, password, database):
-    a = database.session
-    print(a)
+    user = database.session.query(TUserDerived).filter(
+        TUserDerived.c.username == username).first()
 
-    return "not implemented", 400
+    if user is None:
+        return get_failed_auth_resp(message="Incorrect username or password")
+
+    password_hash = hash_password(user, password)
+    if user.password != password_hash:
+        return get_failed_auth_resp(message="Incorrect username or password")
+    else:
+        print("Successful authentication: {}".format(user.username))
+        return provision_jwt(user).get_token(), 200
 
 
 @app.route('/register/user', methods=['POST'])
@@ -152,6 +160,7 @@ def get_theater_details(usernames):
 
 def app_factory():
     return app
-    
+
+
 if __name__ == '__main__':
     app.run()

@@ -21,8 +21,8 @@ CREATE TABLE "User" (
   Status char(8) NOT NULL CHECK (
     Status IN ('All', 'Pending', 'Declined', 'Approved')
   ),
-  -- 32-character hex string hash
-  Password char(32) NOT NULL,
+  -- 44-character base64 hashed password
+  Password char(44) NOT NULL,
   Firstname varchar(240) NOT NULL,
   Lastname varchar(240) NOT NULL,
   PRIMARY KEY (Username)

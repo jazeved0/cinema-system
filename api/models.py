@@ -1,6 +1,11 @@
-from sqlalchemy import BigInteger, CHAR, CheckConstraint, Column, Date, ForeignKey, ForeignKeyConstraint, Integer, String, Table, Text, UniqueConstraint
+from sqlalchemy import BigInteger, Boolean, CHAR, CheckConstraint, Column, Date, ForeignKey, ForeignKeyConstraint, Integer, String, Table, Text, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
+
+"""
+Contains sqlalchemy ORM models for the Team20 database schema
+"""
+
 
 Base = declarative_base()
 metadata = Base.metadata
@@ -15,7 +20,7 @@ class User(Base):
 
     username = Column(String(240), primary_key=True)
     status = Column(CHAR(8), nullable=False)
-    password = Column(CHAR(32), nullable=False)
+    password = Column(CHAR(44), nullable=False)
     firstname = Column(String(240), nullable=False)
     lastname = Column(String(240), nullable=False)
 
@@ -65,7 +70,7 @@ class Company(Base):
     name = Column(String(240), primary_key=True)
 
 
-t_companyderived = Table(
+TCompanyDerived = Table(
     'companyderived', metadata,
     Column('name', String(240)),
     Column('numcitycover', BigInteger),
@@ -82,14 +87,17 @@ class Movie(Base):
     duration = Column(Integer, nullable=False)
 
 
-t_userderived = Table(
+TUserDerived = Table(
     'userderived', metadata,
     Column('username', String(240)),
     Column('status', CHAR(8)),
-    Column('password', CHAR(32)),
+    Column('password', CHAR(44)),
     Column('firstname', String(240)),
     Column('lastname', String(240)),
     Column('creditcardcount', BigInteger),
+    Column('isadmin', Boolean),
+    Column('ismanager', Boolean),
+    Column('iscustomer', Boolean),
     Column('usertype', Text)
 )
 
@@ -160,7 +168,7 @@ class Visit(Base):
     User = relationship('User')
 
 
-t_used = Table(
+TUsed = Table(
     'used', metadata,
     Column('creditcardnum', ForeignKey('creditcard.creditcardnum',
                                        ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False),

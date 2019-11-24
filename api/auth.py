@@ -1,12 +1,63 @@
 import jwt as pyjwt
 import os
 import functools
-from flask import request
-from config import JWT_SECRET
+import base64
+from flask import request, Response
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.backends import default_backend
+
+from config import JWT_SECRET, LOGIN_URL, SALT_FORMAT
 
 """
 Handles JWT-based authentication & provdes a validation route decorator
+Also handles password hashing code
 """
+
+
+def hash_password(user, password):
+    """
+    Hashes the given password using the user's username to generate a salt
+    """
+
+    if user is None or user.username is None:
+        return ""
+
+    username = user.username
+    salt = SALT_FORMAT.format(username)
+    salted_password = password + salt
+    digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
+    digest.update(salted_password.encode())
+    hashed_bytes = digest.finalize()
+    return base64.b64encode(hashed_bytes).decode()
+
+
+def provision_jwt(user):
+    """"
+    Provisions a new JWT for the given user upon successful authentication
+    """
+
+    payload = {
+        'first_name': user.firstname,
+        'last_name': user.lastname,
+        'is_admin': user.isadmin,
+        'is_manager': user.ismanager,
+        'is_customer': user.iscustomer,
+        'status': user.status,
+        'cc_count': user.creditcardcount
+    }
+
+    return JWT(data=payload)
+
+
+def get_failed_auth_resp(message="Not Authorized"):
+    """
+    Returns a failed authentication 401 response, including the
+    'WWW-Authenticate' response header as per the 401 response specifications
+    """
+
+    resp = Response(message, 401)
+    resp.headers['WWW-Authenticate'] = LOGIN_URL
+    return resp
 
 
 def authenticated(fn):
@@ -21,7 +72,7 @@ def authenticated(fn):
         try:
             jwt = JWT(token=request.headers['Authorization'])
         except pyjwt.exceptions.InvalidTokenError:
-            return "Not Authorized", 401
+            return get_failed_auth_resp()
 
         return fn(*args, jwt=jwt, **kwargs)
     return wrapped

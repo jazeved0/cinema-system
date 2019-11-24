@@ -9,6 +9,9 @@ CREATE VIEW UserDerived AS
     SELECT Username, Status, Password, Firstname, Lastname,
     -- CC Count
     COALESCE(COUNT(creditcard.Owner), 0) AS CreditCardCount,
+    NOT admin IS NULL AS IsAdmin,
+    NOT manager IS NULL AS IsManager,
+    NOT customer IS NULL AS IsCustomer,
     -- User type assignment
     CASE
         WHEN NOT admin     IS NULL AND NOT customer IS NULL THEN 'CustomerAdmin'
@@ -17,8 +20,9 @@ CREATE VIEW UserDerived AS
         WHEN NOT manager   IS NULL AND     customer IS NULL THEN 'Manager'
         WHEN NOT customer  IS NULL                          THEN 'Customer'
         ELSE                                                     'User'
+    END AS UserType
     -- Temporary tagged table
-    END AS UserType FROM (
+    FROM (
         SELECT *
         FROM "User"
         LEFT JOIN (SELECT admin.Username    as admin    FROM admin)    AS t1 ON Username = admin
