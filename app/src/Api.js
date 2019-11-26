@@ -57,9 +57,12 @@ export function useApiForm({ path, show = true, onSuccess }) {
         if (error.response) {
           log(`${error.response.status} Error: ${error.response.data}`);
           setError(error.response.data);
+        } else if (error.request) {
+          log(`Client Error: ${JSON.stringify(error.request)}`);
+          setError(`Could not make request. Check network connectivity`);
         } else {
-          log(`Client Error: ${error}`);
-          setError(error);
+          log(`Generic Error: ${error.message}`);
+          setError(error.message);
         }
       });
   };
