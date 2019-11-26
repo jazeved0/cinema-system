@@ -100,6 +100,12 @@ def params(*param_list):
     return _decorate
 
 
+# Uptime checker route
+@app.route('/status', methods=['GET'])
+def status():
+    return "All systems operational", 204
+
+
 @app.route('/login', methods=['POST'])
 @params("username", "password")
 @with_db
