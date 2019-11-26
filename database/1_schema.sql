@@ -1,7 +1,4 @@
 CREATE DATABASE Team20;
---USE `Team20`;
-
---SET FOREIGN_KEY_CHECKS = 0;
 SET session_replication_role = 'replica';
 
 DROP TABLE IF EXISTS Company;
@@ -19,8 +16,8 @@ DROP TABLE IF EXISTS "User";
 CREATE TABLE "User" (
   Username varchar(240) NOT NULL,
   Status char(8) NOT NULL CHECK (
-    Status IN ('All', 'Pending', 'Declined', 'Approved')
-  ),
+    Status IN ('Pending', 'Declined', 'Approved')
+  ) DEFAULT 'Pending',
   -- 44-character base64 hashed password
   Password char(44) NOT NULL,
   Firstname varchar(240) NOT NULL,
@@ -193,5 +190,4 @@ CREATE TABLE Used (
     ON DELETE CASCADE
     ON UPDATE CASCADE
 );
---SET FOREIGN_KEY_CHECKS = 1;
 SET session_replication_role = 'origin';
