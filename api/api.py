@@ -1,9 +1,7 @@
 from flask import Flask, g, jsonify
-from flask_restful import reqparse
+from flask_restful import Api, Resource, reqparse
 from flask_cors import CORS
-from sqlalchemy.exc import SQLAlchemyError
 from sqlachemy import and_
-import functools
 
 from auth import authenticated, get_failed_auth_resp
 from auth import hash_password, provision_jwt
@@ -22,10 +20,30 @@ app = Flask(__name__)
 cors = CORS(app)
 
 
-def get_db():
-    if 'db' not in g:
-        g.db = get_session()
-    return g.db
+def parse_args(*param_list):
+    parser = reqparse.RequestParser()
+    for param in param_list:
+        if type(param) == str:
+            parser.add_argument(param)
+        else:
+            name, param_type = param
+            if param_type == list:
+                parser.add_argument(name, action='append')
+            else:
+                parser.add_argument(name, type=param_type)
+
+    param_values = parser.parse_args()
+
+    # Validate that all parameters were given
+    for param in param_list:
+        name = param
+        if type(param) != str:
+            name = param[0]
+
+        if param_values.get(name) is None:
+            return "Malformed request", 400
+
+    return (param_values[p] for p in param_list)
 
 
 @app.teardown_appcontext
@@ -35,72 +53,103 @@ def teardown_db(exec):
         db.close()
 
 
-def with_db(fn):
-    """
-    Introduces a database object which has a session attribute that
-    lazily obtains a connection to the database. Additionally, wraps database
-    execution errors
-    """
+class DBResource(Resource):
 
-    @functools.wraps(fn)
-    def wrapped(*args, **kwargs):
-        # Create lazy session getter with database class wrapper
-        class Database:
-            def __init__(self):
-                self._session = None
-
-            @property
-            def session(self):
-                if self._session is None:
-                    self._session = get_db()
-                return self._session
-
-        try:
-            # Call the function with the parameters
-            return fn(*args, database=Database(), **kwargs)
-        except SQLAlchemyError as e:
-            print(e)
-            return "A database error ocurred. Check input parameters", 400
-
-    return wrapped
+    @property
+    def db(self):
+        if 'db' not in g:
+            g.db = get_session()
+        return g.db
 
 
-def params(*param_list):
-    """
-    Wraps an app route with automatic parameter parsing and
-    existence validation
-    """
+class Login(DBResource):
+    def post(self):
+        username, password = parse_args("username", "password")
 
-    def _decorate(fn):
-        @functools.wraps(fn)
-        def wrapped(*args, **kwargs):
-            # Parse all parameters
-            parser = reqparse.RequestParser()
-            for param in param_list:
-                if type(param) == str:
-                    parser.add_argument(param)
-                else:
-                    name, param_type = param
-                    if param_type == list:
-                        parser.add_argument(name, action='append')
-                    else:
-                        parser.add_argument(name, type=param_type)
+        user = self.db.session.query(TUserDerived).filter(
+            TUserDerived.c.username == username).first()
 
-            param_values = parser.parse_args()
+        if user is None:
+            return get_failed_auth_resp(message="Incorrect username or password")
 
-            # Validate that all parameters were given
-            for param in param_list:
-                name = param
-                if type(param) != str:
-                    name = param[0]
+        # Perform password hash equality check
+        password_hash = hash_password(password, user)
+        if user.password != password_hash:
+            return get_failed_auth_resp(message="Incorrect username or password")
+        else:
+            print("Successful authentication: {}".format(user.username))
+            return provision_jwt(user).get_token(), 200
 
-                if param_values.get(name) is None:
-                    return "Malformed request", 400
 
-            # Call the function with the parameters
-            return fn(*args, **param_values, **kwargs)
-        return wrapped
-    return _decorate
+class RegistrationUser(DBResource):
+    def post(self):
+        r_user(parse_args("first_name", "last_name", "username", "password"), self.db)
+
+
+class RegistrationManager(DBResource):
+    def post(self):
+        r_manager(
+            parse_args(
+                "first_name",
+                "last_name",
+                "username",
+                "password",
+                "company",
+                "street_address",
+                "city",
+                "state",
+                "zipcode"),
+            self.db
+        )
+
+
+class RegistrationCustomer(DBResource):
+    def post(self):
+        r_customer(
+            parse_args(
+                "first_name",
+                "last_name",
+                "username",
+                "password",
+                ("credit_cards", list)),
+            self.db
+        )
+
+
+class RegistrationManagerCustomer(DBResource):
+    def post(self):
+        r_manager_customer(
+            parse_args(
+                "first_name",
+                "last_name",
+                "username",
+                "password",
+                "company",
+                "street_address",
+                "city",
+                "state",
+                "zipcode",
+                ("credit_cards", list)),
+            self.db
+        )
+
+
+class Companies(DBResource):
+    def get(self):
+        companies = self.db.session.query(Company).all()
+        return jsonify([c.name for c in companies]), 200
+
+
+class VisitResource(DBResource):
+    @authenticated
+    def get(self, jwt):
+        company, start_date, end_date = parse_args("company", "start_date", "end_date")
+        visits = self.db.session.query(Visit).filter(and_(
+            Visit.username == jwt.username,
+            Visit.companyname == company,
+            Visit.date.between(start_date, end_date)
+        )).all()
+        return jsonify({"visits": visits or ()}), 200
 
 
 # Uptime checker route
@@ -109,109 +158,17 @@ def status():
     return "All systems operational", 204
 
 
-@app.route('/login', methods=['POST'])
-@params("username", "password")
-@with_db
-def login(username, password, database):
-    user = database.session.query(TUserDerived).filter(
-        TUserDerived.c.username == username).first()
-
-    if user is None:
-        return get_failed_auth_resp(message="Incorrect username or password")
-
-    # Perform password hash equality check
-    password_hash = hash_password(password, user)
-    if user.password != password_hash:
-        return get_failed_auth_resp(message="Incorrect username or password")
-    else:
-        print("Successful authentication: {}".format(user.username))
-        return provision_jwt(user).get_token(), 200
-
-
-@app.route('/register/user', methods=['POST'])
-@params("first_name", "last_name", "username", "password")
-@with_db
-def register_user(*args, **kwargs):
-    return r_user(*args, **kwargs)
-
-
-@app.route('/register/manager', methods=['POST'])
-@params("first_name", "last_name", "username",
-        "password", "company", "street_address", "city", "state", "zipcode")
-@with_db
-def register_manager(*args, **kwargs):
-    return r_manager(*args, **kwargs)
-
-
-@app.route('/register/manager-customer', methods=['POST'])
-@params("first_name", "last_name", "username", "password", "company",
-        "street_address", "city", "state", "zipcode", ("credit_cards", list))
-@with_db
-def register_manager_customer(*args, **kwargs):
-    return r_manager_customer(*args, **kwargs)
-
-
-@app.route('/register/customer', methods=['POST'])
-@params("first_name", "last_name", "username", "password",
-        ("credit_cards", list))
-@with_db
-def register_customer(*args, **kwargs):
-    return r_customer(*args, **kwargs)
-
-
-@app.route('/companies', methods=['GET'])
-@with_db
-def get_companies(database):
-    companies = database.session.query(Company).all()
-    names = [company.name for company in companies]
-    return jsonify(names), 200
-
-
-@app.route('/admin/users', methods=['GET'])
-def get_users():
-    return "not implemented", 400
-
-
-@app.route('/admin/users/approve', methods=['POST'])
-@params("username")
-def approve(usernames):
-    return "not implemented", 400
-
-
-@app.route('/admin/users/decline', methods=['POST'])
-@params("username")
-def decline(usernames):
-    return "not implemented", 400
-
-
-@app.route('/admin/companies/create', methods=['POST'])
-@params("username")
-def create_theater():
-    return "not implemented", 400
-
-
-@app.route('/admin/companies/detail', methods=['GET'])
-@params("theater")
-def get_theater_details(usernames):
-    return "not implemented", 400
-
-
-@app.route('/visit/history', methods=['GET'])
-@params("company", "start_date", "end_date")
-@with_db
-@authenticated
-def view_vist_history(company, start_date, end_date, db, jwt):
-    visits = db.session.query(Visit).filter(and_(
-            Visit.username == jwt.username,
-            Visit.companyname == company,
-            Visit.date.between(start_date, end_date)
-        )).all()
-    return {"visits": visits or ()}, 200
-
-
 def app_factory():
+    api = Api(app)
+    api.add_resource(Login, "/login")
+    api.add_resource(Companies, "/companies")
+    # api.add_resource(RegistrationUser, "/registration/user")
+    api.add_resource(RegistrationUser, "/register/user")
+    # api.add_resource(RegistrationManager, "/registration/manager")
+    api.add_resource(RegistrationManager, "/register/manager")
+    # api.add_resource(RegistrationCustomer, "/registration/customer")
+    api.add_resource(RegistrationCustomer, "/register/customer")
+    # api.add_resource(RegistrationManagerCustomer, "/registration/manager-customer")
+    api.add_resource(RegistrationManagerCustomer, "/register/manager-customer")
+    api.add_resource(VisitResource, "/visits")
     return app
-
-
-if __name__ == '__main__':
-    app.run()
