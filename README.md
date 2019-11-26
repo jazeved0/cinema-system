@@ -50,6 +50,13 @@ yarn build
 yarn serve
 ```
 
+### Code Style
+
+Cinema System uses [eslint](https://eslint.org/) and [prettier](https://prettier.io/) to enforce JavaScript code style across the repository. To run the linter locally, run:
+
+```console
+yarn run lint
+
 ## 🛠 Tooling
 
 - [Netlify](https://www.netlify.com/) - Used to automatically deploy & generate previews for PRs. Deploy information is available at [the Deploy page](https://app.netlify.com/sites/cinema-system/deploys)
