@@ -24,24 +24,15 @@ def parse_args(*param_list):
     parser = reqparse.RequestParser()
     for param in param_list:
         if type(param) == str:
-            parser.add_argument(param)
+            parser.add_argument(param, required=True)
         else:
             name, param_type = param
             if param_type == list:
-                parser.add_argument(name, action='append')
+                parser.add_argument(name, action='append', required=True)
             else:
-                parser.add_argument(name, type=param_type)
+                parser.add_argument(name, type=param_type, required=True)
 
     param_values = parser.parse_args()
-
-    # Validate that all parameters were given
-    for param in param_list:
-        name = param
-        if type(param) != str:
-            name = param[0]
-
-        if param_values.get(name) is None:
-            return "Malformed request", 400
 
     return (param_values[p] for p in param_list)
 
