@@ -1,12 +1,15 @@
-from flask import Flask, redirect, request, g, jsonify
+from flask import Flask, g, jsonify
 from flask_restful import reqparse
 from flask_cors import CORS
 from sqlalchemy.exc import SQLAlchemyError
+from sqlachemy import and_
 import functools
 
-from auth import JWT, authenticated, get_failed_auth_resp, hash_password, provision_jwt
+from auth import authenticated, get_failed_auth_resp
+from auth import hash_password, provision_jwt
+
 from config import get_session
-from models import TUserDerived, Company
+from models import TUserDerived, Company, Visit
 from register import r_user, r_customer, r_manager, r_manager_customer
 
 """
@@ -133,21 +136,24 @@ def register_user(*args, **kwargs):
 
 
 @app.route('/register/manager', methods=['POST'])
-@params("first_name", "last_name", "username", "password", "company", "street_address", "city", "state", "zipcode")
+@params("first_name", "last_name", "username",
+        "password", "company", "street_address", "city", "state", "zipcode")
 @with_db
 def register_manager(*args, **kwargs):
     return r_manager(*args, **kwargs)
 
 
 @app.route('/register/manager-customer', methods=['POST'])
-@params("first_name", "last_name", "username", "password", "company", "street_address", "city", "state", "zipcode", ("credit_cards", list))
+@params("first_name", "last_name", "username", "password", "company",
+        "street_address", "city", "state", "zipcode", ("credit_cards", list))
 @with_db
 def register_manager_customer(*args, **kwargs):
     return r_manager_customer(*args, **kwargs)
 
 
 @app.route('/register/customer', methods=['POST'])
-@params("first_name", "last_name", "username", "password", ("credit_cards", list))
+@params("first_name", "last_name", "username", "password",
+        ("credit_cards", list))
 @with_db
 def register_customer(*args, **kwargs):
     return r_customer(*args, **kwargs)
@@ -188,6 +194,19 @@ def create_theater():
 @params("theater")
 def get_theater_details(usernames):
     return "not implemented", 400
+
+
+@app.route('/visit/history', methods=['GET'])
+@params("company", "start_date", "end_date")
+@with_db
+@authenticated
+def view_vist_history(company, start_date, end_date, db, jwt):
+    visits = db.session.query(Visit).filter(and_(
+            Visit.username == jwt.username,
+            Visit.companyname == company,
+            Visit.date.between(start_date, end_date)
+        )).all()
+    return {"visits": visits or ()}, 200
 
 
 def app_factory():
