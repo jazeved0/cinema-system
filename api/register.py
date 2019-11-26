@@ -117,14 +117,17 @@ def r_manager_customer(first_name, last_name, username, password, company, stree
     new_manager = Manager(username=username, password=None, firstname=first_name, lastname=last_name,
                           state=state, city=city, zipcode=zipcode, street=street_address, companyname=company)
     new_manager.password = hash_password(password, new_manager)
+    database.session.add(new_manager)
+    database.session.commit()
 
-    # Generate Customer row
-    new_customer = Customer(username=username, password=new_manager.password,
-                            firstname=first_name, lastname=last_name)
+    # Execute an insert onto Customer manually to avoid duplicate User creation
+    database.session.execute(Customer.__table__.insert(), {
+                             "username": username, "password": new_manager.password, "firstname": first_name, "lastname": last_name})
+
+    # Insert credit cards
     new_credit_cards = [Creditcard(
         creditcardnum=cc, owner=username) for cc in credit_cards]
-
-    database.session.add_all([new_customer, new_manager] + new_credit_cards)
+    database.session.add_all(new_credit_cards)
     database.session.commit()
     return provision_jwt(new_manager, is_manager=True, is_customer=True, cc_count=len(credit_cards)).get_token(), 200
 

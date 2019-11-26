@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { buildPath, log, useFallingEdge } from "Utility";
+import { buildPath, log, useFallingEdge, retry } from "Utility";
 import axios from "axios";
 
 export const API_ROOT =
@@ -13,18 +13,11 @@ export function api(path) {
 
 export function useCompanies() {
   const [companies, setCompanies] = useState([]);
+  const get = () => axios.get(api("/companies"));
   useEffect(() => {
-    axios
-      .get(api("/companies"))
-      .then(response => {
-        setCompanies(response.data);
-      })
-      .catch(error => {
-        log(
-          `Error ${error.status} ocurred while fetching company list: ${error.message}`
-        );
-        return new Promise(resolve => setTimeout(resolve, 1000));
-      });
+    retry(get, 1000, "fetching company list").then(response => {
+      setCompanies(response.data);
+    });
   }, []);
 
   return companies;
@@ -64,6 +57,9 @@ export function useApiForm({ path, show = true, onSuccess }) {
         if (error.response) {
           log(`${error.response.status} Error: ${error.response.data}`);
           setError(error.response.data);
+        } else {
+          log(`Client Error: ${error}`);
+          setError(error);
         }
       });
   };

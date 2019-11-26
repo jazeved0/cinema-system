@@ -291,6 +291,13 @@ $line-width: 225px;
 
     .modal-header {
         border: none !important;
+        position: relative;
+        z-index: 1;
+        pointer-events: none;
+
+        .close {
+            pointer-events: all !important;
+        }
 
         @include dark {
             .close {
