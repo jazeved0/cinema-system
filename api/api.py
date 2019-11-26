@@ -83,13 +83,13 @@ class Login(DBResource):
 
 class RegistrationUser(DBResource):
     def post(self):
-        r_user(parse_args("first_name", "last_name", "username", "password"), self.db)
+        r_user(*parse_args("first_name", "last_name", "username", "password"), self.db)
 
 
 class RegistrationManager(DBResource):
     def post(self):
         r_manager(
-            parse_args(
+            *parse_args(
                 "first_name",
                 "last_name",
                 "username",
@@ -106,7 +106,7 @@ class RegistrationManager(DBResource):
 class RegistrationCustomer(DBResource):
     def post(self):
         r_customer(
-            parse_args(
+            *parse_args(
                 "first_name",
                 "last_name",
                 "username",
@@ -119,7 +119,7 @@ class RegistrationCustomer(DBResource):
 class RegistrationManagerCustomer(DBResource):
     def post(self):
         r_manager_customer(
-            parse_args(
+            *parse_args(
                 "first_name",
                 "last_name",
                 "username",
