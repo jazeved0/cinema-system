@@ -56,6 +56,7 @@ Cinema System uses [eslint](https://eslint.org/) and [prettier](https://prettier
 
 ```console
 yarn run lint
+```
 
 ## 🛠 Tooling
 
