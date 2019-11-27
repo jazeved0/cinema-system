@@ -25,8 +25,6 @@ import AnimateHeight from "react-animate-height";
 import { CSSTransition } from "react-transition-group";
 import { Modal } from "react-bootstrap";
 
-import "./style.scss";
-
 // Context for passing error state information down the tree
 const LoginErrorContext = React.createContext({
   errors: [],

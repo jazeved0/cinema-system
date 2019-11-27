@@ -2,7 +2,9 @@
 @import "./fonts";
 @import "./theme";
 @import "./media";
+@import "./app";
 @import "../Components/style";
+@import "../Pages/style";
 
 // Bootstrap config options
 $enable-rounded: true !default;

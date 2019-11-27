@@ -22,6 +22,7 @@ export function isEmptyOrNil(string) {
 
 const logPrefix = "atlanta-movie";
 export const log = message => console.log(`[${logPrefix}] ${message}`);
+export const warn = message => console.warn(`[${logPrefix}] ${message}`);
 
 export const addMissingUnit = dimension =>
   isNaN(dimension) ? dimension : `${dimension}px`;
