@@ -92,8 +92,8 @@ def r_user(first_name, last_name, username, password, database):
     new_user = User(username=username, password=None,
                     firstname=first_name, lastname=last_name)
     new_user.password = hash_password(password, new_user)
-    database.session.add(new_user)
-    database.session.commit()
+    database.add(new_user)
+    database.commit()
     return provision_jwt(new_user, cc_count=0).get_token(), 200
 
 
@@ -104,8 +104,8 @@ def r_manager(first_name, last_name, username, password, company, street_address
     new_manager = Manager(username=username, password=None, firstname=first_name, lastname=last_name,
                           state=state, city=city, zipcode=zipcode, street=street_address, companyname=company)
     new_manager.password = hash_password(password, new_manager)
-    database.session.add(new_manager)
-    database.session.commit()
+    database.add(new_manager)
+    database.commit()
     return provision_jwt(new_manager, is_manager=True, cc_count=0).get_token(), 200
 
 
@@ -117,18 +117,18 @@ def r_manager_customer(first_name, last_name, username, password, company, stree
     new_manager = Manager(username=username, password=None, firstname=first_name, lastname=last_name,
                           state=state, city=city, zipcode=zipcode, street=street_address, companyname=company)
     new_manager.password = hash_password(password, new_manager)
-    database.session.add(new_manager)
-    database.session.commit()
+    database.add(new_manager)
+    database.commit()
 
     # Execute an insert onto Customer manually to avoid duplicate User creation
-    database.session.execute(Customer.__table__.insert(), {
+    database.execute(Customer.__table__.insert(), {
                              "username": username, "password": new_manager.password, "firstname": first_name, "lastname": last_name})
 
     # Insert credit cards
     new_credit_cards = [Creditcard(
         creditcardnum=cc, owner=username) for cc in credit_cards]
-    database.session.add_all(new_credit_cards)
-    database.session.commit()
+    database.add_all(new_credit_cards)
+    database.commit()
     return provision_jwt(new_manager, is_manager=True, is_customer=True, cc_count=len(credit_cards)).get_token(), 200
 
 
@@ -143,6 +143,6 @@ def r_customer(first_name, last_name, username, password, credit_cards, database
     new_credit_cards = [Creditcard(
         creditcardnum=cc, owner=username) for cc in credit_cards]
 
-    database.session.add_all([new_customer] + new_credit_cards)
-    database.session.commit()
+    database.add_all([new_customer] + new_credit_cards)
+    database.commit()
     return provision_jwt(new_customer, is_customer=True, cc_count=len(credit_cards)).get_token(), 200

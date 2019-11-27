@@ -57,7 +57,7 @@ class Login(DBResource):
     def post(self):
         username, password = parse_args("username", "password")
 
-        user = self.db.session.query(TUserDerived).filter(
+        user = self.db.query(TUserDerived).filter(
             TUserDerived.c.username == username).first()
 
         if user is None:
@@ -127,7 +127,7 @@ class RegistrationManagerCustomer(DBResource):
 
 class Companies(DBResource):
     def get(self):
-        companies = self.db.session.query(Company).all()
+        companies = self.db.query(Company).all()
         return jsonify([c.name for c in companies]), 200
 
 
@@ -135,7 +135,7 @@ class VisitResource(DBResource):
     @authenticated
     def get(self, jwt):
         company, start_date, end_date = parse_args("company", "start_date", "end_date")
-        visits = self.db.session.query(Visit).filter(and_(
+        visits = self.db.query(Visit).filter(and_(
             Visit.username == jwt.username,
             Visit.companyname == company,
             Visit.date.between(start_date, end_date)
