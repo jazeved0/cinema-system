@@ -14,8 +14,8 @@ BEGIN
     DROP TABLE IF EXISTS UserLogin;
     CREATE TABLE UserLogin
         SELECT user.Username, Status, Password, case WHEN EXISTS (
-            SELECT employee.Username FROM employee
-            WHERE employee.Username = user.Username
+            SELECT customer.Username FROM customer
+            WHERE customer.Username = user.Username
         ) THEN 1 ELSE 0 END AS isCustomer, case WHEN EXISTS (
             SELECT admin.Username FROM admin
             WHERE admin.Username = user.Username
@@ -101,6 +101,8 @@ CREATE PROCEDURE `manager_only_register` (
 BEGIN
     INSERT INTO user (username, password, firstname, lastname)
     VALUES (i_username, MD5(i_password), i_firstname, i_lastname);
+    INSERT INTO employee (username)
+    VALUES (i_username);
     INSERT INTO manager (username, state, city, zipcode, street, companyname)
     VALUES (i_username, i_empState, i_empCity, i_empZipcode, i_empStreet, i_comName);
 END$$
@@ -126,6 +128,8 @@ CREATE PROCEDURE `manager_customer_register` (
 BEGIN
     INSERT INTO user (username, password, firstname, lastname)
     VALUES (i_username, MD5(i_password), i_firstname, i_lastname);
+    INSERT INTO employee (username)
+    VALUES (i_username);
     INSERT INTO manager (username, state, city, zipcode, street, companyname)
     VALUES (i_username, i_empState, i_empCity, i_empZipcode, i_empStreet, i_comName);
     INSERT INTO customer (username)
@@ -254,11 +258,11 @@ BEGIN
             -- Create temporary table to store filtered values
             DROP TABLE IF EXISTS UserFilterTemp;
             CREATE TABLE UserFilterTemp
-                SELECT username, status, creditCardCount, userType FROM UserDerived
+                SELECT username, creditCardCount, userType, status FROM UserDerived
                 -- Perform filter on username parameter
                 WHERE (UPPER(Username) <=> UPPER(i_username)) or i_username = "" 
                 -- Perform status filter (if applicable)
-                AND CASE WHEN i_status <> 'ALL' THEN Status = i_status ELSE TRUE END;
+                AND CASE WHEN i_status <> 'ALL' THEN status = i_status ELSE TRUE END;
             DROP TABLE IF EXISTS AdFilterUser;
             -- Build dynamic sort query
             SET @query = CONCAT(
@@ -555,7 +559,7 @@ CREATE PROCEDURE `customer_view_mov` (
 )
 BEGIN
     INSERT INTO used (
-        CreditCardNum, Date, MovieName,
+        CreditCardNum, PlayDate, MovieName,
         ReleaseDate, TheaterName, CompanyName
     ) VALUES (
         i_creditCardNum, i_movPlayDate, i_movName,
