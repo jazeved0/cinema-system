@@ -14,8 +14,8 @@ BEGIN
     DROP TABLE IF EXISTS UserLogin;
     CREATE TABLE UserLogin
         SELECT user.Username, Status, Password, case WHEN EXISTS (
-            SELECT employee.Username FROM employee
-            WHERE employee.Username = user.Username
+            SELECT customer.Username FROM customer
+            WHERE customer.Username = user.Username
         ) THEN 1 ELSE 0 END AS isCustomer, case WHEN EXISTS (
             SELECT admin.Username FROM admin
             WHERE admin.Username = user.Username
