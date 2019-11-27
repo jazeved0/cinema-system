@@ -101,6 +101,8 @@ CREATE PROCEDURE `manager_only_register` (
 BEGIN
     INSERT INTO user (username, password, firstname, lastname)
     VALUES (i_username, MD5(i_password), i_firstname, i_lastname);
+    INSERT INTO employee (username)
+    VALUES (i_username);
     INSERT INTO manager (username, state, city, zipcode, street, companyname)
     VALUES (i_username, i_empState, i_empCity, i_empZipcode, i_empStreet, i_comName);
 END$$
@@ -126,6 +128,8 @@ CREATE PROCEDURE `manager_customer_register` (
 BEGIN
     INSERT INTO user (username, password, firstname, lastname)
     VALUES (i_username, MD5(i_password), i_firstname, i_lastname);
+    INSERT INTO employee (username)
+    VALUES (i_username);
     INSERT INTO manager (username, state, city, zipcode, street, companyname)
     VALUES (i_username, i_empState, i_empCity, i_empZipcode, i_empStreet, i_comName);
     INSERT INTO customer (username)
@@ -555,7 +559,7 @@ CREATE PROCEDURE `customer_view_mov` (
 )
 BEGIN
     INSERT INTO used (
-        CreditCardNum, Date, MovieName,
+        CreditCardNum, PlayDate, MovieName,
         ReleaseDate, TheaterName, CompanyName
     ) VALUES (
         i_creditCardNum, i_movPlayDate, i_movName,
