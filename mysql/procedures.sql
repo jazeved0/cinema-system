@@ -254,11 +254,11 @@ BEGIN
             -- Create temporary table to store filtered values
             DROP TABLE IF EXISTS UserFilterTemp;
             CREATE TABLE UserFilterTemp
-                SELECT username, status, creditCardCount, userType FROM UserDerived
+                SELECT username, creditCardCount, userType, status FROM UserDerived
                 -- Perform filter on username parameter
                 WHERE (UPPER(Username) <=> UPPER(i_username)) or i_username = "" 
                 -- Perform status filter (if applicable)
-                AND CASE WHEN i_status <> 'ALL' THEN Status = i_status ELSE TRUE END;
+                AND CASE WHEN i_status <> 'ALL' THEN status = i_status ELSE TRUE END;
             DROP TABLE IF EXISTS AdFilterUser;
             -- Build dynamic sort query
             SET @query = CONCAT(
