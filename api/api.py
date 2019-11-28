@@ -1,13 +1,13 @@
-from flask import Flask, g, jsonify
+from flask import Flask, g, jsonify, make_response
 from flask_restful import Api, Resource, reqparse
 from flask_cors import CORS
-from sqlachemy import and_
+from sqlalchemy import and_
 
 from auth import authenticated, get_failed_auth_resp
 from auth import hash_password, provision_jwt
 
 from config import get_session
-from models import TUserDerived, Company, Visit
+from models import TUserDerived, Company, Visit, Theater, Manager
 from register import r_user, r_customer, r_manager, r_manager_customer
 
 """
@@ -128,7 +128,26 @@ class RegistrationManagerCustomer(DBResource):
 class Companies(DBResource):
     def get(self):
         companies = self.db.query(Company).all()
-        return jsonify([c.name for c in companies]), 200
+        return make_response(jsonify([c.name for c in companies]), 200)
+
+
+class CompaniesNumTheaters(DBResource):
+    def get(self, company):
+        num = self.db.query(Theater).filter(Theater.companyname == company.replace("+", " ")).count()
+        return make_response(jsonify({"num_theaters": num}), 200)
+
+
+class CompaniesNumEmployees(DBResource):
+    def get(self, company):
+        num = self.db.query(Manager).filter(Manager.companyname == company.replace("+", " ")).count()
+        return make_response(jsonify({"num_employees": num}), 200)
+
+
+class CompaniesNumCities(DBResource):
+    def get(self, company):
+        num = self.db.query(Theater).distinct(Theater.city).filter(
+            Theater.companyname == company.replace("+", " ")).count()
+        return make_response(jsonify({"num_cities": num}), 200)
 
 
 class VisitResource(DBResource):
@@ -140,7 +159,7 @@ class VisitResource(DBResource):
             Visit.companyname == company,
             Visit.date.between(start_date, end_date)
         )).all()
-        return jsonify({"visits": visits or ()}), 200
+        return make_response(jsonify({"visits": visits or ()}), 200)
 
 
 # Uptime checker route
@@ -153,6 +172,9 @@ def app_factory():
     api = Api(app)
     api.add_resource(Login, "/login")
     api.add_resource(Companies, "/companies")
+    api.add_resource(CompaniesNumEmployees, "/companies/<string:company>/num_employees")
+    api.add_resource(CompaniesNumCities, "/companies/<string:company>/num_cities")
+    api.add_resource(CompaniesNumTheaters, "/companies/<string:company>/num_theaters")
     # api.add_resource(RegistrationUser, "/registration/user")
     api.add_resource(RegistrationUser, "/register/user")
     # api.add_resource(RegistrationManager, "/registration/manager")
