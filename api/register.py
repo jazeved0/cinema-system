@@ -1,4 +1,5 @@
 import functools
+from sqlalchemy import and_
 
 from auth import hash_password, provision_jwt
 from models import TUserDerived, User, Company, Manager, Customer, Creditcard
@@ -71,7 +72,11 @@ def validate_manager(fn):
 
         # Validate address uniqueness
         manager_dup = kwargs.get("database").session.query(
-            Manager).filter(Manager.state == kwargs.get("state"), Manager.city == kwargs.get("city"), Manager.zipcode == kwargs.get("zipcode"), Manager.street == kwargs.get("street")).first()
+            Manager).filter(and_(
+                Manager.state == kwargs.get("state"),
+                Manager.city == kwargs.get("city"),
+                Manager.zipcode == kwargs.get("zipcode"),
+                Manager.street == kwargs.get("street"))).first()
         if manager_dup is not None:
             return "Address must be unique", 400
 
@@ -99,10 +104,12 @@ def r_user(first_name, last_name, username, password, database):
 
 @validate_user
 @validate_manager
-def r_manager(first_name, last_name, username, password, company, street_address, city, state, zipcode, database):
+def r_manager(first_name, last_name, username, password, company,
+              street_address, city, state, zipcode, database):
     # Add new manager to the database
-    new_manager = Manager(username=username, password=None, firstname=first_name, lastname=last_name,
-                          state=state, city=city, zipcode=zipcode, street=street_address, companyname=company)
+    new_manager = Manager(username=username, password=None, firstname=first_name,
+                          lastname=last_name, state=state, city=city, zipcode=zipcode,
+                          street=street_address, companyname=company)
     new_manager.password = hash_password(password, new_manager)
     database.add(new_manager)
     database.commit()
@@ -112,24 +119,30 @@ def r_manager(first_name, last_name, username, password, company, street_address
 @validate_user
 @validate_customer
 @validate_manager
-def r_manager_customer(first_name, last_name, username, password, company, street_address, city, state, zipcode, credit_cards, database):
+def r_manager_customer(first_name, last_name, username, password, company,
+                       street_address, city, state, zipcode, credit_cards, database):
     # Generate Manager row
-    new_manager = Manager(username=username, password=None, firstname=first_name, lastname=last_name,
-                          state=state, city=city, zipcode=zipcode, street=street_address, companyname=company)
+    new_manager = Manager(username=username, password=None, firstname=first_name,
+                          lastname=last_name, state=state, city=city, zipcode=zipcode,
+                          street=street_address, companyname=company)
     new_manager.password = hash_password(password, new_manager)
     database.add(new_manager)
     database.commit()
 
     # Execute an insert onto Customer manually to avoid duplicate User creation
     database.execute(Customer.__table__.insert(), {
-                             "username": username, "password": new_manager.password, "firstname": first_name, "lastname": last_name})
+        "username": username,
+        "password": new_manager.password,
+        "firstname": first_name,
+        "lastname": last_name})
 
     # Insert credit cards
     new_credit_cards = [Creditcard(
         creditcardnum=cc, owner=username) for cc in credit_cards]
     database.add_all(new_credit_cards)
     database.commit()
-    return provision_jwt(new_manager, is_manager=True, is_customer=True, cc_count=len(credit_cards)).get_token(), 200
+    return provision_jwt(new_manager, is_manager=True, is_customer=True,
+                         cc_count=len(credit_cards)).get_token(), 200
 
 
 @validate_user
@@ -145,4 +158,5 @@ def r_customer(first_name, last_name, username, password, credit_cards, database
 
     database.add_all([new_customer] + new_credit_cards)
     database.commit()
-    return provision_jwt(new_customer, is_customer=True, cc_count=len(credit_cards)).get_token(), 200
+    return provision_jwt(new_customer, is_customer=True,
+                         cc_count=len(credit_cards)).get_token(), 200

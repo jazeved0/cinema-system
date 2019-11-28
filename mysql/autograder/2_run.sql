@@ -1,4 +1,4 @@
--- CS4400 Introduction to Database Systems (v7/Tuesday, November 26, 2019)
+-- CS4400 Introduction to Database Systems (v8/Wednesday, November 27, 2019)
 -- Self-Contained Autograding/Testing Script for Phase 3 of the Course Project
 
 -- This procedure is used to support the scoring process.  It creates an SQL query
@@ -37,6 +37,7 @@ row_hash text NOT NULL
 -- The following tables contain the expected answers for the corresponding tests.
 -- The tables are stored in your database while the script runs, and then deleted
 -- once the script has been completed.
+
 DROP TABLE IF EXISTS `magic44_table1`;
 CREATE TABLE `magic44_table1` (
   `username` varchar(100) NOT NULL,
@@ -128,7 +129,6 @@ CREATE TABLE `magic44_table9` (
 );
 
 INSERT INTO `magic44_table9` VALUES ('clarinetbeast',0,'Customer','Declined'),('gdanger',0,'User','Declined'),('texasStarKarate',0,'User','Declined');
-
 DROP TABLE IF EXISTS `magic44_table10`;
 CREATE TABLE `magic44_table10` (
   `username` varchar(100) NOT NULL,
@@ -485,7 +485,7 @@ CREATE TABLE `magic44_table62` (
   `movReleaseDate` date NOT NULL
 );
 
-INSERT INTO `magic44_table62` VALUES ('4400 The Movie','Cinema Star','100 Cool Place','San Francisco ','CA','94016','4400 Theater Company','2019-09-12','2019-08-12'),('George P Burdell\'s Life Story','Cinema Star','100 Cool Place','San Francisco ','CA','94016','4400 Theater Company','2010-05-20','1927-08-12'),('Georgia Tech The Movie','Cinema Star','100 Cool Place','San Francisco ','CA','94016','4400 Theater Company','2019-09-30','1985-08-13'),('How to Train Your Dragon','Cinema Star','100 Cool Place','San Francisco ','CA','94016','4400 Theater Company','2010-04-02','2010-03-21'),('Spaceballs','Cinema Star','100 Cool Place','San Francisco ','CA','94016','4400 Theater Company','2000-02-02','1987-06-24'),('The King\'s Speech','Cinema Star','100 Cool Place','San Francisco ','CA','94016','4400 Theater Company','2019-12-20','2010-11-26'),('Calculus Returns: A ML Story','ML Movies','314 Pi St','Pallet Town','KS','31415','AI Theater Company','2019-10-10','2019-09-19'),('Calculus Returns: A ML Story','ML Movies','314 Pi St','Pallet Town','KS','31415','AI Theater Company','2019-12-30','2019-09-19'),('Spaceballs','ML Movies','314 Pi St','Pallet Town','KS','31415','AI Theater Company','2010-04-02','1987-06-24'),('Spaceballs','ML Movies','314 Pi St','Pallet Town','KS','31415','AI Theater Company','2023-01-23','1987-06-24'),('Spider-Man: Into the Spider-Verse','ML Movies','314 Pi St','Pallet Town','KS','31415','AI Theater Company','2019-09-30','2018-12-01'),('4400 The Movie','ABC Theater','880 Color Dr','Austin','TX','73301','Awesome Theater Company','2019-10-12','2019-08-12'),('Georgia Tech The Movie','ABC Theater','880 Color Dr','Austin','TX','73301','Awesome Theater Company','1985-08-13','1985-08-13'),('Georgia Tech The Movie','ABC Theater','880 Color Dr','Austin','TX','73301','Awesome Theater Company','2010-04-02','1985-08-13'),('The First Pokemon Movie','ABC Theater','880 Color Dr','Austin','TX','73301','Awesome Theater Company','2018-07-19','1998-07-19'),('George P Burdell\'s Life Story','Main Movies','123 Main St','New York','NY','10001','EZ Theater Company','2019-07-14','1927-08-12'),('George P Burdell\'s Life Story','Main Movies','123 Main St','New York','NY','10001','EZ Theater Company','2019-10-22','1927-08-12'),('How to Train Your Dragon','Main Movies','123 Main St','New York','NY','10001','EZ Theater Company','2010-03-22','2010-03-21'),('How to Train Your Dragon','Main Movies','123 Main St','New York','NY','10001','EZ Theater Company','2010-03-23','2010-03-21'),('Spaceballs','Main Movies','123 Main St','New York','NY','10001','EZ Theater Company','1999-06-24','1987-06-24'),('The King\'s Speech','Main Movies','123 Main St','New York','NY','10001','EZ Theater Company','2019-12-20','2010-11-26'),('4400 The Movie','Star Movies','745 GT St','Atlanta','GA','30332','EZ Theater Company','2019-08-12','2019-08-12'),('How to Train Your Dragon','Star Movies','745 GT St','Atlanta','GA','30332','EZ Theater Company','2010-03-25','2010-03-21'),('Spaceballs','Star Movies','745 GT St','Atlanta','GA','30332','EZ Theater Company','2019-12-06','1987-06-24');
+INSERT INTO `magic44_table62` VALUES ('4400 The Movie','Cinema Star','100 Cool Place','San Francisco ','CA','94016','4400 Theater Company','2019-09-12','2019-08-12'),('George P Burdell\'s Life Story','Cinema Star','100 Cool Place','San Francisco ','CA','94016','4400 Theater Company','2010-05-20','1927-08-12'),('Georgia Tech The Movie','Cinema Star','100 Cool Place','San Francisco ','CA','94016','4400 Theater Company','2019-09-30','1985-08-13'),('How to Train Your Dragon','Cinema Star','100 Cool Place','San Francisco ','CA','94016','4400 Theater Company','2010-04-02','2010-03-21'),('Spaceballs','Cinema Star','100 Cool Place','San Francisco ','CA','94016','4400 Theater Company','2000-02-02','1987-06-24'),('The King\'s Speech','Cinema Star','100 Cool Place','San Francisco ','CA','94016','4400 Theater Company','2019-12-20','2010-11-26'),('Calculus Returns: A ML Story','ML Movies','314 Pi St','Pallet Town','KS','31415','AI Theater Company','2019-10-10','2019-09-19'),('Calculus Returns: A ML Story','ML Movies','314 Pi St','Pallet Town','KS','31415','AI Theater Company','2019-12-30','2019-09-19'),('Spaceballs','ML Movies','314 Pi St','Pallet Town','KS','31415','AI Theater Company','2010-04-02','1987-06-24'),('Spaceballs','ML Movies','314 Pi St','Pallet Town','KS','31415','AI Theater Company','2023-01-23','1987-06-24'),('Spider-Man: Into the Spider-Verse','ML Movies','314 Pi St','Pallet Town','KS','31415','AI Theater Company','2019-09-30','2018-12-01'),('4400 The Movie','ABC Theater','880 Color Dr','Austin','TX','73301','Awesome Theater Company','2019-10-12','2019-08-12'),('Georgia Tech The Movie','ABC Theater','880 Color Dr','Austin','TX','73301','Awesome Theater Company','1985-08-13','1985-08-13'),('Georgia Tech The Movie','ABC Theater','880 Color Dr','Austin','TX','73301','Awesome Theater Company','2010-04-02','1985-08-13'),('The First Pokemon Movie','ABC Theater','880 Color Dr','Austin','TX','73301','Awesome Theater Company','2010-04-02','1998-07-19'),('The First Pokemon Movie','ABC Theater','880 Color Dr','Austin','TX','73301','Awesome Theater Company','2018-07-19','1998-07-19'),('George P Burdell\'s Life Story','Main Movies','123 Main St','New York','NY','10001','EZ Theater Company','2019-07-14','1927-08-12'),('George P Burdell\'s Life Story','Main Movies','123 Main St','New York','NY','10001','EZ Theater Company','2019-10-22','1927-08-12'),('How to Train Your Dragon','Main Movies','123 Main St','New York','NY','10001','EZ Theater Company','2010-03-22','2010-03-21'),('How to Train Your Dragon','Main Movies','123 Main St','New York','NY','10001','EZ Theater Company','2010-03-23','2010-03-21'),('Spaceballs','Main Movies','123 Main St','New York','NY','10001','EZ Theater Company','1999-06-24','1987-06-24'),('The King\'s Speech','Main Movies','123 Main St','New York','NY','10001','EZ Theater Company','2019-12-20','2010-11-26'),('4400 The Movie','Star Movies','745 GT St','Atlanta','GA','30332','EZ Theater Company','2019-08-12','2019-08-12'),('How to Train Your Dragon','Star Movies','745 GT St','Atlanta','GA','30332','EZ Theater Company','2010-03-25','2010-03-21'),('Spaceballs','Star Movies','745 GT St','Atlanta','GA','30332','EZ Theater Company','2019-12-06','1987-06-24');
 
 DROP TABLE IF EXISTS `magic44_table63`;
 CREATE TABLE `magic44_table63` (
@@ -496,7 +496,7 @@ CREATE TABLE `magic44_table63` (
   `movPlayDate` date NOT NULL
 );
 
-INSERT INTO `magic44_table63` VALUES ('Spaceballs','ML Movies','AI Theater Company','1111111111111100','2010-04-02'),('How to Train Your Dragon','Star Movies','EZ Theater Company','1111111111111100','2010-03-25'),('How to Train Your Dragon','Cinema Star','4400 Theater Company','1111111111111111','2010-04-02'),('The First Pokemon Movie','ML Movies','AI Theater Company','1111111111111111','2010-04-02'),('How to Train Your Dragon','Main Movies','EZ Theater Company','1111111111111111','2010-03-22'),('How to Train Your Dragon','Main Movies','EZ Theater Company','1111111111111111','2010-03-23');
+INSERT INTO `magic44_table63` VALUES ('Spaceballs','ML Movies','AI Theater Company','1111111111111100','2010-04-02'),('How to Train Your Dragon','Star Movies','EZ Theater Company','1111111111111100','2010-03-25'),('How to Train Your Dragon','Cinema Star','4400 Theater Company','1111111111111111','2010-04-02'),('The First Pokemon Movie','ABC Theater','Awesome Theater Company','1111111111111111','2010-04-02'),('How to Train Your Dragon','Main Movies','EZ Theater Company','1111111111111111','2010-03-22'),('How to Train Your Dragon','Main Movies','EZ Theater Company','1111111111111111','2010-03-23');
 
 -- The actual tests are listed below.  The tests for select queries are evaluated
 -- directly by executing the corresponding stored procedures, and then comparing the
@@ -507,6 +507,7 @@ INSERT INTO `magic44_table63` VALUES ('Spaceballs','ML Movies','AI Theater Compa
 -- The first seven (7) steps of this script [step #1 through step #7] are designed
 -- to check the select queries in an unfiltered manner as much as possible, to help
 -- confirm that the initial data has been loaded correctly.
+
 -- [step #1: screen 13c] (wide-aperture/unfiltered select queries)
 CALL admin_filter_user('', 'ALL', '', '');
 CALL magic44_check_step('1', 'AdFilterUser', "username, '#', creditCardCount, '#', userType, '#', status");
@@ -538,6 +539,7 @@ CALL magic44_check_step('7', 'UserFilterTh', "thName, '#', thStreet, '#', thCity
 -- The next twenty-three (23) steps of this script [step #8 through step #30] are designed
 -- to test the filters on some of the select queries to ensure that the proper rows
 -- are being included and excluded.
+
 -- [step #8: screen 13c] (filtered select queries)
 CALL admin_filter_user('', 'Approved', '', '');
 CALL magic44_check_step('8', 'AdFilterUser', "username, '#', creditCardCount, '#', userType, '#', status");
@@ -592,18 +594,15 @@ CALL magic44_check_step('20', 'ManFilterTh', "movName, '#', movDuration, '#', mo
 
 -- [step #21: screen 20a]
 CALL customer_filter_mov('ALL', 'ALL', '', '', null, null);
-CALL magic44_check_step('21', 'CosFilterMovie', "movName, '#', thName, '#', thStreet, '#', thCity, '#', thState, '#', thZipcode, '#', 
-comName, '#', movPlayDate, '#', movReleaseDate");
+CALL magic44_check_step('21', 'CosFilterMovie', "movName, '#', thName, '#', thStreet, '#', thCity, '#', thState, '#', thZipcode, '#', comName, '#', movPlayDate, '#', movReleaseDate");
 
 -- [step #22: screen 20a]
 CALL customer_filter_mov('Spaceballs', 'ALL', '', '', '2000-01-01', null);
-CALL magic44_check_step('22', 'CosFilterMovie', "movName, '#', thName, '#', thStreet, '#', thCity, '#', thState, '#', thZipcode, '#', 
-comName, '#', movPlayDate, '#', movReleaseDate");
+CALL magic44_check_step('22', 'CosFilterMovie', "movName, '#', thName, '#', thStreet, '#', thCity, '#', thState, '#', thZipcode, '#', comName, '#', movPlayDate, '#', movReleaseDate");
 
 -- [step #23: screen 20a]
 CALL customer_filter_mov('ALL', 'EZ Theater Company', '', '', null, '2011-01-01');
-CALL magic44_check_step('23', 'CosFilterMovie', "movName, '#', thName, '#', thStreet, '#', thCity, '#', thState, '#', thZipcode, '#', 
-comName, '#', movPlayDate, '#', movReleaseDate");
+CALL magic44_check_step('23', 'CosFilterMovie', "movName, '#', thName, '#', thStreet, '#', thCity, '#', thState, '#', thZipcode, '#', comName, '#', movPlayDate, '#', movReleaseDate");
 
 -- [step #24: screen 21]
 CALL customer_view_history('georgep');
@@ -637,6 +636,7 @@ CALL magic44_check_step('30', 'UserLogin', "username, '#', status, '#', isCustom
 -- designed to test the modifications made by your insert, update and delete queries
 -- to ensure that the database state is being updated properly.  We confirm/validate
 -- that the state was updated correctly by referencing the earlier select queries. 
+
 -- [step #31: screen 3] (insert, update and delete queries)
 CALL user_register('flinstone4', 111111111, 'Fred', 'Flintstone');
 
@@ -703,6 +703,7 @@ CALL magic44_check_step('48', 'UserVisitHistory', "thName, '#', thStreet, '#', t
 -- attempting insert, update and delete queries that should not be permitted, and
 -- then confirming/validating that the database state was not updated in an
 -- incorrect manner by referencing the earlier select queries. 
+
 -- [step #49: screen 4b] (logical constraint handling)
 CALL customer_add_creditcard('georgep', '1234123412341234');
 
@@ -728,11 +729,10 @@ CALL manager_schedule_mov('imbatman', 'Spaceballs', '1987-06-24', '1987-06-23');
 
 -- [step #56: screen 20a] (ensure movie was not scheduled before release date)
 CALL customer_filter_mov('ALL', 'ALL', '', '', null, null);
-CALL magic44_check_step('56', 'CosFilterMovie', "movName, '#', thName, '#', thStreet, '#', thCity, '#', thState, '#', thZipcode, '#', 
-comName, '#', movPlayDate, '#', movReleaseDate");
+CALL magic44_check_step('56', 'CosFilterMovie', "movName, '#', thName, '#', thStreet, '#', thCity, '#', thState, '#', thZipcode, '#', comName, '#', movPlayDate, '#', movReleaseDate");
 
 -- [step #57: screen 19]
-CALL manager_schedule_mov('imbatman', 'The First Pokemon Movie', '1988-07-19', '2010-04-02');
+CALL manager_schedule_mov('imbatman', 'The First Pokemon Movie', '1998-07-19', '2010-04-02');
 
 -- [step #58: screen 19]
 CALL manager_schedule_mov('imbatman', 'Georgia Tech The Movie', '1985-08-13', '2010-04-02');
@@ -741,15 +741,14 @@ CALL manager_schedule_mov('imbatman', 'Georgia Tech The Movie', '1985-08-13', '2
 CALL customer_view_mov('1111111111111100', 'Spaceballs', '1987-06-24', 'ML Movies', 'AI Theater Company', '2010-04-02');
 
 -- [step #60: screen 20b]
-CALL customer_view_mov('1111111111111111', 'The First Pokemon Movie', '1988-07-19', 'ML Movies', 'AI Theater Company', '2010-04-02');
+CALL customer_view_mov('1111111111111111', 'The First Pokemon Movie', '1998-07-19', 'ABC Theater', 'Awesome Theater Company', '2010-04-02');
 
 -- [step #61: screen 20b]
-CALL customer_view_mov('1111111111111100', 'Georgia Tech The Movie', '1985-08-13', 'ML Movies', 'AI Theater Company', '2010-04-02');
+CALL customer_view_mov('1111111111111100', 'Georgia Tech The Movie', '1985-08-13', 'ABC Theater', 'Awesome Theater Company', '2010-04-02');
 
 -- [step #62: screen 20a] (ensure customer is not able to view more than three movies per day)
 CALL customer_filter_mov('ALL', 'ALL', '', '', null, null);
-CALL magic44_check_step('62', 'CosFilterMovie', "movName, '#', thName, '#', thStreet, '#', thCity, '#', thState, '#', thZipcode, '#', 
-comName, '#', movPlayDate, '#', movReleaseDate");
+CALL magic44_check_step('62', 'CosFilterMovie', "movName, '#', thName, '#', thStreet, '#', thCity, '#', thState, '#', thZipcode, '#', comName, '#', movPlayDate, '#', movReleaseDate");
 
 -- [step #63: screen 21]
 CALL customer_view_history('georgep');
@@ -758,6 +757,7 @@ CALL magic44_check_step('63', 'CosViewHistory', "movName, '#', thName, '#', comN
 -- The following commands clean up the environment and remove data structures that
 -- are no longer needed.  We deliberately leave the intermediate tables that were
 -- created during testing to support later analysis/troubleshooting as needed.
+
 DROP PROCEDURE IF EXISTS magic44_check_step;
 DROP TABLE IF EXISTS magic44_table1, magic44_table10, magic44_table11, magic44_table12, magic44_table13, magic44_table14;
 DROP TABLE IF EXISTS magic44_table15, magic44_table16, magic44_table17, magic44_table18, magic44_table19;
