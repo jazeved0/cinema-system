@@ -182,6 +182,25 @@ class Companies(DBResource, ListResource):
         return serialize(company, table=TCompanyDerived)
 
 
+class CompaniesNumTheaters(DBResource):
+    def get(self, company):
+        num = self.db.query(Theater).filter(Theater.companyname == company.replace("%20", " ")).count()
+        return make_response(jsonify({"num_theaters": num}), 200)
+
+
+class CompaniesNumEmployees(DBResource):
+    def get(self, company):
+        num = self.db.query(Manager).filter(Manager.companyname == company.replace("&20", " ")).count()
+        return make_response(jsonify({"num_employees": num}), 200)
+
+
+class CompaniesNumCities(DBResource):
+    def get(self, company):
+        num = self.db.query(Theater).distinct(Theater.city).filter(
+            Theater.companyname == company.replace("%20", " ")).count()
+        return make_response(jsonify({"num_cities": num}), 200)
+
+
 class Users(DBResource):
     @authenticated
     @requires_admin
@@ -261,7 +280,37 @@ class CompaniesNumCities(DBResource):
         return make_response(jsonify({"num_cities": num}), 200)
 
 
-class VisitResource(DBResource):
+class Theaters(DBResource):
+    def post(self):
+        # TODO validation
+        tn, cn, state, city, zip, cap, man, st = parse_args(
+            "theatername",
+            "companyname",
+            "state",
+            "city",
+            "zipcode",
+            "capacity",
+            "manager",
+            "street"
+        )
+
+        theater = Theater(
+            theatername=tn,
+            companyname=cn,
+            state=state,
+            city=city,
+            zipcode=zip,
+            capacity=cap,
+            manager=man,
+            street=st
+        )
+        self.db.add(theater)
+        self.db.commit()
+
+        return 204
+
+
+class Visits(DBResource):
     @authenticated
     def get(self, jwt):
         company, start_date, end_date = parse_args("company", "start_date", "end_date")
@@ -293,5 +342,6 @@ def app_factory():
     api.add_resource(RegistrationManager, "/register/manager")
     api.add_resource(RegistrationCustomer, "/register/customer")
     api.add_resource(RegistrationManagerCustomer, "/register/manager-customer")
-    api.add_resource(VisitResource, "/visits")
+    api.add_resource(Theaters, "/theaters")
+    api.add_resource(Visits, "/visits")
     return app
