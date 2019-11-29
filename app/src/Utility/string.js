@@ -22,6 +22,7 @@ export function isEmptyOrNil(string) {
 
 const logPrefix = "atlanta-movie";
 export const log = message => console.log(`[${logPrefix}] ${message}`);
+export const warn = message => console.warn(`[${logPrefix}] ${message}`);
 
 export const addMissingUnit = dimension =>
   isNaN(dimension) ? dimension : `${dimension}px`;
@@ -58,6 +59,11 @@ export function buildPath(...args) {
     .filter(x => x.length)
     .join("/");
 }
+
+export const collator = new Intl.Collator(undefined, {
+  numeric: true,
+  sensitivity: "base"
+});
 
 export function capitalize(s) {
   if (typeof s !== "string") return "";

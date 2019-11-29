@@ -4,7 +4,7 @@ import { useAllRoutes, useUnauthorizedRoutes } from "Routes";
 
 import { AppMenu, NotFound } from "Pages";
 import { Switch, Route } from "react-router-dom";
-import { Redirect } from "Components";
+import { Redirect, NotificationPane } from "Components";
 import { splitPath } from "Utility";
 
 export default function AppRoot() {
@@ -19,18 +19,20 @@ export default function AppRoot() {
     </Route>
   ));
   return (
-    <Switch>
-      {Redirect({ when: !isAuthenticated, to: "/" })}
-      {Redirect({ from: unauthorizedRedirects, to: base, exact: true })}
-      {Redirect({ from: redirects, to: base, exact: true })}
-      <Route path={base} exact>
-        <AppMenu base={base} />
-      </Route>
-      {generatedRoutes}
-      <Route path="*">
-        <NotFound />
-      </Route>
-    </Switch>
+    <NotificationPane>
+      <Switch>
+        {Redirect({ when: !isAuthenticated, to: "/" })}
+        {Redirect({ from: unauthorizedRedirects, to: base, exact: true })}
+        {Redirect({ from: redirects, to: base, exact: true })}
+        <Route path={base} exact>
+          <AppMenu base={base} />
+        </Route>
+        {generatedRoutes}
+        <Route path="*">
+          <NotFound />
+        </Route>
+      </Switch>
+    </NotificationPane>
   );
 }
 AppRoot.displayName = "AppRoot";

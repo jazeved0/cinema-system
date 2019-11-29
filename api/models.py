@@ -7,15 +7,22 @@ Contains sqlalchemy ORM models for the Team20 database schema
 """
 
 
-Base = declarative_base()
-metadata = Base.metadata
+decl_base = declarative_base()
+metadata = decl_base.metadata
+
+
+class Base(decl_base):
+    __abstract__ = True
+
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
 class User(Base):
     __tablename__ = 'User'
     __table_args__ = (
         CheckConstraint(
-            "status = ANY (ARRAY['All'::bpchar, 'Pending'::bpchar, 'Declined'::bpchar, 'Approved'::bpchar])"),
+            "status = ANY (ARRAY['Pending'::bpchar, 'Declined'::bpchar, 'Approved'::bpchar])"),
     )
 
     username = Column(String(240), primary_key=True)

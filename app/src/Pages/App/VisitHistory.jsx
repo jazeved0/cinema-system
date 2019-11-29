@@ -4,7 +4,7 @@ import { AppBase } from "Pages";
 
 export default function VisitHistory() {
   return (
-    <AppBase title="Visit History">
+    <AppBase title="Visit History" level="user">
       <p>TODO: implement</p>
     </AppBase>
   );

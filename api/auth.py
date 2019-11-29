@@ -6,6 +6,7 @@ from flask import request, Response
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 
+from util import to_snake_case, to_camel_case
 from config import JWT_SECRET, LOGIN_URL, SALT_FORMAT
 
 """
@@ -31,36 +32,41 @@ def hash_password(password, user):
     return base64.b64encode(hashed_bytes).decode()
 
 
-def provision_jwt(user, is_admin=None, is_manager=None, is_customer=None, cc_count=None):
+def provision_jwt(user, is_admin=None, is_manager=None, is_customer=None,
+                  cc_count=None):
     """"
     Provisions a new JWT for the given user upon successful authentication
     """
 
     # Whether to use named arguments to define authorization/cc
-    flag = is_admin is not None or is_manager is not None or is_customer is not None or cc_count is not None
+    flag = (is_admin is not None
+            or is_manager is not None
+            or is_customer is not None
+            or cc_count is not None)
     is_admin = is_admin or False if flag else user.isadmin
     is_manager = is_manager or False if flag else user.ismanager
     is_customer = is_customer or False if flag else user.iscustomer
     cc_count = cc_count if flag else user.creditcardcount
 
     payload = {
-        'firstName': user.firstname,
-        'lastName': user.lastname,
-        'isAdmin': is_admin,
-        'isManager': is_manager,
-        'isCustomer': is_customer,
+        'first_name': user.firstname,
+        'last_name': user.lastname,
+        'is_admin': is_admin,
+        'is_manager': is_manager,
+        'is_customer': is_customer,
         'status': user.status,
-        'ccCount': cc_count,
+        'cc_count': cc_count,
         'username': user.username
     }
 
     return JWT(data=payload)
 
 
-def get_failed_auth_resp(message="Not Authorized"):
+def get_failed_auth_resp(message="Requires authentication"):
     """
     Returns a failed authentication 401 response, including the
-    'WWW-Authenticate' response header as per the 401 response specifications
+    'WWW-Authenticate' response header as per the 401 response
+    specifications
     """
 
     resp = Response(message, 401)
@@ -77,12 +83,78 @@ def authenticated(fn):
 
     @functools.wraps(fn)
     def wrapped(*args, **kwargs):
+        if 'Authorization' not in request.headers:
+            return get_failed_auth_resp()
+
         try:
             jwt = JWT(token=request.headers['Authorization'])
         except pyjwt.exceptions.InvalidTokenError:
             return get_failed_auth_resp()
 
         return fn(*args, jwt=jwt, **kwargs)
+    return wrapped
+
+
+def requires_admin(fn):
+    """
+    Validates that the authenticated user is an admin
+    """
+
+    @functools.wraps(fn)
+    def wrapped(*args, **kwargs):
+        if 'jwt' in kwargs:
+            jwt = kwargs.pop("jwt")
+            if not jwt.is_admin:
+                return get_failed_auth_resp(
+                    "Insufficient authorization: requires admin status")
+
+            # If passed, continue with route
+            return fn(*args, **kwargs)
+
+        else:
+            return "requires_admin needs JWT", 500
+    return wrapped
+
+
+def requires_manager(fn):
+    """
+    Validates that the authenticated user is a manager
+    """
+
+    @functools.wraps(fn)
+    def wrapped(*args, **kwargs):
+        if 'jwt' in kwargs:
+            jwt = kwargs.pop("jwt")
+            if not jwt.is_manager:
+                return get_failed_auth_resp(
+                    "Insufficient authorization: requires manager status")
+
+            # If passed, continue with route
+            return fn(*args, **kwargs)
+
+        else:
+            return "requires_manager needs JWT", 500
+    return wrapped
+
+
+def requires_customer(fn):
+    """
+    Validates that the authenticated user is a customer
+    """
+
+    @functools.wraps(fn)
+    def wrapped(*args, **kwargs):
+        if 'jwt' in kwargs:
+            jwt = kwargs.pop("jwt")
+            if not jwt.is_customer:
+                return get_failed_auth_resp(
+                    "Insufficient authorization: requires customer status")
+
+            # If passed, continue with route
+            return fn(*args, **kwargs)
+
+        else:
+            return "requires_customer needs JWT", 500
     return wrapped
 
 
@@ -96,7 +168,9 @@ class JWT:
         assert data is not None or token is not None
 
         if data is None:
-            self._data = self._decode(token)
+            decoded = self._decode(token)
+            self._data = {to_snake_case(key): value for key, value
+                          in decoded.items()}
         else:
             self._data = data
 
@@ -119,4 +193,5 @@ class JWT:
         return pyjwt.decode(token, JWT_SECRET, algorithm='HS256')
 
     def _encode(self, payload):
-        return pyjwt.encode(payload, JWT_SECRET, algorithm='HS256')
+        return pyjwt.encode({to_camel_case(key): value for key, value
+                             in payload.items()}, JWT_SECRET, algorithm='HS256')

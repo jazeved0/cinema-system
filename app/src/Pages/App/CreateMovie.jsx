@@ -4,7 +4,7 @@ import { AppBase } from "Pages";
 
 export default function CreateMovie() {
   return (
-    <AppBase title="Create Movie">
+    <AppBase title="Create Movie" level="admin">
       <p>TODO: implement</p>
     </AppBase>
   );

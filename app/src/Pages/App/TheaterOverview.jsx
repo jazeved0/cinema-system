@@ -4,7 +4,7 @@ import { AppBase } from "Pages";
 
 export default function TheaterOverview() {
   return (
-    <AppBase title="Theater Overview">
+    <AppBase title="Theater Overview" level="manager">
       <p>TODO: implement</p>
     </AppBase>
   );
