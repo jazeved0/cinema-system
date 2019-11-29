@@ -4,7 +4,7 @@ import { AppBase } from "Pages";
 
 export default function ScheduleMovie() {
   return (
-    <AppBase title="Schedule Movie">
+    <AppBase title="Schedule Movie" level="manager">
       <p>TODO: implement</p>
     </AppBase>
   );

@@ -408,3 +408,68 @@ $line-width: 225px;
         transition: opacity $speed, transform $speed;
     }
 }
+
+.layout {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+
+    main {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+.app-base {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 2rem;
+
+    .data-grid {
+        flex-grow: 1;
+    }
+
+    .app-space {
+        margin-top: 2rem;
+    }
+
+    .level-badge-header {
+        margin-bottom: 0.5rem;
+    }
+
+    .level-badge {
+        border-radius: 400px;
+        border-width: 2px;
+        border-style: solid;
+        padding: 0.3rem 0.75rem 0.2rem;
+        font-size: 1.2rem;
+        margin-left: 0;
+
+        @mixin badge-variant($color) {
+            border-color: $color;
+            background-color: rgba($color, 0.15);
+        }
+
+        @include respond-above(sm) {
+            margin-left: -0.5rem;
+        }
+
+        &.badge__admin {
+            @include badge-variant($-warning);
+        }
+
+        &.badge__customer {
+            @include badge-variant($-primary);
+        }
+
+        &.badge__manager {
+            @include badge-variant($-success);
+        }
+
+        &.badge__user {
+            @include badge-variant(rgba(127, 127, 127, 0.5));
+        }
+    }
+}

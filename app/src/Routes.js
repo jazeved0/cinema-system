@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import {
   AppManageUser,
-  AppManageCustomer,
+  AppManageCompany,
   AppCreateMovie,
   AppTheaterOverview,
   AppScheduleMovie,
@@ -18,9 +18,9 @@ const adminRoutes = [
     page: AppManageUser
   },
   {
-    to: "/admin/manage-customer",
-    text: "Manage Customer",
-    page: AppManageCustomer
+    to: "/admin/manage-company",
+    text: "Manage Company",
+    page: AppManageCompany
   },
   {
     to: "/admin/create-movie",

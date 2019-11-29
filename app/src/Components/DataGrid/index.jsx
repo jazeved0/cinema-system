@@ -3,8 +3,6 @@ import React, { Suspense, lazy } from "react";
 import { Spinner } from "react-bootstrap";
 import { ErrorBoundary } from "Components";
 
-import "./style.scss";
-
 // Re-export filter
 export { default as NumericFilter } from "./NumericFilter";
 
@@ -35,7 +33,7 @@ DataGridLoader.displayName = "DataGridLoader";
 // ? =================
 
 // Split bundle
-const LazyLoadingWrapper = lazy(() => import("components/DataGrid/DataGrid"));
+const LazyLoadingWrapper = lazy(() => import("Components/DataGrid/DataGrid"));
 LazyLoadingWrapper.displayName = "LazyLoadingWrapper";
 
 function LoadingFallback() {

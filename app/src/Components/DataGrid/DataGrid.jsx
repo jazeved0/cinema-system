@@ -4,10 +4,10 @@ import classNames from "classnames";
 import {
   isNil,
   isDefined,
-  useClientSide,
   useMediaBreakpoints,
-  useCallbackOnce
-} from "utility";
+  useCallbackOnce,
+  isArray
+} from "Utility";
 
 import {
   Icon,
@@ -15,9 +15,10 @@ import {
   HelpTooltip,
   Switch,
   Placeholder,
-  AddRowModel
+  AddRowModal
 } from "Components";
 import ReactDataGrid from "react-data-grid";
+import { Data } from "react-data-grid-addons";
 
 function DataGrid({
   data,
@@ -36,6 +37,7 @@ function DataGrid({
   canDeleteRow,
   toolbarComponents,
   viewModeButton,
+  getRowActions,
   ...rest
 }) {
   // Escape hatch to access library methods imperatively
@@ -79,22 +81,28 @@ function DataGrid({
   // Row deletion
   const getCellActions = useCallback(
     (column, row) =>
-      column.idx === columns.length - 1 && canDeleteRow(row)
+      column.idx === columns.length - 1
         ? [
-            {
-              icon: <Icon name="times-circle" size="lg" noAutoWidth />,
-              callback: () => {
-                onRowDelete(row);
-              }
-            }
+            ...(isDefined(canDeleteRow) && canDeleteRow(row)
+              ? [
+                  {
+                    icon: <Icon name="times-circle" size="lg" noAutoWidth />,
+                    callback: () => {
+                      onRowDelete(row);
+                    }
+                  }
+                ]
+              : []),
+            ...(isDefined(getRowActions) ? getRowActions(row) : [])
           ]
         : null,
-    [onRowDelete, canDeleteRow, columns.length]
+    [onRowDelete, canDeleteRow, columns.length, getRowActions]
   );
 
   // Filtering
   const [filters, setFilters] = useState({});
-  const filteredRows = getRows(rows, filters);
+  let filteredRows = getRows(rows, filters);
+  if (!isArray(filteredRows)) filteredRows = [];
 
   // Empty display
   const EmptyDisplay = useCallback(
@@ -185,13 +193,23 @@ function DataGrid({
       columnMeta.map(c => ({
         ...c,
         formatter: props => {
-          return (isLoadingRef.current
-            ? isDefined(c.placeholderFormatter)
-              ? c.placeholderFormatter
-              : PlaceholderFormatter
-            : c.formatter)(props);
+          if (isLoadingRef.current) {
+            if (isDefined(c.placeholderFormatter)) {
+              return c.placeholderFormatter(props);
+            } else {
+              return PlaceholderFormatter(props);
+            }
+          } else {
+            if (isDefined(c.formatter)) {
+              return c.formatter(props);
+            } else {
+              return props.value.toString();
+            }
+          }
         },
-        editable: !isLoading && c.editable
+        editable: !isLoading && c.editable,
+        filterable: !isLoading && c.filterable,
+        sortable: !isLoading && c.sortable
       })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [isLoading, columnMeta]
@@ -202,6 +220,12 @@ function DataGrid({
   const updateViewMode = i => {
     setViewMode(i);
     setTimeout(() => {
+      if (
+        isNil(dataGrid.current) ||
+        isNil(dataGrid.current.base) ||
+        isNil(dataGrid.current.base.viewport)
+      )
+        return;
       dataGrid.current.base.viewport.metricsUpdated();
       dataGrid.current.base.viewport.onScroll(
         dataGrid.current.base.viewport.canvas._scroll
@@ -209,43 +233,44 @@ function DataGrid({
     });
   };
 
-  return useClientSide(
-    () => (
-      <>
-        <div className="table-outer">
-          <ReactDataGrid
-            ref={dataGrid}
-            columns={derivedColumns}
-            rowGetter={rowGetter}
-            rowsCount={isLoading ? loadingRowCount : filteredRows.length}
-            onGridRowsUpdated={handleRowUpdate}
-            onCellSelected={onCellSelected}
-            onRowClick={onRowClick}
-            enableCellSelect={true}
-            enableCellAutoFocus={false}
-            onGridSort={onGridSort}
-            onAddFilter={onAddFilter}
-            onClearFilters={onClearFilters}
-            rowHeight={[60, 45, 35][viewMode]}
-            headerFiltersHeight={55}
-            headerRowHeight={45}
-            rowRenderer={RowRenderer}
-            getCellActions={getCellActions}
-            enableRowSelect={null}
-            emptyRowsView={EmptyDisplay}
-            toolbar={
-              <ToolbarComponent
-                onAddRow={onAddRow}
-                addRowButton={addRowButton}
-                slot={toolbarComponents}
-                viewModeButton={viewModeButton}
-                setViewMode={updateViewMode}
-                viewMode={viewMode}
-              />
-            }
-            {...rest}
-          />
-        </div>
+  return (
+    <>
+      <div className="table-outer">
+        <ReactDataGrid
+          ref={dataGrid}
+          columns={derivedColumns}
+          rowGetter={rowGetter}
+          rowsCount={isLoading ? loadingRowCount : filteredRows.length}
+          onGridRowsUpdated={handleRowUpdate}
+          onCellSelected={onCellSelected}
+          onRowClick={onRowClick}
+          enableCellSelect={true}
+          enableCellAutoFocus={false}
+          onGridSort={onGridSort}
+          onAddFilter={onAddFilter}
+          onClearFilters={onClearFilters}
+          rowHeight={[60, 45, 35][viewMode]}
+          headerFiltersHeight={55}
+          headerRowHeight={45}
+          rowRenderer={RowRenderer}
+          getCellActions={getCellActions}
+          enableRowSelect={null}
+          emptyRowsView={EmptyDisplay}
+          toolbar={
+            <ToolbarComponent
+              onAddRow={onAddRow}
+              addRowButton={addRowButton}
+              slot={toolbarComponents}
+              viewModeButton={viewModeButton}
+              setViewMode={updateViewMode}
+              viewMode={viewMode}
+              isLoading={isLoading}
+            />
+          }
+          {...rest}
+        />
+      </div>
+      {addRowButton && (
         <AddRowModal
           show={showAddRowDialog}
           onHide={hideAddRowDialog}
@@ -254,9 +279,8 @@ function DataGrid({
           columns={columnMeta}
           data={filteredRows}
         />
-      </>
-    ),
-    null
+      )}
+    </>
   );
 }
 
@@ -266,7 +290,7 @@ DataGrid.propTypes = {
   onRowAdd: PropTypes.func,
   onRowUpdate: PropTypes.func,
   onRowDelete: PropTypes.func,
-  data: PropTypes.array.isRequired,
+  data: PropTypes.array,
   transformRow: PropTypes.func,
   columns: PropTypes.arrayOf(PropTypes.object),
   columnWidths: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.number)),
@@ -291,10 +315,11 @@ DataGrid.defaultProps = {
   canDeleteRow: () => true,
   transformRow: r => r,
   columns: [],
+  data: [],
   baseColumnMeta: {},
   isLoading: false,
   emptyLabel: "No items to display",
-  addRowButton: true,
+  addRowButton: false,
   loadingRowCount: 5,
   viewModeButton: true
 };
@@ -327,7 +352,8 @@ function ToolbarComponent({
   slot,
   viewModeButton,
   setViewMode,
-  viewMode
+  viewMode,
+  isLoading
 }) {
   // Filter show state
   const [show, setShow] = useState(false);
@@ -344,6 +370,7 @@ function ToolbarComponent({
             <Switch
               onChange={onChange}
               checked={show}
+              disabled={isLoading}
               label="Show Filters"
               className="mr-sm-3"
             />
@@ -360,17 +387,16 @@ function ToolbarComponent({
           {viewModeButton && (
             <div className="view-mode-toolbar">
               {viewModes.map(({ icon, name }, i) => (
-                <button
-                  className={classNames("view-mode-toolbar--button", {
-                    active: viewMode === i
-                  })}
-                  key={icon}
-                  onClick={() => setViewMode(i)}
-                >
-                  <Tooltip top text={name}>
+                <Tooltip top text={name} key={name}>
+                  <button
+                    className={classNames("view-mode-toolbar--button", {
+                      active: viewMode === i
+                    })}
+                    onClick={() => setViewMode(i)}
+                  >
                     <Icon name={icon} />
-                  </Tooltip>
-                </button>
+                  </button>
+                </Tooltip>
               ))}
             </div>
           )}

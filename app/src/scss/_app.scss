@@ -1,8 +1,8 @@
 @import "./colors";
 
 // AppContent
-$app-content-dark-bg: $dark-300;
-$app-content-light-bg: $-light;
+$app-content-dark-bg: $dark-main-bg;
+$app-content-light-bg: $light-main-bg;
 $app-content-dark-fg: $-light;
 $app-content-light-fg: $-dark;
 
@@ -11,5 +11,5 @@ $data-grid-header-dark-bg: $dark-200;
 $data-grid-header-light-bg: $light-300;
 $data-grid-header-hover-dark-bg: $dark-250;
 $data-grid-header-hover-light-bg: $light-250;
-$data-grid-placeholder-dark-bg: $dark-200;
+$data-grid-placeholder-dark-bg: $dark-300;
 $data-grid-placeholder-light-bg: $light-500;

@@ -314,9 +314,11 @@ Form.ComboInput = function(props, ref) {
     onKeyDown,
     ...rest
   } = props;
-  const derivedOptions = options.map(o =>
-    typeof o === "string" ? { value: o, label: capitalize(o) } : o
-  );
+  const derivedOptions = isDefined(options)
+    ? options.map(o =>
+        typeof o === "string" ? { value: o, label: capitalize(o) } : o
+      )
+    : null;
 
   const onKeyPress = e => {
     const code = e.keyCode || e.which;

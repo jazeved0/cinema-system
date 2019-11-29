@@ -8,7 +8,7 @@ import {
   isNil
 } from "Utility";
 
-function Placeholder({
+export default function Placeholder({
   circle = false,
   block = false,
   light = false,
@@ -34,8 +34,6 @@ function Placeholder({
     />
   );
 }
-
-export default Placeholder;
 
 Placeholder.propTypes = {
   circle: PropTypes.bool,

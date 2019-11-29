@@ -60,6 +60,11 @@ export function buildPath(...args) {
     .join("/");
 }
 
+export const collator = new Intl.Collator(undefined, {
+  numeric: true,
+  sensitivity: "base"
+});
+
 export function capitalize(s) {
   if (typeof s !== "string") return "";
   return s.charAt(0).toUpperCase() + s.slice(1);

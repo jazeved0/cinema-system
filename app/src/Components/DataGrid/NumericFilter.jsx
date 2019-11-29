@@ -151,7 +151,7 @@ class NumericFilter extends React.Component {
           <HelpTooltip
             content={tooltipText}
             className="mr-2"
-            style={{ top: "-5px" }}
+            style={{ top: "-8px" }}
           />
         </div>
       </div>

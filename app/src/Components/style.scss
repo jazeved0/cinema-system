@@ -3,6 +3,7 @@
 @import "../scss/media";
 @import "../scss/app";
 @import "../scss/colors";
+@import "../scss/fonts";
 
 .nav {
     padding-left: 1rem !important;
@@ -902,7 +903,7 @@ $secondary-nav-breakpoint: sm;
 
     display: block;
     width: 100%;
-    margin-bottom: 0.6rem;
+    margin-bottom: 12px;
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
 
@@ -1157,28 +1158,27 @@ input.form-control.editor-main {
             }
         }
 
-        @include respond-below(xs) {
-            .tools {
-                display: flex;
-                flex-direction: column;
-
-                .controls {
-                    margin-bottom: 1rem;
-                }
-            }
-        }
-
         @include respond-above(sm) {
             position: absolute;
-            top: -50px;
+            top: -76px;
             right: 0;
         }
 
         .tools {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: flex-end;
+
             .controls {
-                margin-right: 0.5rem;
+                margin-right: 1rem;
                 position: relative;
-                top: -5px;
+            }
+
+            & > div {
+                margin-top: 0.5rem;
+                margin-bottom: 0.5rem;
             }
         }
 
@@ -1255,6 +1255,18 @@ input.form-control.editor-main {
         &:first-child {
             border-top-left-radius: 8px;
             border-top-right-radius: 8px;
+
+            .react-grid-HeaderCell {
+                & > div {
+                    padding: {
+                        top: 10px;
+                        bottom: 6px;
+                        left: 10px;
+                        right: 8px;
+                    }
+                    position: relative;
+                }
+            }
         }
 
         &:last-child {
@@ -1321,14 +1333,6 @@ input.form-control.editor-main {
         }
 
         .react-grid-HeaderCell-sortable {
-            padding: {
-                top: 10px;
-                bottom: 6px;
-                left: 10px;
-                right: 8px;
-            }
-            position: relative;
-
             &::after {
                 $height: 2px;
                 position: absolute;
@@ -1383,9 +1387,10 @@ input.form-control.editor-main {
 
             .rdg-cell-action-button {
                 margin-left: 0.35rem;
-                margin-right: 0.15rem;
+                margin-right: 0.5rem;
                 cursor: pointer;
                 color: $-primary;
+                width: 24px;
 
                 &:hover {
                     color: color-adjust($-primary, -12.5%);
@@ -1477,11 +1482,16 @@ input.form-control.editor-main {
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;
-    margin-right: 1rem;
+    margin-right: 0.5rem;
+
+    @include respond-above(md) {
+        margin-right: 1rem;
+    }
 
     &--button {
         @extend %button-blank;
         padding: 0.65rem 0.4rem !important;
+        top: 0 !important;
 
         @include light {
             color: $-dark !important;
@@ -1509,7 +1519,7 @@ input.form-control.editor-main {
     position: relative;
     cursor: help;
     opacity: 0.55;
-    font-size: 0.9em;
+    font-size: 1.3em;
 }
 
 .switch {
@@ -1564,15 +1574,15 @@ input.form-control.editor-main {
     }
 
     &.placeholder-auto {
-        @include theme-property(
+        @include dark(opacity, 0.4);
+        @include dark(
             background-image,
             linear-gradient(
                 to right,
                 $light-color 4%,
                 $light-highlight-color 25%,
                 $light-color 36%
-            ),
-            dark
+            )
         );
     }
 }
@@ -1588,5 +1598,95 @@ input.form-control.editor-main {
     .modal-body {
         padding-left: 2rem;
         padding-right: 2rem;
+    }
+
+    ._form--buttons {
+        flex-direction: row-reverse;
+    }
+}
+
+.notification-pane {
+    $header-offset: 64px;
+    $screen-padding: 12px;
+    $layout-breakpoint: sm;
+    $full-vertical-position: $header-offset + 77px + $screen-padding;
+
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    z-index: 1600;
+    pointer-events: none;
+
+    .notification {
+        pointer-events: all;
+    }
+
+    &--toast {
+        position: absolute;
+
+        height: 400px;
+        max-width: 350px;
+        padding: $screen-padding;
+
+        .notification-toast {
+            width: auto !important;
+        }
+
+        @include respond-above($layout-breakpoint) {
+            right: 0;
+            top: $full-vertical-position;
+
+            .notification-list--transition-group {
+                align-items: flex-end;
+                justify-content: flex-start;
+            }
+        }
+
+        @include respond-below($layout-breakpoint) {
+            right: 0;
+            bottom: 0;
+            left: 0;
+
+            max-width: none;
+
+            .notification-list--transition-group {
+                align-items: stretch;
+                justify-content: flex-end;
+            }
+
+            .notification-toast:last-child {
+                margin-bottom: 0 !important;
+            }
+        }
+    }
+
+    &--alert {
+        position: absolute;
+        left: 0;
+        right: 0;
+
+        padding: $screen-padding 0;
+        margin: 0 auto;
+        height: 400px;
+        max-width: 800px;
+
+        .container {
+            height: 100%;
+        }
+
+        .notification-list--transition-group {
+            align-items: stretch;
+        }
+
+        @include respond-above($layout-breakpoint) {
+            top: $full-vertical-position;
+        }
+
+        @include respond-below($layout-breakpoint) {
+            top: $header-offset;
+        }
     }
 }
