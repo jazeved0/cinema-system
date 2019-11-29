@@ -1,4 +1,4 @@
-from flask import Flask, g, jsonify
+from flask import Flask, g, jsonify, make_response
 from flask_restful import Api, Resource, reqparse, inputs
 from flask_cors import CORS
 from sqlalchemy import and_
@@ -7,7 +7,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from auth import authenticated, get_failed_auth_resp, hash_password, \
     provision_jwt, requires_admin
 from config import get_session
-from models import TUserDerived, Company, Visit, User, TCompanyDerived
+from models import TUserDerived, Company, Visit, User, TCompanyDerived, \
+    Theater, Manager
 from register import r_user, r_customer, r_manager, r_manager_customer
 from util import serialize, to_dict
 
@@ -241,6 +242,25 @@ class UserDeclineResource(DBResource):
             return "Success", 200
 
 
+class CompaniesNumTheaters(DBResource):
+    def get(self, company):
+        num = self.db.query(Theater).filter(Theater.companyname == company.replace("+", " ")).count()
+        return make_response(jsonify({"num_theaters": num}), 200)
+
+
+class CompaniesNumEmployees(DBResource):
+    def get(self, company):
+        num = self.db.query(Manager).filter(Manager.companyname == company.replace("+", " ")).count()
+        return make_response(jsonify({"num_employees": num}), 200)
+
+
+class CompaniesNumCities(DBResource):
+    def get(self, company):
+        num = self.db.query(Theater).distinct(Theater.city).filter(
+            Theater.companyname == company.replace("+", " ")).count()
+        return make_response(jsonify({"num_cities": num}), 200)
+
+
 class VisitResource(DBResource):
     @authenticated
     def get(self, jwt):
@@ -266,6 +286,9 @@ def app_factory():
     api.add_resource(Users, "/users")
     api.add_resource(UserApproveResource, "/users/<username>/approve")
     api.add_resource(UserDeclineResource, "/users/<username>/decline")
+    api.add_resource(CompaniesNumEmployees, "/companies/<string:company>/num_employees")
+    api.add_resource(CompaniesNumCities, "/companies/<string:company>/num_cities")
+    api.add_resource(CompaniesNumTheaters, "/companies/<string:company>/num_theaters")
     api.add_resource(RegistrationUser, "/register/user")
     api.add_resource(RegistrationManager, "/register/manager")
     api.add_resource(RegistrationCustomer, "/register/customer")

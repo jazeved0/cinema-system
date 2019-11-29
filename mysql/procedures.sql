@@ -14,9 +14,9 @@ BEGIN
     DROP TABLE IF EXISTS UserLogin;
     CREATE TABLE UserLogin
         SELECT user.Username, Status, Password, case WHEN EXISTS (
-            SELECT employee.Username FROM employee
-            WHERE employee.Username = user.Username
-        ) THEN 1 ELSE 0 END AS isEmployee, case WHEN EXISTS (
+            SELECT customer.Username FROM customer
+            WHERE customer.Username = user.Username
+        ) THEN 1 ELSE 0 END AS isCustomer, case WHEN EXISTS (
             SELECT admin.Username FROM admin
             WHERE admin.Username = user.Username
         ) THEN 1 ELSE 0 END AS isAdmin, case WHEN EXISTS (
@@ -101,6 +101,8 @@ CREATE PROCEDURE `manager_only_register` (
 BEGIN
     INSERT INTO user (username, password, firstname, lastname)
     VALUES (i_username, MD5(i_password), i_firstname, i_lastname);
+    INSERT INTO employee (username)
+    VALUES (i_username);
     INSERT INTO manager (username, state, city, zipcode, street, companyname)
     VALUES (i_username, i_empState, i_empCity, i_empZipcode, i_empStreet, i_comName);
 END$$
@@ -126,6 +128,8 @@ CREATE PROCEDURE `manager_customer_register` (
 BEGIN
     INSERT INTO user (username, password, firstname, lastname)
     VALUES (i_username, MD5(i_password), i_firstname, i_lastname);
+    INSERT INTO employee (username)
+    VALUES (i_username);
     INSERT INTO manager (username, state, city, zipcode, street, companyname)
     VALUES (i_username, i_empState, i_empCity, i_empZipcode, i_empStreet, i_comName);
     INSERT INTO customer (username)
@@ -217,8 +221,9 @@ DELIMITER $$
 CREATE PROCEDURE `admin_filter_user` (
     IN i_username varchar(240),
     IN i_status char(8),
-    IN i_sortDirection char(4),
-    IN i_sortBy varchar(15)
+    IN i_sortBy varchar(15),
+    IN i_sortDirection char(4)
+    
 )
 BEGIN
     -- i_status has implicit 'ALL' possibility
@@ -253,11 +258,11 @@ BEGIN
             -- Create temporary table to store filtered values
             DROP TABLE IF EXISTS UserFilterTemp;
             CREATE TABLE UserFilterTemp
-                SELECT username, status, creditCardCount, userType FROM UserDerived
+                SELECT username, creditCardCount, userType, status FROM UserDerived
                 -- Perform filter on username parameter
-                WHERE UPPER(Username) <=> UPPER(i_username)
+                WHERE (UPPER(Username) <=> UPPER(i_username)) or i_username = "" 
                 -- Perform status filter (if applicable)
-                AND CASE WHEN i_status <> 'ALL' THEN Status = i_status ELSE TRUE END;
+                AND CASE WHEN i_status <> 'ALL' THEN status = i_status ELSE TRUE END;
             DROP TABLE IF EXISTS AdFilterUser;
             -- Build dynamic sort query
             SET @query = CONCAT(
@@ -451,11 +456,11 @@ CREATE PROCEDURE `manager_filter_th` (
 BEGIN
     DROP TABLE IF EXISTS ManFilterTh;
     CREATE TABLE ManFilterTh
-        SELECT movieplay.MovieName AS movName, movieplay.Duration as movDuration,
-            movieplay.ReleaseDate AS movReleaseDate, movieplay.Date as movPlayDate
+        SELECT movie.Name AS movName, movie.Duration as movDuration,
+            movie.ReleaseDate AS movReleaseDate, movieplay.Date as movPlayDate
         FROM movieplay
         LEFT JOIN movie ON movieplay.MovieName = movie.Name
-            AND movieplay.ReleaseDate = movie.ReleaaseDate
+            AND movieplay.ReleaseDate = movie.ReleaseDate
         LEFT JOIN theater ON movieplay.TheaterName = theater.TheaterName
             AND movieplay.CompanyName = theater.CompanyName
         WHERE i_manUsername = theater.Manager
@@ -554,7 +559,7 @@ CREATE PROCEDURE `customer_view_mov` (
 )
 BEGIN
     INSERT INTO used (
-        CreditCardNum, Date, MovieName,
+        CreditCardNum, PlayDate, MovieName,
         ReleaseDate, TheaterName, CompanyName
     ) VALUES (
         i_creditCardNum, i_movPlayDate, i_movName,
@@ -600,13 +605,13 @@ CREATE PROCEDURE `user_filter_th` (
 BEGIN
     DROP TABLE IF EXISTS UserFilterTh;
     CREATE TABLE UserFilterTh
-        SELECT thName, thStreet, thCity, thState, thZipcode, comName 
+        SELECT TheaterName as thName, Street as thStreet, City as thCity, State as thState, Zipcode as thZipcode, CompanyName as comName
         FROM Theater
         WHERE 
-            (thName = i_thName OR i_thName = "ALL") AND
-            (comName = i_comName OR i_comName = "ALL") AND
-            (thCity = i_city OR i_city = "") AND
-            (thState = i_state OR i_state = "ALL");
+            (TheaterName = i_thName OR i_thName = "ALL") AND
+            (CompanyName = i_comName OR i_comName = "ALL") AND
+            (City = i_city OR i_city = "") AND
+            (State = i_state OR i_state = "ALL");
 END$$
 DELIMITER ;
 
@@ -642,11 +647,11 @@ CREATE PROCEDURE `user_filter_visitHistory` (
 BEGIN
     DROP TABLE IF EXISTS UserVisitHistory;
     CREATE TABLE UserVisitHistory
-        SELECT thName, thStreet, thCity, thState, thZipcode, comName, visitDate
-        FROM UserVisitTheater NATURAL JOIN Theater
+        SELECT TheaterName as thName, Street as thStreet, City as thCity, State as thState, Zipcode as thZipcode, CompanyName as comName, Date as visitDate
+        FROM visit NATURAL JOIN Theater
         WHERE
             (username = i_username) AND
-            (i_minVisitDate IS NULL OR visitDate >= i_minVisitDate) AND
-            (i_maxVisitDate IS NULL OR visitDate <= i_maxVisitDate);
+            (i_minVisitDate IS NULL OR Date >= i_minVisitDate) AND
+            (i_maxVisitDate IS NULL OR Date <= i_maxVisitDate);
 END$$
 DELIMITER ;
