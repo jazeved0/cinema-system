@@ -81,12 +81,21 @@ export function useNotificationStore() {
     [showNotification]
   );
 
+  const toast = useCallback((message, variant = "danger", duration = 8000) =>
+    showToast({ message, variant, duration })
+  );
+  const alert = useCallback((message, variant = "danger", duration = 8000) =>
+    showAlert({ message, variant, duration })
+  );
+
   return {
     toasts: state.toast,
     alerts: state.alert,
     onDismissToast,
     onDismissAlert,
     showAlert,
-    showToast
+    showToast,
+    toast,
+    alert
   };
 }
