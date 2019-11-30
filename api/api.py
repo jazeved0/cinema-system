@@ -255,11 +255,27 @@ class Movies(DBResource):
     @requires_admin
     def post(self):
         name, duration, releasedate = parse_args("name", "duration", "releasedate")
-        movie = Movie(name=name, duration=duration, releasedate=releasedate)
-        self.db.add(movie)
-        self.db.commit()
 
-        return 201
+        # Validate that name/release date is unique
+        movie = self.db.query(Movie).filter(
+            Movie.name == name, Movie.releasedate == releasedate).first()
+        if movie:
+            return f"Movie name and release date must be unique", 400
+
+        # Validate that duration is valid
+        if not duration.isdigit():
+            return "Duration must be an integer", 400
+
+        # TODO validate that date is a proper date (and parse it to make sqlalchemy happy)
+
+        try:
+            movie = Movie(name=name, duration=duration, releasedate=releasedate)
+            self.db.add(movie)
+            self.db.commit()
+        except SQLAlchemyError:
+            return "Could not create movie", 403
+        else:
+            return 201
 
     def get(self):
         movies = self.db.query(Movie).all()
