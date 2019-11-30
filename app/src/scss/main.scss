@@ -261,3 +261,75 @@ input[type="password"] {
         }
     }
 }
+
+.modal-dialog {
+    margin-top: 8rem !important;
+    margin-bottom: 1rem;
+
+    &.modal-container {
+        @include make-container();
+        @include make-container-max-widths();
+    }
+
+    @include respond-below(md) {
+        margin-top: 6rem !important;
+    }
+
+    @include respond-below(sm) {
+        margin-top: 5.35rem !important;
+    }
+
+    // Header collapse breakpoint
+    @media (max-width: 400px) {
+        margin-top: 5rem !important;
+    }
+
+    .modal-content {
+        box-shadow: $drop-shadow;
+        border: none !important;
+
+        @include dark-fg;
+        @include dark-bg;
+        @include light-fg;
+        @include light-bg;
+    }
+
+    .modal-header {
+        border: none !important;
+        position: relative;
+        z-index: 1;
+        pointer-events: none;
+
+        .close {
+            pointer-events: all !important;
+        }
+
+        @include dark {
+            .close {
+                @extend %close-dark;
+            }
+        }
+    }
+
+    @mixin modal-padding($padding, $top-adjust: -0.25rem) {
+        .modal-header .close {
+            padding-right: $padding;
+            padding-top: $padding;
+        }
+
+        .content {
+            margin-top: -$padding + $top-adjust;
+            padding: 0 $padding $padding;
+        }
+    }
+
+    @include modal-padding(2rem);
+
+    @include respond-below(xs) {
+        @include modal-padding(1rem, $top-adjust: -1rem);
+    }
+
+    .content {
+        position: relative;
+    }
+}

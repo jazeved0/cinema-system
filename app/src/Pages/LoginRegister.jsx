@@ -244,7 +244,7 @@ LoginRegister.RegisterModal = function(props) {
         from: [base, ...panes.map(k => `${base}/${k}`)],
         to: "/"
       })}
-      <Modal show={show} onHide={onHide} dialogClassName="register-modal">
+      <Modal show={show} onHide={onHide} dialogClassName="register-modal .modal-container">
         <Modal.Header closeButton />
         <div className="content">
           {panes.map(k => {

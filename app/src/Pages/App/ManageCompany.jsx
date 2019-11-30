@@ -1,8 +1,10 @@
 import React, { useRef, useMemo } from "react";
-import { useAuthGet } from "Api";
 import { isDefined } from "Utility";
+import { useAuthGet } from "Api";
+import { useRouteMatch, useHistory, Redirect } from "react-router-dom";
 
-import { AppBase } from "Pages";
+import { AppBase, CompanyDetail } from "Pages";
+import { Modal } from "react-bootstrap";
 import { DataGrid, Icon } from "Components";
 import { NumericFilter, ComboFilter } from "Components/DataGrid";
 
@@ -50,11 +52,17 @@ export default function ManageCompany() {
     }
   ].map(c => ({ ...baseColumn, ...c }));
 
-  // Details callback
-  const showDetails = row => {
-    console.log("showing details");
-    console.log(row);
-  };
+  // Details
+  const base = "/app/admin/manage-company";
+  const detailsRouteMatch = useRouteMatch({ path: `${base}/details/:name` });
+  const detailShown = isDefined(detailsRouteMatch);
+  const history = useHistory();
+  const hideDetails = () => history.push(base);
+  const showDetails = ({ name }) =>
+    history.push(`${base}/details/${encodeURI(name)}`);
+  const detailCompany = detailShown
+    ? decodeURI(detailsRouteMatch.params.name)
+    : null;
 
   return (
     <AppBase title="Manage Company" level="admin">
@@ -78,6 +86,17 @@ export default function ManageCompany() {
             ];
         }}
       />
+      <Redirect from={`${base}/details`} to={base} exact />
+      <Modal
+        show={detailShown}
+        onHide={hideDetails}
+        dialogClassName="company-details"
+      >
+        <Modal.Header closeButton />
+        <div className="content">
+          <CompanyDetail company={detailCompany} />
+        </div>
+      </Modal>
     </AppBase>
   );
 }
