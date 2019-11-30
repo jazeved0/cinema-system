@@ -581,13 +581,28 @@ CREATE PROCEDURE `customer_view_mov` (
     IN i_movPlayDate date
 )
 BEGIN
-    INSERT INTO used (
-        CreditCardNum, PlayDate, MovieName,
-        ReleaseDate, TheaterName, CompanyName
-    ) VALUES (
-        i_creditCardNum, i_movPlayDate, i_movName,
-        i_movReleaseDate, i_thName, i_comName
-    );
+    DROP TABLE IF EXISTS CreditCardOwnerTemp;
+    CREATE TABLE CreditCardOwnerTemp
+        SELECT Owner
+        FROM creditcard
+        WHERE creditcardnum = i_creditCardNum;
+    IF EXISTS (
+        SELECT COUNT(*) as playcount, PlayDate FROM used
+        NATURAL JOIN creditcard
+        WHERE creditcard.Owner IN ( SELECT * FROM CreditCardOwnerTemp AS t1) AND PlayDate = i_movPlayDate
+        GROUP BY Owner, PlayDate
+        HAVING playcount >= 3
+    ) THEN SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Cannot view more than 3 movies in one day';
+    ELSE
+        INSERT INTO used (
+            CreditCardNum, PlayDate, MovieName,
+            ReleaseDate, TheaterName, CompanyName
+        ) VALUES (
+            i_creditCardNum, i_movPlayDate, i_movName,
+            i_movReleaseDate, i_thName, i_comName
+        );
+    END IF;
 END$$
 DELIMITER ;
 
@@ -609,7 +624,7 @@ BEGIN
             creditCardNum,
             PlayDate AS movPlayDate
         FROM used NATURAL JOIN CreditCard
-        WHERE Owner = i_cusUsername;
+        WHERE Owner <=> i_cusUsername OR i_cusUsername = '';
 END$$
 DELIMITER ;
 
