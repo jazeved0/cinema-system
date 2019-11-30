@@ -512,12 +512,16 @@ CREATE PROCEDURE `manager_schedule_mov` (
     IN i_movPlayDate date
 )
 BEGIN
-    -- Find theater/company of manager
-    SET @theater_name = (SELECT TheaterName FROM Theater WHERE Manager = i_manUsername);
-    SET @company_name = (SELECT CompanyName FROM Theater WHERE Manager = i_manUsername);
-    -- Add new MoviePlay row
-    INSERT INTO movieplay (Date, MovieName, ReleaseDate, TheaterName, CompanyName)
-    VALUES (i_movPlayDate, i_movName, i_movReleaseDate, @theater_name, @company_name );
+    IF i_movPlayDate < i_movReleaseDate THEN SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Cannot schedule movie before release date';
+    ELSE
+        -- Find theater/company of manager
+        SET @theater_name = (SELECT TheaterName FROM Theater WHERE Manager = i_manUsername);
+        SET @company_name = (SELECT CompanyName FROM Theater WHERE Manager = i_manUsername);
+        -- Add new MoviePlay row
+        INSERT INTO movieplay (Date, MovieName, ReleaseDate, TheaterName, CompanyName)
+        VALUES (i_movPlayDate, i_movName, i_movReleaseDate, @theater_name, @company_name );
+    END IF;
 END$$
 DELIMITER ;
 
