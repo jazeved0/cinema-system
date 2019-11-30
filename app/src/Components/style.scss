@@ -255,137 +255,142 @@
             border-top-right-radius: 8px;
         }
     }
+}
 
-    .combo-input {
-        $this: ".combo-input";
+.combo-input {
+    $this: ".combo-input";
 
-        input {
-            cursor: text;
-            box-shadow: none !important;
+    input {
+        cursor: text;
+        box-shadow: none !important;
+    }
+
+    &__control {
+        border-radius: 8px;
+        transition: box-shadow 0.25s ease;
+        box-shadow: none;
+        cursor: pointer;
+
+        @include dark {
+            background-color: blend($dark-000, $dark-400, 0.575) !important;
+            color: $-light !important;
+            border-color: transparent !important;
         }
 
-        &__control {
-            border-radius: 8px;
-            transition: box-shadow 0.25s ease;
-            box-shadow: none;
-            cursor: pointer;
+        @include light {
+            border-color: $input-border-color !important;
+            background-color: white !important;
+            color: $-dark !important;
+
+            &:focus-within {
+                border-color: $active-input-border-color;
+            }
+        }
+
+        &:focus-within {
+            @include highlight-shadow($-primary);
+        }
+
+        &#{$this}__control--menu-is-open {
+            #{$this}__indicator {
+                @include dark-fg(rgba($-light, 0.9));
+            }
+        }
+    }
+
+    &--is-disabled {
+        pointer-events: initial !important;
+
+        #{$this}__control {
+            cursor: not-allowed !important;
 
             @include dark {
-                background-color: blend($dark-000, $dark-400, 0.575) !important;
-                color: $-light !important;
-                border-color: transparent;
+                background-color: blend(
+                    $dark-000,
+                    $dark-400,
+                    0.8
+                ) !important;
+                color: rgba($-light, 0.8) !important;
+                border-color: $dark-200;
             }
 
             @include light {
-                border-color: $input-border-color;
-                background-color: white !important;
-                color: $-dark !important;
-
-                &:focus-within {
-                    border-color: $active-input-border-color;
-                }
+                background-color: $light-400 !important;
+                color: rgba($-dark, 0.8) !important;
             }
+        }
+    }
+
+    &.is-invalid {
+        #{$this}__control {
+            border-color: $-danger;
 
             &:focus-within {
-                @include highlight-shadow($-primary);
-            }
-
-            &#{$this}__control--menu-is-open {
-                #{$this}__indicator {
-                    @include dark-fg(rgba($-light, 0.9));
-                }
+                @include highlight-shadow($-danger);
             }
         }
+    }
 
-        &--is-disabled {
-            pointer-events: initial !important;
+    &.is-valid {
+        #{$this}__control {
+            border-color: $-success;
 
-            #{$this}__control {
-                cursor: not-allowed !important;
-
-                @include dark {
-                    background-color: blend(
-                        $dark-000,
-                        $dark-400,
-                        0.8
-                    ) !important;
-                    color: rgba($-light, 0.8) !important;
-                    border-color: $dark-200;
-                }
-
-                @include light {
-                    background-color: $light-400 !important;
-                    color: rgba($-dark, 0.8) !important;
-                }
+            &:focus-within {
+                @include highlight-shadow($-success);
             }
         }
+    }
 
-        &.is-invalid {
-            #{$this}__control {
-                border-color: $-danger;
+    &.is-invalid ~ .invalid-feedback,
+    &.is-invalid ~ .invalid-tooltip {
+        display: block;
+    }
 
-                &:focus-within {
-                    @include highlight-shadow($-danger);
-                }
-            }
-        }
+    &__placeholder {
+        @include light-fg(rgba($-dark, 0.4));
+        @include dark-fg(rgba($-light, 0.4));
+    }
 
-        &.is-valid {
-            #{$this}__control {
-                border-color: $-success;
+    &__single-value {
+        @include dark-fg;
+    }
 
-                &:focus-within {
-                    @include highlight-shadow($-success);
-                }
-            }
-        }
+    &__menu {
+        @include dark-bg(blend($dark-000, $dark-400, 0.575));
+        @include light-border($input-border-color);
+        border-width: 1px;
+    }
 
-        &.is-invalid ~ .invalid-feedback,
-        &.is-invalid ~ .invalid-tooltip {
-            display: block;
-        }
+    &__indicator-separator {
+        @include dark-bg(rgba($-light, 0.3));
+    }
 
-        &__placeholder {
-            @include light-fg(rgba($-dark, 0.4));
-            @include dark-fg(rgba($-light, 0.4));
-        }
+    &__indicator {
+        @include dark-fg(rgba($-light, 0.5));
+    }
 
-        &__single-value {
-            @include dark-fg;
-        }
+    &__option {
+        cursor: pointer;
+    }
 
-        &__menu {
-            @include dark-bg(blend($dark-000, $dark-400, 0.575));
-            @include light-border($input-border-color);
-            border-width: 1px;
-        }
+    &__option--is-selected {
+        @include dark-bg(rgba($-primary, 0.8));
+        @include light-bg(rgba($-primary, 0.8));
+    }
 
-        &__indicator-separator {
-            @include dark-bg(rgba($-light, 0.3));
-        }
+    &__option--is-focused {
+        @include dark-bg(rgba($-primary, 0.1));
+        @include light-bg(rgba($-primary, 0.1));
+    }
 
-        &__indicator {
-            @include dark-fg(rgba($-light, 0.5));
-        }
+    &__option--is-focused#{$this}__option--is-selected {
+        @include dark-bg(rgba($-primary, 0.9));
+        @include light-bg(rgba($-primary, 0.9));
+    }
 
-        &__option {
-            cursor: pointer;
-        }
-
-        &__option--is-selected {
-            @include dark-bg(rgba($-primary, 0.9));
-            @include light-bg(rgba($-primary, 0.9));
-        }
-
-        &__option--is-focused {
-            @include dark-bg(rgba($-primary, 0.1));
-            @include light-bg(rgba($-primary, 0.1));
-        }
-
-        &__option--is-focused#{$this}__option--is-selected {
-            @include dark-bg(rgba($-primary, 1));
-            @include light-bg(rgba($-primary, 1));
-        }
+    &__option:active {
+        @include dark-bg(rgba($-primary, 1));
+        @include light-bg(rgba($-primary, 1));
     }
 }
 
@@ -1214,7 +1219,7 @@ input.form-control.editor-main {
         height: 100% !important;
         @extend %custom-scrollbar-alt;
         height: 982px;
-        z-index: 2;
+        z-index: 1;
         background-color: transparent;
     }
 
@@ -1250,7 +1255,8 @@ input.form-control.editor-main {
         @extend %header-cell-fill;
         margin-top: -1px;
         min-height: 0 !important;
-        overflow-y: hidden;
+        overflow-y: visible !important;
+        overflow-x: visible !important;
 
         &:first-child {
             border-top-left-radius: 8px;
@@ -1302,6 +1308,21 @@ input.form-control.editor-main {
                 }
             }
 
+            .combo-input {
+                width: 100%;
+                z-index: 2;
+                position: relative;
+
+                &__control {
+                    @include dark {
+                        &.combo-input__control--is-focused {
+                            @include highlight-shadow($-primary, 0.4);
+                        }
+                        background-color: color-adjust($-dark, 10%) !important;
+                    }
+                }
+            }
+
             .input-sm {
                 height: 100%;
                 display: flex;
@@ -1334,7 +1355,7 @@ input.form-control.editor-main {
 
         .react-grid-HeaderCell-sortable {
             &::after {
-                $height: 2px;
+                $height: 0;
                 position: absolute;
                 z-index: 0;
                 content: " ";
@@ -1342,10 +1363,8 @@ input.form-control.editor-main {
                 top: 0;
                 left: 0;
                 right: 0;
-                height: $height;
                 background-color: $-primary;
-                transform: translateY(-#{$height + 1px});
-                @include transitions(transform);
+                @include transitions("height");
             }
 
             &:hover {
@@ -1353,7 +1372,7 @@ input.form-control.editor-main {
                 @include light-bg($data-grid-header-hover-light-bg);
 
                 &::after {
-                    transform: translateY(0);
+                    height: 3px;
                 }
             }
         }

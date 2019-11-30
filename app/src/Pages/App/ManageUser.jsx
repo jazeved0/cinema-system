@@ -6,56 +6,51 @@ import { useAuth } from "Authentication";
 
 import { AppBase } from "Pages";
 import { DataGrid, Icon } from "Components";
-import { NumericFilter } from "Components/DataGrid";
+import { NumericFilter, ComboFilter } from "Components/DataGrid";
 
 export default function ManageUser() {
   // Fetch API data
   const [users, isLoading, adjustCache] = useAuthGet("/users");
 
   // Column definitions
+  const baseColumn = {
+    sortable: true,
+    filterable: true,
+    resizable: true
+  };
   const columns = [
     {
       key: "username",
-      name: "Username",
-      sortable: true,
-      filterable: true,
-      resizable: true
+      name: "Username"
     },
     {
       key: "creditcardcount",
       name: "Credit Card Count",
-      filterRenderer: NumericFilter,
-      sortable: true,
-      filterable: true,
-      resizable: true
+      filterRenderer: NumericFilter
     },
     {
       key: "usertype",
-      name: "User Type",
-      sortable: true,
-      filterable: true,
-      resizable: true
+      name: "User Type"
     },
     {
       key: "status",
       name: "Status",
-      sortable: true,
-      filterable: true,
-      resizable: true
+      filterRenderer: props => (
+        <ComboFilter
+          options={["All", "Pending", "Approved", "Declined"]}
+          {...props}
+        />
+      )
     }
-  ];
+  ].map(c => ({ ...baseColumn, ...c }));
 
   const { token } = useAuth();
-  const { showToast } = useNotifications();
+  const { toast } = useNotifications();
   const onDecline = useCallbackOnce(({ username }) =>
     performAuthRequest(`/users/${username}/decline`, "put", token, {
-      onFailure: error => showToast({ message: error, duration: 30000 }),
+      onFailure: error => toast(error),
       onSuccess: () => {
-        showToast({
-          message: `User ${username} declined`,
-          variant: "success",
-          duration: 30000
-        });
+        toast(`User ${username} declined`, "success");
         adjustCache(user_list =>
           user_list.map(u =>
             u.username === username ? { ...u, status: "Declined" } : u
@@ -66,13 +61,9 @@ export default function ManageUser() {
   );
   const onApprove = useCallbackOnce(({ username }) =>
     performAuthRequest(`/users/${username}/approve`, "put", token, {
-      onFailure: error => showToast({ message: error, duration: 30000 }),
+      onFailure: error => toast(error),
       onSuccess: () => {
-        showToast({
-          message: `User ${username} approved`,
-          variant: "success",
-          duration: 30000
-        });
+        toast(`User ${username} approved`, "success");
         adjustCache(user_list =>
           user_list.map(u =>
             u.username === username ? { ...u, status: "Approved" } : u

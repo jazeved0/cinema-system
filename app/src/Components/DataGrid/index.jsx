@@ -3,8 +3,9 @@ import React, { Suspense, lazy } from "react";
 import { Spinner } from "react-bootstrap";
 import { ErrorBoundary } from "Components";
 
-// Re-export filter
+// Re-export filters
 export { default as NumericFilter } from "./NumericFilter";
+export { default as ComboFilter } from "./ComboFilter";
 
 // Lazy-loading tree contains:
 // - DataGrid
