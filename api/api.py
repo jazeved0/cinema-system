@@ -182,6 +182,26 @@ class Companies(DBResource, ListResource):
         return serialize(company, table=TCompanyDerived)
 
 
+class CompaniesTheaters(DBResource):
+    @authenticated
+    @requires_admin
+    def get(self, name):
+        theaters = self.db.query(Theater).filter(
+            Theater.companyname == name
+        )
+        return jsonify([t.as_dict() for t in theaters])
+
+
+class CompaniesManagers(DBResource):
+    @authenticated
+    @requires_admin
+    def get(self, name):
+        managers = self.db.query(Manager).filter(
+            Manager.companyname == name
+        )
+        return jsonify([m.as_dict() for m in managers])
+
+
 class CompaniesNumTheaters(DBResource):
     def get(self, company):
         num = self.db.query(Theater).filter(Theater.companyname == company.replace("%20", " ")).count()
@@ -190,7 +210,7 @@ class CompaniesNumTheaters(DBResource):
 
 class CompaniesNumEmployees(DBResource):
     def get(self, company):
-        num = self.db.query(Manager).filter(Manager.companyname == company.replace("&20", " ")).count()
+        num = self.db.query(Manager).filter(Manager.companyname == company).count()
         return make_response(jsonify({"num_employees": num}), 200)
 
 
@@ -261,25 +281,6 @@ class UserDeclineResource(DBResource):
             return "Success", 200
 
 
-class CompaniesNumTheaters(DBResource):
-    def get(self, company):
-        num = self.db.query(Theater).filter(Theater.companyname == company.replace("+", " ")).count()
-        return make_response(jsonify({"num_theaters": num}), 200)
-
-
-class CompaniesNumEmployees(DBResource):
-    def get(self, company):
-        num = self.db.query(Manager).filter(Manager.companyname == company.replace("+", " ")).count()
-        return make_response(jsonify({"num_employees": num}), 200)
-
-
-class CompaniesNumCities(DBResource):
-    def get(self, company):
-        num = self.db.query(Theater).distinct(Theater.city).filter(
-            Theater.companyname == company.replace("+", " ")).count()
-        return make_response(jsonify({"num_cities": num}), 200)
-
-
 class Theaters(DBResource):
     def post(self):
         # TODO validation
@@ -332,12 +333,14 @@ def app_factory():
     api = Api(app)
     api.add_resource(Login, "/login")
     ListResource.register(api, Companies, "/companies", param="name")
+    api.add_resource(CompaniesManagers, "/companies/<string:name>/managers")
+    api.add_resource(CompaniesTheaters, "/companies/<string:name>/rheaters")
     api.add_resource(Users, "/users")
     api.add_resource(UserApproveResource, "/users/<username>/approve")
     api.add_resource(UserDeclineResource, "/users/<username>/decline")
-    api.add_resource(CompaniesNumEmployees, "/companies/<string:company>/num_employees")
-    api.add_resource(CompaniesNumCities, "/companies/<string:company>/num_cities")
-    api.add_resource(CompaniesNumTheaters, "/companies/<string:company>/num_theaters")
+    # api.add_resource(CompaniesNumEmployees, "/companies/<string:company>/num_employees")
+    # api.add_resource(CompaniesNumCities, "/companies/<string:company>/num_cities")
+    # api.add_resource(CompaniesNumTheaters, "/companies/<string:company>/num_theaters")
     api.add_resource(RegistrationUser, "/register/user")
     api.add_resource(RegistrationManager, "/register/manager")
     api.add_resource(RegistrationCustomer, "/register/customer")
