@@ -5,7 +5,7 @@ from sqlalchemy import and_
 from sqlalchemy.exc import SQLAlchemyError
 
 from auth import authenticated, get_failed_auth_resp, hash_password, \
-    provision_jwt, requires_admin
+    provision_jwt, requires_admin, requires_manager
 from config import get_session
 from models import TUserDerived, Company, Visit, User, TCompanyDerived, \
     Theater, Manager, Movie
@@ -323,6 +323,26 @@ class Movies(DBResource):
         return 204
 
 
+class TheaterOverview(DBResource):
+    @authenticated
+    @requires_manager
+    def get(self, jwt):
+        result = self.db.execute(
+            "SELECT movie.Name AS movName, movie.Duration as movDuration,"
+            "    movie.ReleaseDate AS movReleaseDate, t1.Date as movPlayDate "
+            "FROM ("
+            "  SELECT movieplay.*"
+            "  FROM movieplay"
+            "  LEFT JOIN theater ON movieplay.TheaterName = theater.TheaterName"
+            "    AND movieplay.CompanyName = theater.CompanyName"
+            "  WHERE :username = theater.Manager"
+            ") AS t1 "
+            "RIGHT JOIN movie ON t1.MovieName = movie.Name",
+            {"username": jwt.username}
+        ).fetchall()
+        return jsonify({'result': [dict(row) for row in result]})
+
+
 class Visits(DBResource):
     @authenticated
     def get(self, jwt):
@@ -347,6 +367,7 @@ def app_factory():
     ListResource.register(api, Companies, "/companies", param="name")
     api.add_resource(CompaniesManagers, "/companies/<string:name>/managers")
     api.add_resource(CompaniesTheaters, "/companies/<string:name>/theaters")
+    api.add_resource(TheaterOverview, "/theater_overview")
     api.add_resource(Users, "/users")
     api.add_resource(UserApproveResource, "/users/<username>/approve")
     api.add_resource(UserDeclineResource, "/users/<username>/decline")

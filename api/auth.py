@@ -124,7 +124,7 @@ def requires_manager(fn):
     @functools.wraps(fn)
     def wrapped(*args, **kwargs):
         if 'jwt' in kwargs:
-            jwt = kwargs.pop("jwt")
+            jwt = kwargs["jwt"]
             if not jwt.is_manager:
                 return get_failed_auth_resp(
                     "Insufficient authorization: requires manager status")
