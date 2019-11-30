@@ -27,8 +27,11 @@ import {
   InputGroup
 } from "react-bootstrap";
 import { Prompt } from "react-router-dom";
-import { SetInput, NumericUpDown } from "Components";
+import { SetInput, NumericUpDown, Icon } from "Components";
 import Select from "react-select";
+import DatePicker from "react-datepicker";
+
+import "react-datepicker/dist/react-datepicker.css";
 
 export default function Form(props) {
   const {
@@ -333,6 +336,50 @@ Form.SetInput = function(props, ref) {
   );
 };
 
+Form.DateInput = function(props, ref) {
+  const {
+    inputKey,
+    value,
+    onChange,
+    isInvalid,
+    placeholder,
+    message,
+    onBlur,
+    disabled,
+    dateFormat
+  } = props;
+  const specificOnChange = useCallback(
+    e => {
+      console.log(e);
+      onChange(inputKey, e);
+    },
+    [onChange, inputKey]
+  );
+  return (
+    <>
+      <div className={classNames("date-picker", { "is-invalid": isInvalid })}>
+        <InputGroup>
+          <DatePicker
+            onBlur={() => onBlur(inputKey)}
+            onChange={specificOnChange}
+            selected={value}
+            disabled={disabled}
+            isClearable
+            placeholderText={placeholder}
+            dateFormat={dateFormat}
+          />
+          <InputGroup.Append>
+            <InputGroup.Text>
+              <Icon name="calendar-alt" />
+            </InputGroup.Text>
+          </InputGroup.Append>
+        </InputGroup>
+      </div>
+      <BootstrapForm.Control.Feedback type="invalid" children={message} />
+    </>
+  );
+};
+
 Form.NumericInput = function(props, ref) {
   const {
     inputKey,
@@ -454,7 +501,8 @@ const formInputs = {
   combo: Form.ComboInput,
   text: (p, r) => Form.TextInput({ ...p, type: "text" }, r),
   password: (p, r) => Form.TextInput({ ...p, type: "password" }, r),
-  numeric: Form.NumericInput
+  numeric: Form.NumericInput,
+  date: Form.DateInput
 };
 
 const placeholderFormats = {
@@ -462,7 +510,8 @@ const placeholderFormats = {
   set: entry => `Add ${entry.name.toLowerCase()}`,
   text: entry => `Enter ${entry.name.toLowerCase()}`,
   password: entry => `Enter ${entry.name.toLowerCase()}`,
-  numeric: entry => `Enter ${entry.name.toLowerCase()}`
+  numeric: entry => `Enter ${entry.name.toLowerCase()}`,
+  date: entry => `Choose ${entry.name.toLowerCase()}`
 };
 
 // ? ==================
@@ -587,6 +636,7 @@ Form.SmartSetInput.defaultProps = {
 function getDefaultValue(entry) {
   if (isDefined(entry.defaultValue)) return entry.defaultValue;
   else if (entry.type === "set") return [];
+  else if (entry.type === "date") return null;
   else if (entry.type === "numeric")
     return getDefaultNumeric(entry.props).toString();
   else return "";

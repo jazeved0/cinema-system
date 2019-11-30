@@ -70,6 +70,10 @@ export function capitalize(s) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+export function pad(string, length) {
+  return ("0" + string).slice(-length);
+}
+
 // ? ===============
 // ? Regex functions
 // ? ===============

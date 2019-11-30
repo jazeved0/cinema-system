@@ -266,10 +266,29 @@
             @include dark {
                 border-color: $dark-400;
                 border-width: 0;
-                border-right-width: 0.25rem;
-                display: table;
                 position: relative;
-                top: 1px;
+            }
+        }
+    }
+
+    .input-group-prepend {
+        .input-group-text {
+            @include dark {
+                border-right-width: 0.25rem;
+            }
+        }
+
+        & > .form-control:not(:last-child),
+        & > .custom-select:not(:last-child) {
+            border-bottom-right-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+    }
+
+    .input-group-append {
+        .input-group-text {
+            @include dark {
+                border-left-width: 0.25rem;
             }
         }
 
@@ -1836,5 +1855,26 @@ input.form-control.editor-main {
     &.is-invalid ~ .invalid-feedback,
     &.is-invalid ~ .invalid-tooltip {
         display: block;
+    }
+}
+
+.date-picker {
+    display: flex;
+    flex-direction: row;
+
+    .react-datepicker-wrapper {
+        flex-grow: 1;
+    }
+
+    .react-datepicker__input-container,
+    input {
+        width: 100%;
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+    }
+
+    .icon {
+        position: relative;
+        top: -3px;
     }
 }

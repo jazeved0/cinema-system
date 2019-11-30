@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useAuthForm } from "Api";
 import { useNotifications } from "Notifications";
 import { useHistory } from "react-router-dom";
+import { useCallbackOnce, formatDate } from "Utility";
 
 import { Button } from "react-bootstrap";
 import { Form, Card } from "Components";
@@ -20,11 +21,19 @@ export default function CreateMovie() {
     }
   });
 
+  const onFormSubmit = useCallbackOnce(({ name, duration, releasedate }) =>
+    onSubmit({
+      name,
+      duration,
+      releasedate: formatDate(releasedate)
+    })
+  );
+
   return (
     <AppBase title="Create Movie" level="admin">
       <Card>
         <Form
-          onSubmit={onSubmit}
+          onSubmit={onFormSubmit}
           isShown
           isBlocking={isBlocking}
           isLoading={isLoading}
@@ -54,8 +63,15 @@ export default function CreateMovie() {
                 min: 1
               }
             },
-            // TODO implement date picker input
-            { key: "releasedate", name: "Release Date", required: true }
+            {
+              key: "releasedate",
+              name: "Release Date",
+              required: true,
+              type: "date",
+              props: {
+                dateFormat: "yyyy-MM-dd"
+              }
+            }
           ]}
         />
       </Card>

@@ -1,3 +1,5 @@
+import { pad } from "./string";
+
 const identity = x => x;
 export function invertMap(map, f = identity) {
   return Object.keys(map).reduce(function(acc, k) {
@@ -86,4 +88,13 @@ export function clamp(number, min, max) {
   if (isDefined(min)) result = Math.max(result, min);
   if (isDefined(max)) result = Math.min(result, max);
   return result;
+}
+
+export function formatDate(date) {
+  const a = `${pad(date.getFullYear(), 4)}-${pad(date.getMonth(), 2)}-${pad(
+    date.getDate(),
+    2
+  )}`;
+  console.log(a);
+  return a;
 }

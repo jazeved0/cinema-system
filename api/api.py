@@ -3,6 +3,7 @@ from flask_restful import Api, inputs
 from flask_cors import CORS
 from sqlalchemy import and_
 from sqlalchemy.exc import SQLAlchemyError
+import datetime
 
 from auth import authenticated, get_failed_auth_resp, hash_password, \
     provision_jwt, requires_admin, requires_manager
@@ -256,9 +257,15 @@ class Movies(DBResource):
     def post(self):
         name, duration, releasedate = parse_args("name", "duration", "releasedate")
 
+        # Validate that date is valid
+        try:
+            date = datetime.strptime(releasedate, "%Y-%m-%d")
+        except ValueError:
+            return "Duration must be a date in the format YYYY-MM-DD", 400
+
         # Validate that name/release date is unique
         movie = self.db.query(Movie).filter(
-            Movie.name == name, Movie.releasedate == releasedate).first()
+            Movie.name == name, Movie.releasedate == date).first()
         if movie:
             return f"Movie name and release date must be unique", 400
 
@@ -266,10 +273,9 @@ class Movies(DBResource):
         if not duration.isdigit():
             return "Duration must be an integer", 400
 
-        # TODO validate that date is a proper date (and parse it to make sqlalchemy happy)
-
         try:
-            movie = Movie(name=name, duration=duration, releasedate=releasedate)
+            # Add to database
+            movie = Movie(name=name, duration=duration, releasedate=date)
             self.db.add(movie)
             self.db.commit()
         except SQLAlchemyError:
