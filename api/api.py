@@ -1,9 +1,10 @@
 from flask import Flask, g, jsonify
+from flask.json import JSONEncoder
 from flask_restful import Api, inputs
 from flask_cors import CORS
 from sqlalchemy import and_
 from sqlalchemy.exc import SQLAlchemyError
-from datetime import datetime
+from datetime import datetime, date
 
 from auth import authenticated, get_failed_auth_resp, hash_password, \
     provision_jwt, requires_admin, requires_manager
@@ -18,6 +19,15 @@ Contains the core of the API logic, including RESTful endpoints and custom
 decorator functions
 """
 
+
+class ISOEncoder(JSONEncoder):
+    def default(self, o):
+        if isinstance(o, date):
+            return o.isoformat()
+        return super().default(o)
+
+
+Flask.json_encoder = ISOEncoder
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -170,7 +180,7 @@ class EligibleManagers(DBResource):
     def get(self):
         try:
             managers = self.db.query(Manager).outerjoin(Theater).filter(
-                Theater.theatername == None).all()
+                Theater.theatername is None).all()
         except SQLAlchemyError:
             return "Could not find eligible managers", 403
         else:
@@ -228,7 +238,7 @@ class Theaters(DBResource):
 
         # Validate that manager is not managing any other theaters
         manager_object = self.db.query(Manager).outerjoin(Theater).filter(
-            Theater.theatername != None, Manager.username == manager).first()
+            Theater.theatername is not None, Manager.username == manager).first()
         if manager_object:
             return f"Manager @{manager} is already managing a theater", 400
 
@@ -293,7 +303,7 @@ class MoviesSchedule(DBResource):
     @requires_manager
     def post(self, jwt):
         moviename, releasedate, playdate = parse_args("moviename", "releasedate", "playdate")
-        result = self.db.execute(
+        self.db.execute(
             "INSERT INTO movieplay (Date, MovieName, ReleaseDate, TheaterName, CompanyName) "
             "VALUES (:playdate, :moviename, :releasedate, ("
             "  SELECT TheaterName FROM Theater WHERE Manager = :username), ("
