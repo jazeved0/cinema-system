@@ -377,14 +377,23 @@ CREATE PROCEDURE `admin_create_theater` (
     IN i_managerUsername varchar(240)
 )
 BEGIN
-    INSERT INTO theater (
-        TheaterName, CompanyName, State,
-        City, Zipcode, Street, Capacity, Manager
-    ) VALUES (
-        i_thName, i_comName, i_thState, i_thCity,
-        i_thZipcode, i_thStreet, i_capacity,
-        i_managerUsername
-    );
+    IF NOT EXISTS (
+        SELECT Name from company
+        INNER JOIN manager ON manager.CompanyName = company.Name
+        WHERE manager.CompanyName = i_comName
+        AND manager.Username = i_managerUsername
+    ) THEN SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Manager must work for company';
+    ELSE
+      INSERT INTO theater (
+          TheaterName, CompanyName, State,
+          City, Zipcode, Street, Capacity, Manager
+      ) VALUES (
+          i_thName, i_comName, i_thState, i_thCity,
+          i_thZipcode, i_thStreet, i_capacity,
+          i_managerUsername
+      );
+    END IF;
 END$$
 DELIMITER ;
 
