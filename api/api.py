@@ -8,7 +8,7 @@ from auth import authenticated, get_failed_auth_resp, hash_password, \
     provision_jwt, requires_admin
 from config import get_session
 from models import TUserDerived, Company, Visit, User, TCompanyDerived, \
-    Theater, Manager
+    Theater, Manager, Movie
 from register import r_user, r_customer, r_manager, r_manager_customer
 from util import serialize, to_dict
 
@@ -311,10 +311,22 @@ class Theaters(DBResource):
         return 204
 
 
+class Movies(DBResource):
+    @authenticated
+    @requires_admin
+    def post(self):
+        name, duration, releasedate = parse_args("name", "duration", "releasedate")
+        movie = Movie(name=name, duration=duration, releasedate=releasedate)
+        self.db.add(movie)
+        self.db.commit()
+
+        return 204
+
+
 class Visits(DBResource):
     @authenticated
     def get(self, jwt):
-        company, start_date, end_date = parse_args("company", "start_date", "end_date")
+        company, start_date, end_date = parse_args("company", "startdate", "enddate")
         visits = self.db.query(Visit).filter(and_(
             Visit.username == jwt.username,
             Visit.companyname == company,
@@ -346,5 +358,6 @@ def app_factory():
     api.add_resource(RegistrationCustomer, "/register/customer")
     api.add_resource(RegistrationManagerCustomer, "/register/manager-customer")
     api.add_resource(Theaters, "/theaters")
+    api.add_resource(Movies, "/movies")
     api.add_resource(Visits, "/visits")
     return app
