@@ -6,6 +6,7 @@ import { ErrorBoundary } from "Components";
 // Re-export filters
 export { default as NumericFilter } from "./NumericFilter";
 export { default as ComboFilter } from "./ComboFilter";
+export { default as DateFilter } from "./DateFilter";
 
 // Lazy-loading tree contains:
 // - DataGrid

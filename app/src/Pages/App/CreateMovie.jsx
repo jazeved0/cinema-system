@@ -67,10 +67,7 @@ export default function CreateMovie() {
               key: "releasedate",
               name: "Release Date",
               required: true,
-              type: "date",
-              props: {
-                dateFormat: "yyyy-MM-dd"
-              }
+              type: "date"
             }
           ]}
         />

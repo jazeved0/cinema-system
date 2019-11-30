@@ -258,45 +258,45 @@
             }
         }
     }
+}
 
-    .input-group {
-        .input-group-text {
-            @include dark-fg;
-            @include dark-bg($dark-250);
-            @include dark {
-                border-color: $dark-400;
-                border-width: 0;
-                position: relative;
-            }
+.input-group {
+    .input-group-text {
+        @include dark-fg;
+        @include dark-bg($dark-250);
+        @include dark {
+            border-color: $dark-400;
+            border-width: 0;
+            position: relative;
+        }
+    }
+}
+
+.input-group-prepend {
+    .input-group-text {
+        @include dark {
+            border-right-width: 0.25rem;
         }
     }
 
-    .input-group-prepend {
-        .input-group-text {
-            @include dark {
-                border-right-width: 0.25rem;
-            }
-        }
+    & > .form-control:not(:last-child),
+    & > .custom-select:not(:last-child) {
+        border-bottom-right-radius: 8px;
+        border-top-right-radius: 8px;
+    }
+}
 
-        & > .form-control:not(:last-child),
-        & > .custom-select:not(:last-child) {
-            border-bottom-right-radius: 8px;
-            border-top-right-radius: 8px;
+.input-group-append {
+    .input-group-text {
+        @include dark {
+            border-left-width: 0.25rem;
         }
     }
 
-    .input-group-append {
-        .input-group-text {
-            @include dark {
-                border-left-width: 0.25rem;
-            }
-        }
-
-        & > .form-control:not(:last-child),
-        & > .custom-select:not(:last-child) {
-            border-bottom-right-radius: 8px;
-            border-top-right-radius: 8px;
-        }
+    & > .form-control:not(:last-child),
+    & > .custom-select:not(:last-child) {
+        border-bottom-right-radius: 8px;
+        border-top-right-radius: 8px;
     }
 }
 
@@ -1231,6 +1231,13 @@ input.form-control.editor-main {
             .controls {
                 margin-right: 1rem;
                 position: relative;
+
+                .control-spacing {
+                    margin-right: 1rem;
+                    @include respond-above(xs) {
+                        margin-right: 2.5rem;
+                    }
+                }
             }
 
             & > div {
@@ -1974,4 +1981,33 @@ input.form-control.editor-main {
     &.is-invalid ~ .invalid-tooltip {
         display: block;
     }
+}
+
+.date-filter {
+    .date-picker:first-child {
+        margin-right: 0.2rem;
+        input {
+            border-top-left-radius: 8px !important;
+            border-bottom-left-radius: 8px !important;
+            border-top-right-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
+        }
+    }
+
+    .date-picker:last-child {
+        margin-left: 0.2rem;
+        input {
+            border-top-left-radius: 0 !important;
+            border-bottom-left-radius: 0 !important;
+            border-top-right-radius: 8px !important;
+            border-bottom-right-radius: 8px !important;
+        }
+    }
+    // display: flex;
+    // flex-direction: column;
+    // align-items: stretch;
+
+    // .input-group {
+    //     flex-wrap: nowrap !important;
+    // }
 }

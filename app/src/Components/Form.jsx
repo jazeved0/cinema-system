@@ -27,9 +27,8 @@ import {
   InputGroup
 } from "react-bootstrap";
 import { Prompt } from "react-router-dom";
-import { SetInput, NumericUpDown, Icon } from "Components";
+import { SetInput, NumericUpDown, DatePicker } from "Components";
 import Select from "react-select";
-import DatePicker from "react-datepicker";
 
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -348,35 +347,23 @@ Form.DateInput = function(props, ref) {
     disabled,
     dateFormat
   } = props;
-  const specificOnChange = useCallback(
-    e => {
-      console.log(e);
-      onChange(inputKey, e);
-    },
-    [onChange, inputKey]
-  );
-  console.log(isInvalid);
-  console.log(value);
+  const specificOnChange = useCallback(e => onChange(inputKey, e), [
+    onChange,
+    inputKey
+  ]);
   return (
     <>
-      <div className={classNames("date-picker", { "is-invalid": isInvalid })}>
-        <InputGroup>
-          <DatePicker
-            onBlur={() => onBlur(inputKey)}
-            onChange={specificOnChange}
-            selected={value}
-            disabled={disabled}
-            isClearable
-            placeholderText={placeholder}
-            dateFormat={dateFormat}
-          />
-          <InputGroup.Append>
-            <InputGroup.Text>
-              <Icon name="calendar-alt" />
-            </InputGroup.Text>
-          </InputGroup.Append>
-        </InputGroup>
-      </div>
+      <DatePicker
+        isInvalid={isInvalid}
+        onBlur={() => onBlur(inputKey)}
+        onChange={specificOnChange}
+        selected={value}
+        disabled={disabled}
+        isClearable
+        placeholderText={placeholder}
+        dateFormat={dateFormat}
+        ref={ref}
+      />
       <BootstrapForm.Control.Feedback type="invalid" children={message} />
     </>
   );

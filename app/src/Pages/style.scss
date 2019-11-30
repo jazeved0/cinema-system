@@ -408,3 +408,9 @@ $line-width: 225px;
 .create-theater-button {
     margin-right: 2.5rem;
 }
+
+.theater-overview {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}

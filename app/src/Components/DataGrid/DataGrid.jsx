@@ -208,7 +208,7 @@ function DataGrid({
             if (isDefined(c.formatter)) {
               return c.formatter(props);
             } else {
-              return props.value.toString();
+              return isDefined(props.value) ? props.value.toString() : "";
             }
           }
         },

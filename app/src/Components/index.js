@@ -12,6 +12,7 @@ export { default as SetInput } from "./SetInput";
 export { default as Redirect } from "./Redirect";
 export { default as DataGrid } from "./DataGrid";
 export { default as CtaButton } from "./CtaButton";
+export { default as DatePicker } from "./DatePicker";
 export { default as BackButton } from "./BackButton";
 export { default as HelpTooltip } from "./HelpTooltip";
 export { default as Placeholder } from "./Placeholder";

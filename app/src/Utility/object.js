@@ -91,8 +91,16 @@ export function clamp(number, min, max) {
 }
 
 export function formatDate(date) {
-  return `${pad(date.getFullYear(), 4)}-${pad(date.getMonth(), 2)}-${pad(
+  return `${pad(date.getFullYear(), 4)}-${pad(date.getMonth() + 1, 2)}-${pad(
     date.getDate(),
     2
   )}`;
+}
+
+export function parseDate(dateStr) {
+  var dateArray = dateStr.split("-");
+  var year = dateArray[0];
+  var month = parseInt(dateArray[1], 10) - 1;
+  var date = dateArray[2];
+  return new Date(year, month, date);
 }
