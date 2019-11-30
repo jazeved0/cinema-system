@@ -293,14 +293,15 @@ class MoviesSchedule(DBResource):
     @requires_manager
     def post(self, jwt):
         moviename, releasedate, playdate = parse_args("moviename", "releasedate", "playdate")
-        self.db.execute(
+        result = self.db.execute(
             "INSERT INTO movieplay (Date, MovieName, ReleaseDate, TheaterName, CompanyName) "
             "VALUES (:playdate, :moviename, :releasedate, ("
             "  SELECT TheaterName FROM Theater WHERE Manager = :username), ("
             "  SELECT CompanyName FROM Theater WHERE Manager = :username));",
             {"playdate": playdate, "moviename": moviename, "releasedate": releasedate, "username": jwt.username}
         )
-        return 201
+        self.db.commit()
+        return 204
 
 
 class ExploreMovie(DBResource):
@@ -363,7 +364,7 @@ def app_factory():
     api.add_resource(ExploreMovie, "/movies/explore")
 
     api.add_resource(Theaters, "/theaters")
-    api.add_resource(TheaterOverview, "/theater_overview")
+    api.add_resource(TheaterOverview, "/manager/overview")
 
     api.add_resource(Users, "/users")
     api.add_resource(UserApproveResource, "/users/<username>/approve")
