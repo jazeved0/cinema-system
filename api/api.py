@@ -293,7 +293,9 @@ class Movies(DBResource):
         else:
             return 201
 
-    def get(self):
+    @authenticated
+    @requires_manager
+    def get(self, jwt):
         movies = self.db.query(Movie).all()
         return jsonify({'movies': to_dict(movies)})
 
@@ -303,15 +305,26 @@ class MoviesSchedule(DBResource):
     @requires_manager
     def post(self, jwt):
         moviename, releasedate, playdate = parse_args("moviename", "releasedate", "playdate")
-        self.db.execute(
-            "INSERT INTO movieplay (Date, MovieName, ReleaseDate, TheaterName, CompanyName) "
-            "VALUES (:playdate, :moviename, :releasedate, ("
-            "  SELECT TheaterName FROM Theater WHERE Manager = :username), ("
-            "  SELECT CompanyName FROM Theater WHERE Manager = :username));",
-            {"playdate": playdate, "moviename": moviename, "releasedate": releasedate, "username": jwt.username}
-        )
-        self.db.commit()
-        return 204
+
+        # Validate that the movie exists
+        movie = self.db.query(Movie).filter(
+            Movie.name == moviename, Movie.releasedate == releasedate).first()
+        if not movie:
+            return f"Movie name and release date must correspond to an already-created movie", 400
+
+        try:
+            self.db.execute(
+                "INSERT INTO movieplay (Date, MovieName, ReleaseDate, TheaterName, CompanyName) "
+                "VALUES (:playdate, :moviename, :releasedate, ("
+                "  SELECT TheaterName FROM Theater WHERE Manager = :username), ("
+                "  SELECT CompanyName FROM Theater WHERE Manager = :username));",
+                {"playdate": playdate, "moviename": moviename, "releasedate": releasedate, "username": jwt.username}
+            )
+            self.db.commit()
+        except SQLAlchemyError:
+            return "Could not schedule movie", 403
+        else:
+            return 204
 
 
 class ExploreMovie(DBResource):

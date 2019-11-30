@@ -200,7 +200,7 @@
             padding-right: 1.5rem;
             flex-grow: 1;
             flex-shrink: 1;
-            max-width: 140px;
+            max-width: 150px;
 
             &:not(:last-child) {
                 margin-right: 1.25rem;
@@ -413,6 +413,7 @@
         @include dark-fg;
         @include light-fg;
         border-width: 1px;
+        z-index: 2 !important;
     }
 
     &__option {
@@ -1871,6 +1872,7 @@ input.form-control.editor-main {
 
     .react-datepicker-wrapper {
         flex-grow: 1;
+        z-index: 1;
     }
 
     .react-datepicker__input-container,

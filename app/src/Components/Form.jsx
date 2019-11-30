@@ -705,6 +705,11 @@ const steps = [
       } else if (isNil(value)) return requiredResult;
     }
   },
+  // Custom validator function
+  {
+    canApply: entry => isDefined(entry.validator),
+    apply: ({ entry, ...rest }) => entry.validator(rest)
+  },
   // Numeric is numeric validator
   {
     canApply: entry => entry.type === "numeric",
