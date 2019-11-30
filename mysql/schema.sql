@@ -87,7 +87,7 @@ CREATE TABLE `CreditCard` (
     ON UPDATE CASCADE
 );
 
-DROP TABLE IF EXISTS `Theater`; 
+DROP TABLE IF EXISTS `Theater`;
 CREATE TABLE `Theater` (
   `TheaterName` varchar(240) NOT NULL,
   /* partial key */

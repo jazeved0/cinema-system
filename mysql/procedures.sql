@@ -529,12 +529,12 @@ BEGIN
             movieplay.Date AS movPlayDate,
             movieplay.ReleaseDate AS movReleaseDate
         FROM movieplay
-        LEFT JOIN theater ON movieplay.TheaterName = theater.TheaterName
+        LEFT OUTER JOIN theater ON movieplay.TheaterName = theater.TheaterName
             AND movieplay.CompanyName = theater.CompanyName
         -- Perform simple filters
-        WHERE (i_movName = '' OR movieplay.MovieName   <=> i_movName)
-        AND (i_comName   = '' OR movieplay.CompanyName <=> i_comName)
-        AND (i_city      = '' OR City                  <=> i_city)
+        WHERE (i_movName = '' OR movieplay.MovieName   <=> i_movName OR i_movName = 'ALL')
+        AND (i_comName   = '' OR movieplay.CompanyName <=> i_comName OR i_comName = 'ALL')
+        AND (i_city      = '' OR City                  <=> i_city OR i_city = 'ALL')
         -- State can be '' or 'ALL' to indicate no filter
         AND (i_state = '' OR i_state = 'ALL' OR State <=> i_state)
         -- Perform min/max movie play date filters
