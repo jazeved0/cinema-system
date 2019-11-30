@@ -322,6 +322,25 @@ class Movies(DBResource):
 
         return 204
 
+    def get(self):
+        movies = self.db.query(Movie).all()
+        return jsonify([m.as_dict() for m in movies])
+
+
+class MoviesSchedule(DBResource):
+    @authenticated
+    @requires_manager
+    def post(self, jwt):
+        moviename, releasedate, playdate = parse_args("moviename", "releasedate", "playdate")
+        self.db.execute(
+            "INSERT INTO movieplay (Date, MovieName, ReleaseDate, TheaterName, CompanyName) "
+            "VALUES (:playdate, :moviename, :releasedate, ("
+            "  SELECT TheaterName FROM Theater WHERE Manager = :username), ("
+            "  SELECT CompanyName FROM Theater WHERE Manager = :username));",
+            {"playdate": playdate, "moviename": moviename, "releasedate": releasedate, "username": jwt.username}
+        )
+        return 204
+
 
 class TheaterOverview(DBResource):
     @authenticated
@@ -380,5 +399,6 @@ def app_factory():
     api.add_resource(RegistrationManagerCustomer, "/register/manager-customer")
     api.add_resource(Theaters, "/theaters")
     api.add_resource(Movies, "/movies")
+    api.add_resource(MoviesSchedule, "/movies/schedule")
     api.add_resource(Visits, "/visits")
     return app
