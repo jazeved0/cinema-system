@@ -238,7 +238,7 @@ export default function Form(props) {
   return (
     <>
       {blocking && !isEmpty && <Prompt message={blockingMessage} />}
-      <BootstrapForm noValidate className={classNames("_form", {horizontal})}>
+      <BootstrapForm noValidate className={classNames("_form", { horizontal })}>
         {/* Input rows */}
         {formGroups}
         {/* Submit row */}
@@ -320,7 +320,7 @@ Form.SetInput = function(props, ref) {
   // Eslint complains because of the way this component was declared
   /* eslint-disable react-hooks/rules-of-hooks */
 
-  const { inputKey, onBlur, message, onChange, ...rest } = props;
+  const { inputKey, onBlur, message, onChange, valuesRef, ...rest } = props;
 
   return (
     <Form.SmartSetInput

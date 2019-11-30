@@ -1,16 +1,16 @@
 from flask import Flask, g, jsonify
-from flask_restful import Api, Resource, reqparse, inputs
+from flask_restful import Api, inputs
 from flask_cors import CORS
 from sqlalchemy import and_
 from sqlalchemy.exc import SQLAlchemyError
 
 from auth import authenticated, get_failed_auth_resp, hash_password, \
     provision_jwt, requires_admin, requires_manager
-from config import get_session, states
+from config import states
 from models import TUserDerived, Company, Visit, User, TCompanyDerived, \
     Theater, Manager, Movie
-from register import r_user, r_customer, r_manager, r_manager_customer
-from util import to_dict, remove_non_numeric
+from register import registration
+from util import to_dict, remove_non_numeric, DBResource, parse_args, Param
 
 """
 Contains the core of the API logic, including RESTful endpoints and custom
@@ -22,46 +22,11 @@ app = Flask(__name__)
 cors = CORS(app)
 
 
-class Param(object):
-    def __init__(self, name, type=None, optional=False):
-        self.name = name
-        self.type = type
-        self.optional = optional
-
-
-def parse_args(*param_list, as_dict=False):
-    parser = reqparse.RequestParser()
-    for param in param_list:
-        if type(param) == str:
-            parser.add_argument(param, required=True)
-        else:
-            required = not param.optional
-            if param.type == list:
-                parser.add_argument(param.name, action='append', required=required)
-            else:
-                parser.add_argument(param.name, type=param.type, required=required)
-
-    param_values = parser.parse_args()
-    param_names = [p if type(p) == str else p.name for p in param_list]
-
-    if as_dict:
-        return {p: param_values[p] for p in param_names}
-    return (param_values[p] for p in param_names)
-
-
 @app.teardown_appcontext
 def teardown_db(exec):
     db = g.pop('db', None)
     if db is not None:
         db.close()
-
-
-class DBResource(Resource):
-    @property
-    def db(self):
-        if 'db' not in g:
-            g.db = get_session()
-        return g.db
 
 
 class Login(DBResource):
@@ -82,70 +47,6 @@ class Login(DBResource):
             print("Successful authentication: {}".format(user.username))
             token = provision_jwt(user).get_token().decode()
             return jsonify({"token": token})
-
-
-class RegistrationUser(DBResource):
-    def post(self):
-        return r_user(
-            **parse_args(
-                "first_name",
-                "last_name",
-                "username",
-                "password",
-                as_dict=True),
-            database=self.db
-        )
-
-
-class RegistrationManager(DBResource):
-    def post(self):
-        return r_manager(
-            **parse_args(
-                "first_name",
-                "last_name",
-                "username",
-                "password",
-                "company",
-                "street_address",
-                "city",
-                "state",
-                "zipcode",
-                as_dict=True),
-            database=self.db
-        )
-
-
-class RegistrationCustomer(DBResource):
-    def post(self):
-        return r_customer(
-            **parse_args(
-                "first_name",
-                "last_name",
-                "username",
-                "password",
-                Param("credit_cards", type=list),
-                as_dict=True),
-            database=self.db
-        )
-
-
-class RegistrationManagerCustomer(DBResource):
-    def post(self):
-        return r_manager_customer(
-            **parse_args(
-                "first_name",
-                "last_name",
-                "username",
-                "password",
-                "company",
-                "street_address",
-                "city",
-                "state",
-                "zipcode",
-                Param("credit_cards", type=list),
-                as_dict=True),
-            database=self.db
-        )
 
 
 class Companies(DBResource):
@@ -427,10 +328,9 @@ def status():
 def app_factory():
     api = Api(app)
     api.add_resource(Login, "/login")
-    api.add_resource(RegistrationUser, "/register/user")
-    api.add_resource(RegistrationManager, "/register/manager")
-    api.add_resource(RegistrationCustomer, "/register/customer")
-    api.add_resource(RegistrationManagerCustomer, "/register/manager-customer")
+    app.register_blueprint(registration, url_prefix="/register")
+    api.add_resource(Visits, "/visits")
+    api.add_resource(EligibleManagers, "/managers/eligible")
 
     api.add_resource(Companies, "/companies")
     api.add_resource(CompaniesManagers, "/companies/<string:name>/managers")
@@ -447,6 +347,4 @@ def app_factory():
     api.add_resource(UserApproveResource, "/users/<username>/approve")
     api.add_resource(UserDeclineResource, "/users/<username>/decline")
 
-    api.add_resource(Visits, "/visits")
-    api.add_resource(EligibleManagers, "/managers/eligible")
     return app

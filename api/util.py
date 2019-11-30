@@ -1,6 +1,10 @@
 import re
-from flask import jsonify
-from typing import Dict, List
+from flask_restful import reqparse
+from flask import jsonify, g
+from typing import Dict, List, Union
+from flask_restful import Resource
+
+from config import get_session
 
 first_cap_re = re.compile('(.)([A-Z][a-z]+)')
 all_cap_re = re.compile('([a-z0-9])([A-Z])')
@@ -113,3 +117,51 @@ def remove_non_numeric(string: str) -> str:
     """
 
     return re.sub('[^0-9]', '', string)
+
+
+class DBResource(Resource):
+    """
+    Represents a flask-restful resource that is also connected to the database
+    """
+
+    @property
+    def db(self):
+        if 'db' not in g:
+            g.db = get_session()
+        return g.db
+
+
+class Param(object):
+    """
+    Represents a parameter named tuple with optional arguments for use
+    in parse_args
+    """
+
+    def __init__(self, name: str, type=None, optional: bool = False):
+        self.name = name
+        self.type = type
+        self.optional = optional
+
+
+def parse_args(*param_list: List[Union[str, Param]], as_dict: bool = False):
+    """
+    Parses args via RequestParser
+    """
+
+    parser = reqparse.RequestParser()
+    for param in param_list:
+        if type(param) == str:
+            parser.add_argument(param, required=True)
+        else:
+            required = not param.optional
+            if param.type == list:
+                parser.add_argument(param.name, action='append', required=required)
+            else:
+                parser.add_argument(param.name, type=param.type, required=required)
+
+    param_values = parser.parse_args()
+    param_names = [p if type(p) == str else p.name for p in param_list]
+
+    if as_dict:
+        return {p: param_values[p] for p in param_names}
+    return (param_values[p] for p in param_names)
