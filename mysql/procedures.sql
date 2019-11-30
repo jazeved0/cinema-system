@@ -223,7 +223,7 @@ CREATE PROCEDURE `admin_filter_user` (
     IN i_status char(8),
     IN i_sortBy varchar(15),
     IN i_sortDirection char(4)
-    
+
 )
 BEGIN
     -- i_status has implicit 'ALL' possibility
@@ -260,7 +260,7 @@ BEGIN
             CREATE TABLE UserFilterTemp
                 SELECT username, creditCardCount, userType, status FROM UserDerived
                 -- Perform filter on username parameter
-                WHERE (UPPER(Username) <=> UPPER(i_username)) or i_username = "" 
+                WHERE (UPPER(Username) <=> UPPER(i_username)) or i_username = ""
                 -- Perform status filter (if applicable)
                 AND CASE WHEN i_status <> 'ALL' THEN status = i_status ELSE TRUE END;
             DROP TABLE IF EXISTS AdFilterUser;
@@ -269,7 +269,7 @@ BEGIN
                 "CREATE TABLE AdFilterUser "
                 "SELECT * FROM UserFilterTemp ORDER BY UserFilterTemp.",
                 @sort_column,
-                " ", 
+                " ",
                 @sort_direction
             );
             PREPARE stmt FROM @query;
@@ -340,7 +340,7 @@ BEGIN
                 "CREATE TABLE AdFilterCom ",
                 "SELECT * FROM CompanyFilterTemp ORDER BY CompanyFilterTemp.",
                 @sort_column,
-                " ", 
+                " ",
                 @sort_direction
             );
             PREPARE stmt FROM @query;
@@ -457,27 +457,27 @@ BEGIN
     DROP TABLE IF EXISTS ManFilterTh;
     CREATE TABLE ManFilterTh
         SELECT movie.Name AS movName, movie.Duration as movDuration,
-            movie.ReleaseDate AS movReleaseDate, movieplay.Date as movPlayDate
-        FROM movieplay
-        LEFT JOIN movie ON movieplay.MovieName = movie.Name
-            AND movieplay.ReleaseDate = movie.ReleaseDate
-        LEFT JOIN theater ON movieplay.TheaterName = theater.TheaterName
-            AND movieplay.CompanyName = theater.CompanyName
-        WHERE i_manUsername = theater.Manager
+            movie.ReleaseDate AS movReleaseDate, t1.Date as movPlayDate
+        FROM (
+          SELECT movieplay.*
+          FROM movieplay
+          LEFT JOIN theater ON movieplay.TheaterName = theater.TheaterName AND movieplay.CompanyName = theater.CompanyName
+          WHERE i_manUsername = theater.Manager
+        ) AS t1
+        RIGHT JOIN movie ON t1.MovieName = movie.Name
         -- Perform movie name filter
-        AND (i_movName <=> '' OR UPPER(movie.Name) <=> UPPER(i_movName))
+        AND ((i_movName <=> '' OR UPPER(movie.Name) <=> UPPER(i_movName)) OR i_movName = 'ALL')
         -- Perform movie duration filter
-        AND (i_minMovDuration     IS NULL OR Duration              >= i_minMovDuration)
-        AND (i_maxMovDuration     IS NULL OR Duration              <= i_maxMovDuration)
+        AND (i_minMovDuration     IS NULL OR Duration          >= i_minMovDuration)
+        AND (i_maxMovDuration     IS NULL OR Duration          <= i_maxMovDuration)
         -- Perform movie release date filter
-        AND (i_minMovReleaseDate  IS NULL OR movieplay.ReleaseDate >= i_minMovReleaseDate)
-        AND (i_maxMovReleaseDate  IS NULL OR movieplay.ReleaseDate <= i_maxMovReleaseDate)
+        AND (i_minMovReleaseDate  IS NULL OR movie.ReleaseDate >= i_minMovReleaseDate)
+        AND (i_maxMovReleaseDate  IS NULL OR movie.ReleaseDate <= i_maxMovReleaseDate)
         -- Perform movie play date filter
-        AND (i_minMovPlayDate     IS NULL OR movieplay.Date        >= i_minMovPlayDate)
-        AND (i_maxMovPlayDate     IS NULL OR movieplay.Date        <= i_maxMovPlayDate)
+        AND (i_minMovPlayDate     IS NULL OR t1.Date           >= i_minMovPlayDate)
+        AND (i_maxMovPlayDate     IS NULL OR t1.Date           <= i_maxMovPlayDate)
         -- Perform include not played
         AND (i_includeNotPlayed is NOT TRUE OR (i_includeNotPlayed is TRUE AND i_minMovPlayDate is NULL));
--- 		AND (i_includeNotPlayed is NOT TRUE) OR movieplay.Date <= CURDATE();
 END$$
 DELIMITER ;
 
@@ -608,7 +608,7 @@ BEGIN
     CREATE TABLE UserFilterTh
         SELECT TheaterName as thName, Street as thStreet, City as thCity, State as thState, Zipcode as thZipcode, CompanyName as comName
         FROM Theater
-        WHERE 
+        WHERE
             (TheaterName = i_thName OR i_thName = "ALL") AND
             (CompanyName = i_comName OR i_comName = "ALL") AND
             (City = i_city OR i_city = "") AND
@@ -641,7 +641,7 @@ DELIMITER ;
 DROP PROCEDURE IF EXISTS `user_filter_visitHistory`;
 DELIMITER $$
 CREATE PROCEDURE `user_filter_visitHistory` (
-    IN i_username VARCHAR(240), 
+    IN i_username VARCHAR(240),
     IN i_minVisitDate DATE,
     IN i_maxVisitDate DATE
 )

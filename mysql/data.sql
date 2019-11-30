@@ -1,12 +1,12 @@
 USE `Team20`;
-SET FOREIGN_KEY_CHECKS = 0; 
+SET FOREIGN_KEY_CHECKS = 0;
 
 --
 -- Dumping data for table `user`
 --
 
 LOCK TABLES `user` WRITE;
-INSERT INTO `user` VALUES 
+INSERT INTO `user` VALUES
     ('calcultron',          'Approved', '77C9749B451AB8C713C48037DDFBB2C4', 'Dwight',     'Schrute'),
     ('calcultron2',         'Approved', '8792B8CF71D27DC96173B2AC79B96E0D', 'Jim',        'Halpert'),
     ('calcwizard',          'Approved', '0D777E9E30B918E9034AB610712C90CF', 'Issac',      'Newton'),
@@ -52,7 +52,7 @@ UNLOCK TABLES;
 --
 
 LOCK TABLES `company` WRITE;
-INSERT INTO `company` VALUES 
+INSERT INTO `company` VALUES
     ('4400 Theater Company'),
     ('AI Theater Company'),
     ('Awesome Theater Company'),
@@ -170,7 +170,7 @@ INSERT INTO `movie` VALUES
     ('4400 The Movie',                    '2019-08-12', 130),
     ('Avengers: Endgame',                 '2019-04-26', 181),
     ('Calculus Returns: A ML Story',      '2019-09-19', 314),
-    ('George P Burdell\' Life Story',    '1927-08-12', 100),
+    ('George P Burdell\'s Life Story',    '1927-08-12', 100),
     ('Georgia Tech The Movie',            '1985-08-13', 100),
     ('How to Train Your Dragon',          '2010-03-21', 98),
     ('Spaceballs',                        '1987-06-24', 96),
