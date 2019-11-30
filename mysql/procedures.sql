@@ -76,8 +76,17 @@ CREATE PROCEDURE `customer_add_creditcard` (
     IN i_creditCardNum char(16)
 )
 BEGIN
-    INSERT INTO creditcard (owner, creditcardnum)
-    VALUES (i_username, i_creditCardNum);
+    IF EXISTS (
+        SELECT Username from UserDerived
+        WHERE Username = i_username AND CreditCardCount >= 5
+    ) THEN SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Cannot add another credit card';
+    ELSEIF CHAR_LENGTH(i_creditCardNum) != 16 THEN SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Credit card must be 16 characters long';
+    ELSE
+      INSERT INTO creditcard (owner, creditcardnum)
+      VALUES (i_username, i_creditCardNum);
+    END IF;
 END$$
 DELIMITER ;
 
