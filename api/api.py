@@ -3,7 +3,7 @@ from flask_restful import Api, inputs
 from flask_cors import CORS
 from sqlalchemy import and_
 from sqlalchemy.exc import SQLAlchemyError
-import datetime
+from datetime import datetime
 
 from auth import authenticated, get_failed_auth_resp, hash_password, \
     provision_jwt, requires_admin, requires_manager
