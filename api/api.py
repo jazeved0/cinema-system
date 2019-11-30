@@ -341,6 +341,11 @@ class MoviesSchedule(DBResource):
         )
         return 204
 
+class ExploreMovie(DBResource):
+    def get(self):
+        result = self.db.execute("select * from movieplay natural join theater").fetchall()
+        return jsonify({'result': [dict(row) for row in result]})
+
 
 class TheaterOverview(DBResource):
     @authenticated
@@ -400,5 +405,6 @@ def app_factory():
     api.add_resource(Theaters, "/theaters")
     api.add_resource(Movies, "/movies")
     api.add_resource(MoviesSchedule, "/movies/schedule")
+    api.add_resource(ExploreMovie, "/movies/explore")
     api.add_resource(Visits, "/visits")
     return app
