@@ -476,7 +476,8 @@ BEGIN
         AND (i_minMovPlayDate     IS NULL OR movieplay.Date        >= i_minMovPlayDate)
         AND (i_maxMovPlayDate     IS NULL OR movieplay.Date        <= i_maxMovPlayDate)
         -- Perform include not played
-        AND IFNULL(i_includeNotPlayed, FALSE) OR movieplay.Date <= CURDATE();
+        AND (i_includeNotPlayed is NOT TRUE OR (i_includeNotPlayed is TRUE AND i_minMovPlayDate is NULL));
+-- 		AND (i_includeNotPlayed is NOT TRUE) OR movieplay.Date <= CURDATE();
 END$$
 DELIMITER ;
 
