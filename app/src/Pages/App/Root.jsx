@@ -13,8 +13,8 @@ export default function AppRoot() {
   const unauthorizedRedirects = useUnauthorizedRedirects(base);
   const routes = useAllRoutes();
   const { isAuthenticated } = useAuth();
-  const generatedRoutes = routes.map(({ to, page: Page }) => (
-    <Route key={to} path={base + to} exact>
+  const generatedRoutes = routes.map(({ to, page: Page, exact = true }) => (
+    <Route key={to} path={base + to} exact={exact}>
       <Page />
     </Route>
   ));

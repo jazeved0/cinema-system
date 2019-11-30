@@ -8,6 +8,7 @@ export { default as RegisterManagerCustomer } from "./Register/ManagerCustomer";
 
 // App pages
 export { default as AppBase } from "./App/Base";
+export { default as CompanyDetail } from "./App/CompanyDetail";
 export { default as AppManageUser } from "./App/ManageUser";
 export { default as AppCreateMovie } from "./App/CreateMovie";
 export { default as AppViewHistory } from "./App/ViewHistory";

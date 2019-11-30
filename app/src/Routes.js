@@ -20,7 +20,8 @@ const adminRoutes = [
   {
     to: "/admin/manage-company",
     text: "Manage Company",
-    page: AppManageCompany
+    page: AppManageCompany,
+    exact: false
   },
   {
     to: "/admin/create-movie",
