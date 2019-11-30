@@ -629,7 +629,7 @@ CREATE PROCEDURE `user_visit_th` (
     IN i_username VARCHAR(240)
 )
 BEGIN
-    INSERT INTO UserVisitTheater (thName, comName, visitDate, username)
+    INSERT INTO visit (TheaterName, CompanyName, Date, Username)
     VALUES (i_thName, i_comName, i_visitDate, i_username);
 END$$
 DELIMITER ;

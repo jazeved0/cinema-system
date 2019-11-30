@@ -86,7 +86,7 @@ CREATE TABLE CreditCard (
     ON UPDATE CASCADE
 );
 
-DROP TABLE IF EXISTS Theater; 
+DROP TABLE IF EXISTS Theater;
 CREATE TABLE Theater (
   TheaterName varchar(240) NOT NULL,
   /* partial key */
@@ -137,7 +137,7 @@ CREATE TABLE MoviePlay (
 
 DROP TABLE IF EXISTS Visit;
 CREATE TABLE Visit (
-  ID int NOT NULL,
+  ID SERIAL NOT NULL,
   Date date NOT NULL,
   Username varchar(240) NOT NULL,
   TheaterName varchar(240) NOT NULL,
@@ -186,7 +186,7 @@ CREATE TABLE Used (
       ReleaseDate,
       TheaterName,
       CompanyName
-    ) 
+    )
     ON DELETE CASCADE
     ON UPDATE CASCADE
 );

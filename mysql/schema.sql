@@ -1,7 +1,7 @@
 CREATE DATABASE IF NOT EXISTS `Team20`;
 USE `Team20`;
 
-SET FOREIGN_KEY_CHECKS = 0; 
+SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS `Company`;
 CREATE TABLE `Company` (`Name` varchar(240), PRIMARY KEY (`Name`));
 
@@ -138,7 +138,7 @@ CREATE TABLE `MoviePlay` (
 
 DROP TABLE IF EXISTS `Visit`;
 CREATE TABLE `Visit` (
-  `ID` int NOT NULL,
+  `ID` int AUTO_INCREMENT NOT NULL,
   `Date` date NOT NULL,
   `Username` varchar(240) NOT NULL,
   `TheaterName` varchar(240) NOT NULL,
@@ -187,7 +187,7 @@ CREATE TABLE `Used` (
       `ReleaseDate`,
       `TheaterName`,
       `CompanyName`
-    ) 
+    )
     ON DELETE CASCADE
     ON UPDATE CASCADE
 );
