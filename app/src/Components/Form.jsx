@@ -12,7 +12,8 @@ import {
   identity,
   isEmptyOrNil,
   equal,
-  capitalize
+  capitalize,
+  clamp
 } from "Utility";
 import hash from "object-hash";
 import classNames from "classnames";
@@ -26,7 +27,7 @@ import {
   InputGroup
 } from "react-bootstrap";
 import { Prompt } from "react-router-dom";
-import { SetInput } from "Components";
+import { SetInput, NumericUpDown } from "Components";
 import Select from "react-select";
 
 export default function Form(props) {
@@ -41,7 +42,8 @@ export default function Form(props) {
     collapse,
     blocking,
     blockingMessage,
-    horizontal
+    horizontal,
+    reverseButtons
   } = props;
 
   // Key => Entry map
@@ -58,7 +60,10 @@ export default function Form(props) {
     (key, event) => {
       let processFunc = entriesMap[key].processValue;
       if (isNil(processFunc)) processFunc = identity;
-      const newValue = isDefined(event.target) ? event.target.value : event;
+      const newValue =
+        isDefined(event) && isDefined(event.target)
+          ? event.target.value
+          : event;
       setValues({
         ...values,
         [key]: processFunc(newValue)
@@ -66,6 +71,9 @@ export default function Form(props) {
     },
     [values, entriesMap]
   );
+  // Stable inputs reference wrapper
+  const valuesRef = useRef(values);
+  valuesRef.current = values;
 
   // Auto-focus first input field
   const firstInput = useRef(null);
@@ -145,34 +153,41 @@ export default function Form(props) {
   // "unique" form hash
   const formHash = useMemo(() => hash(entries), [entries]);
 
-  const inputs = entries.map((entry, i) => (
-    <>
-      <Form.Input
-        type={entry.type || "text"}
-        inputKey={entry.key}
-        placeholder={placeholderFormats[entry.type || "text"](entry)}
-        onChange={onChange}
-        onBlur={onBlur}
-        onKeyDown={handleKeyPressed}
-        value={values[entry.key]}
-        isValid={
-          validated(entry) &&
-          validationStatus[entry.key].result &&
-          entry.showValid
-        }
-        isInvalid={validated(entry) && !validationStatus[entry.key].result}
-        ref={i === 0 ? firstInput : undefined}
-        disabled={isLoading}
-        {...entry.props}
-        message={validationStatus[entry.key].message}
-      />
-      {isDefined(entry.info) ? (
-        <BootstrapForm.Text className="text-muted">
-          {entry.info}
-        </BootstrapForm.Text>
-      ) : null}
-    </>
-  ));
+  const inputs = entries.map((entry, i) => {
+    const format = entry.type || "text";
+    const placeholder = placeholderFormats.hasOwnProperty(format)
+      ? placeholderFormats[format]
+      : placeholderFormats["text"];
+    return (
+      <>
+        <Form.Input
+          type={format}
+          inputKey={entry.key}
+          placeholder={placeholder(entry)}
+          onChange={onChange}
+          onBlur={onBlur}
+          onKeyDown={handleKeyPressed}
+          value={values[entry.key]}
+          valuesRef={valuesRef}
+          isValid={
+            validated(entry) &&
+            validationStatus[entry.key].result &&
+            entry.showValid
+          }
+          isInvalid={validated(entry) && !validationStatus[entry.key].result}
+          ref={i === 0 ? firstInput : undefined}
+          disabled={isLoading}
+          {...entry.props}
+          message={validationStatus[entry.key].message}
+        />
+        {isDefined(entry.info) ? (
+          <BootstrapForm.Text className="text-muted">
+            {entry.info}
+          </BootstrapForm.Text>
+        ) : null}
+      </>
+    );
+  });
 
   const wrappedInputs = entries.map((entry, i) =>
     isDefined(entry.prefix) ? (
@@ -223,13 +238,17 @@ export default function Form(props) {
   return (
     <>
       {blocking && !isEmpty && <Prompt message={blockingMessage} />}
-      <BootstrapForm noValidate className="_form">
+      <BootstrapForm noValidate className={classNames("_form", {horizontal})}>
         {/* Input rows */}
         {formGroups}
         {/* Submit row */}
         <BootstrapForm.Group as={Row}>
           <Col sm={{ span: 10, offset: 2 }}>
-            <div className="_form--buttons">
+            <div
+              className={classNames("_form--buttons", {
+                "_form--buttons__reverse": reverseButtons
+              })}
+            >
               <Button
                 className={classNames("_form--submit-button", {
                   "_form--submit-button__loading": isLoading
@@ -259,6 +278,10 @@ Form.defaultProps = {
   isShown: true
 };
 
+// ? ===================
+// ? Form inputs
+// ? ===================
+
 Form.Input = React.forwardRef(({ type, ...props }, ref) => {
   const resolvedType = isDefined(type) ? type : "text";
   const handler = formInputs[resolvedType];
@@ -270,7 +293,15 @@ Form.TextInput = function(props, ref) {
   // Eslint complains because of the way this component was declared
   /* eslint-disable react-hooks/rules-of-hooks */
 
-  const { inputKey, onBlur, message, onChange, type, ...rest } = props;
+  const {
+    inputKey,
+    onBlur,
+    message,
+    onChange,
+    type,
+    valuesRef,
+    ...rest
+  } = props;
   return (
     <>
       <BootstrapForm.Control
@@ -302,9 +333,73 @@ Form.SetInput = function(props, ref) {
   );
 };
 
+Form.NumericInput = function(props, ref) {
+  const {
+    inputKey,
+    value,
+    onChange,
+    isInvalid,
+    min,
+    max,
+    placeholder,
+    message,
+    onBlur,
+    disabled
+  } = props;
+  const specificOnChange = useCallback(e => onChange(inputKey, e), [
+    onChange,
+    inputKey
+  ]);
+
+  // Increment/decrement callbacks
+  const setValue = useCallback(
+    v => {
+      const newValue = clamp(v, min, max).toString();
+      if (newValue !== value) specificOnChange(newValue);
+    },
+    [min, max, value, specificOnChange]
+  );
+  const onUp = useCallback(
+    () => setValue(isEmptyOrNil(value) ? 0 : parseFloat(value) + 1),
+    [value, setValue]
+  );
+  const onDown = useCallback(
+    () => setValue(isEmptyOrNil(value) ? 0 : parseFloat(value) - 1),
+    [value, setValue]
+  );
+
+  // Filter input to ensure valid number
+  const onInputChange = useCallback(
+    event => {
+      const rawValue = isDefined(event.target) ? event.target.value : "";
+      let newValue = rawValue.replace(/[^0-9.-]*/g, "");
+      specificOnChange(newValue);
+    },
+    [specificOnChange]
+  );
+
+  return (
+    <>
+      <NumericUpDown
+        isInvalid={isInvalid}
+        value={value}
+        onChange={onInputChange}
+        placeholder={placeholder}
+        onUp={onUp}
+        onDown={onDown}
+        ref={ref}
+        onBlur={() => onBlur(inputKey)}
+        disabled={disabled}
+      />
+      <BootstrapForm.Control.Feedback type="invalid" children={message} />
+    </>
+  );
+};
+
 Form.ComboInput = function(props, ref) {
   const {
     inputKey,
+    valuesRef,
     onBlur,
     message,
     onChange,
@@ -312,13 +407,18 @@ Form.ComboInput = function(props, ref) {
     isInvalid,
     disabled,
     onKeyDown,
+    getOptions,
+    value,
     ...rest
   } = props;
-  const derivedOptions = isDefined(options)
-    ? options.map(o =>
-        typeof o === "string" ? { value: o, label: capitalize(o) } : o
-      )
-    : null;
+
+  let derivedOptions = options;
+  if (isDefined(getOptions)) {
+    derivedOptions = getOptions({ value, values: valuesRef.current });
+  }
+
+  // Insert missing values/label structure
+  if (isDefined(derivedOptions)) derivedOptions = mapOptions(derivedOptions);
 
   const onKeyPress = e => {
     const code = e.keyCode || e.which;
@@ -337,9 +437,11 @@ Form.ComboInput = function(props, ref) {
         onBlur={useCallback(() => onBlur(inputKey), [onBlur, inputKey])}
         onKeyDown={onKeyPress}
         isSearchable
+        isClearable
         options={derivedOptions}
         isDisabled={disabled}
         ref={ref}
+        value={value}
         {...rest}
       />
       <BootstrapForm.Control.Feedback type="invalid" children={message} />
@@ -351,15 +453,21 @@ const formInputs = {
   set: Form.SetInput,
   combo: Form.ComboInput,
   text: (p, r) => Form.TextInput({ ...p, type: "text" }, r),
-  password: (p, r) => Form.TextInput({ ...p, type: "password" }, r)
+  password: (p, r) => Form.TextInput({ ...p, type: "password" }, r),
+  numeric: Form.NumericInput
 };
 
 const placeholderFormats = {
   combo: entry => `Select ${entry.name.toLowerCase()}`,
   set: entry => `Add ${entry.name.toLowerCase()}`,
   text: entry => `Enter ${entry.name.toLowerCase()}`,
-  password: entry => `Enter ${entry.name.toLowerCase()}`
+  password: entry => `Enter ${entry.name.toLowerCase()}`,
+  numeric: entry => `Enter ${entry.name.toLowerCase()}`
 };
+
+// ? ==================
+// ? Utility components
+// ? ==================
 
 Form.SmartSetInput = React.forwardRef((props, ref) => {
   const {
@@ -477,8 +585,20 @@ Form.SmartSetInput.defaultProps = {
 // ? =================
 
 function getDefaultValue(entry) {
-  if (entry.type === "set") return [];
+  if (isDefined(entry.defaultValue)) return entry.defaultValue;
+  else if (entry.type === "set") return [];
+  else if (entry.type === "numeric")
+    return getDefaultNumeric(entry.props).toString();
   else return "";
+}
+
+function getDefaultNumeric({ min, max }) {
+  if (isDefined(min)) {
+    return min;
+  } else if (isDefined(max)) {
+    if (0 <= max) return 0;
+    else return max;
+  } else return 0;
 }
 
 function calculateInitialState(entries) {
@@ -525,6 +645,7 @@ function validate(entries, values, hasSubmitted) {
   return [validationStatus, allPass];
 }
 
+const floatRegex = /^[-+]?[0-9]*\.?[0-9]+$/g;
 const steps = [
   // Required field validator
   {
@@ -547,10 +668,52 @@ const steps = [
       } else return null;
     }
   },
-  // Custom validator function
+  // Numeric is numeric validator
   {
-    canApply: entry => isDefined(entry.validator),
-    apply: ({ entry, ...rest }) => entry.validator(rest)
+    canApply: entry => entry.type === "numeric",
+    apply: ({ value, entry }) => {
+      if (isDefined(value)) {
+        const numeric = parseFloat(value);
+        if (isNaN(numeric) || isNil(value.match(floatRegex))) {
+          return {
+            result: false,
+            message: `${entry.name} must be numeric`
+          };
+        }
+      }
+    }
+  },
+  // Numeric domain validation
+  {
+    canApply: entry => entry.type === "numeric",
+    apply: ({ value, entry }) => {
+      const { integer, min, max } = entry.props;
+      const numeric = parseFloat(value);
+      if (isDefined(integer)) {
+        if (integer && !Number.isInteger(numeric)) {
+          return {
+            result: false,
+            message: `${entry.name} must be an integer`
+          };
+        }
+      }
+      if (isDefined(min)) {
+        if (numeric < min) {
+          return {
+            result: false,
+            message: `${entry.name} must be greater than ${min}`
+          };
+        }
+      }
+      if (isDefined(max)) {
+        if (numeric > max) {
+          return {
+            result: false,
+            message: `${entry.name} must be less than ${max}`
+          };
+        }
+      }
+    }
   }
 ];
 
@@ -623,4 +786,10 @@ function aggregateEntries(entries) {
     groups.push(currentGroup);
   }
   return groups;
+}
+
+function mapOptions(options) {
+  return options.map(o =>
+    typeof o === "string" ? { value: o, label: capitalize(o) } : o
+  );
 }

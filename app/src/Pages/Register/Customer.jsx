@@ -14,10 +14,11 @@ export default function RegisterCustomer() {
     onSubmit
   } = useApiForm({
     path: "/register/customer",
-    onSuccess: data => {
+    onSuccess: ({response}) => {
+      const { token } = response;
       setIsBlocking(false);
-      const session = decodeJWT(data);
-      loadAuth({ ...session, token: data });
+      const session = decodeJWT(token);
+      loadAuth({ ...session, token });
     }
   });
 

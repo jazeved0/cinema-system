@@ -1,19 +1,21 @@
-import React, { useRef, useMemo } from "react";
-import { isDefined } from "Utility";
+import React, { useRef, useMemo, useCallback } from "react";
+import { isDefined, useCallbackOnce } from "Utility";
 import { useAuthGet } from "Api";
-import { useRouteMatch, useHistory, Redirect } from "react-router-dom";
+import { useRouteMatch, useHistory } from "react-router-dom";
 
-import { AppBase, CompanyDetail } from "Pages";
-import { Modal } from "react-bootstrap";
-import { DataGrid, Icon } from "Components";
+import { AppBase } from "Pages";
+import { Modal, Button } from "react-bootstrap";
+import { DataGrid, Icon, CompanyDetail, CreateTheaterForm } from "Components";
 import { NumericFilter, ComboFilter } from "Components/DataGrid";
 
 export default function ManageCompany() {
   // Fetch API data
-  let [companies, isLoading] = useAuthGet("/companies", {
-    config: { params: { only_names: false } }
+  // eslint-disable-next-line no-unused-vars
+  let [{ companies }, { isLoading, refresh }] = useAuthGet({
+    route: "/companies",
+    config: { params: { only_names: false } },
+    defaultValue: { companies: [] }
   });
-  companies = isDefined(companies) ? companies : [];
 
   // Use ref to bypass incorrect generation usage
   const companyNameRef = useRef([]);
@@ -64,6 +66,22 @@ export default function ManageCompany() {
     ? decodeURI(detailsRouteMatch.params.name)
     : null;
 
+  // Create theater dialog visibility
+  const dialogPath = `${base}/create-theater`;
+  const createTheaterDialogShown = isDefined(
+    useRouteMatch({ path: dialogPath })
+  );
+  const hideCreateTheaterDialog = useCallbackOnce(() => history.push(base));
+  const showCreateTheaterDialog = useCallbackOnce(() =>
+    history.push(dialogPath)
+  );
+
+  // Update local cache upon theater add
+  const createTheater = useCallback(() => {
+    refresh();
+    hideCreateTheaterDialog();
+  }, [hideCreateTheaterDialog, refresh]);
+
   return (
     <AppBase title="Manage Company" level="admin">
       <DataGrid
@@ -85,16 +103,40 @@ export default function ManageCompany() {
               }
             ];
         }}
+        toolbarComponents={
+          <Button
+            variant="primary"
+            className="create-theater-button"
+            onClick={showCreateTheaterDialog}
+          >
+            Create Theater
+          </Button>
+        }
       />
-      <Redirect from={`${base}/details`} to={base} exact />
       <Modal
         show={detailShown}
         onHide={hideDetails}
-        dialogClassName="company-details"
+        dialogClassName="company-details modal-container modal-app"
       >
         <Modal.Header closeButton />
         <div className="content">
           <CompanyDetail company={detailCompany} />
+        </div>
+      </Modal>
+      <Modal
+        show={createTheaterDialogShown}
+        onHide={hideCreateTheaterDialog}
+        dialogClassName="company-details modal-app"
+        size="lg"
+      >
+        <Modal.Header closeButton />
+        <div className="content create-theater">
+          <h2>Create Theater</h2>
+          <CreateTheaterForm
+            show={createTheaterDialogShown}
+            onHide={hideCreateTheaterDialog}
+            onAdd={createTheater}
+          />
         </div>
       </Modal>
     </AppBase>

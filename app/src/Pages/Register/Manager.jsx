@@ -16,10 +16,11 @@ export default function RegisterManager() {
     onSubmit
   } = useApiForm({
     path: "/register/manager",
-    onSuccess: data => {
+    onSuccess: ({response}) => {
+      const { token } = response;
       setIsBlocking(false);
-      const session = decodeJWT(data);
-      loadAuth({ ...session, token: data });
+      const session = decodeJWT(token);
+      loadAuth({ ...session, token });
     }
   });
 

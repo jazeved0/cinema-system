@@ -130,14 +130,19 @@ function DataGrid({
   );
 
   // Responsive column widths
+  let derivedColumnWidths = isDefined(columnWidths)
+    ? columnWidths
+    : {
+        base: columns.map(() => null)
+      };
   function getBreakpoints(columnWidthMap) {
     return Object.keys(columnWidthMap).filter(k => k !== "base");
   }
-  const breakpointArray = getBreakpoints(columnWidths);
+  const breakpointArray = getBreakpoints(derivedColumnWidths);
   const activeBreakpoint = useMediaBreakpoints(breakpointArray);
   const currentColumnWidths = isNil(activeBreakpoint)
-    ? columnWidths.base
-    : columnWidths[activeBreakpoint];
+    ? derivedColumnWidths.base
+    : derivedColumnWidths[activeBreakpoint];
 
   // Process column meta to add base info, column widths, and help text
   const columnMeta = columns.map((c, i) => {

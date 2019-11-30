@@ -17,7 +17,6 @@ export function useNotifications() {
 }
 
 function notificationReducer(state, action) {
-  console.log(state);
   switch (action.type) {
     case "dismiss": {
       const { type, id } = action.payload;

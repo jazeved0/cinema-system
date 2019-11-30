@@ -1,5 +1,4 @@
 import jwt as pyjwt
-import os
 import functools
 import base64
 from flask import request, Response
@@ -89,7 +88,7 @@ def authenticated(fn):
         try:
             jwt = JWT(token=request.headers['Authorization'])
         except pyjwt.exceptions.InvalidTokenError:
-            return get_failed_auth_resp()
+            return get_failed_auth_resp("Invalid token supplied")
 
         return fn(*args, jwt=jwt, **kwargs)
     return wrapped

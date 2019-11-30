@@ -1,6 +1,7 @@
 export {
   faMoon,
   faPlus,
+  faMinus,
   faCaretDown,
   faFilter,
   faTimesCircle,

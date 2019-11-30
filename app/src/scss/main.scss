@@ -266,17 +266,34 @@ input[type="password"] {
     margin-top: 8rem !important;
     margin-bottom: 1rem;
 
+    &.modal-app {
+        margin-top: 10.5rem !important;
+    }
+
     &.modal-container {
         @include make-container();
         @include make-container-max-widths();
     }
 
+    &:not(.modal-container) {
+        @include respond-below(xs) {
+            margin-left: 15px;
+            margin-right: 15px;
+        }
+    }
+
     @include respond-below(md) {
         margin-top: 6rem !important;
+        &.modal-app {
+            margin-top: 10rem !important;
+        }
     }
 
     @include respond-below(sm) {
         margin-top: 5.35rem !important;
+        &.modal-app {
+            margin-top: 5.35rem !important;
+        }
     }
 
     // Header collapse breakpoint

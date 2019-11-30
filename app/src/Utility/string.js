@@ -16,7 +16,7 @@ export function isFile(href) {
 }
 
 export function isEmptyOrNil(string) {
-  if (typeof string !== "string") return true;
+  if (typeof string !== "string") return isNil(string);
   return isNil(string) || string.trim().length === 0;
 }
 

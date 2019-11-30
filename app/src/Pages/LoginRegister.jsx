@@ -41,9 +41,10 @@ export default function LoginRegister() {
   const { errorContext, isLoading, onSubmit } = useApiForm({
     show: activeLogin && !registerOpen,
     path: "/login",
-    onSuccess: data => {
-      const session = decodeJWT(data);
-      loadAuth({ ...session, token: data });
+    onSuccess: ({ response }) => {
+      const { token } = response;
+      const session = decodeJWT(token);
+      loadAuth({ ...session, token });
     }
   });
 
@@ -244,7 +245,11 @@ LoginRegister.RegisterModal = function(props) {
         from: [base, ...panes.map(k => `${base}/${k}`)],
         to: "/"
       })}
-      <Modal show={show} onHide={onHide} dialogClassName="register-modal .modal-container">
+      <Modal
+        show={show}
+        onHide={onHide}
+        dialogClassName="register-modal modal-container"
+      >
         <Modal.Header closeButton />
         <div className="content">
           {panes.map(k => {

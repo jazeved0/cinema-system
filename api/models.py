@@ -1,4 +1,6 @@
-from sqlalchemy import BigInteger, Boolean, CHAR, CheckConstraint, Column, Date, ForeignKey, ForeignKeyConstraint, Integer, String, Table, Text, UniqueConstraint
+from sqlalchemy import BigInteger, Boolean, CHAR, CheckConstraint, Column, \
+     Date, ForeignKey, ForeignKeyConstraint, Integer, String, Table, Text, \
+     UniqueConstraint, inspect
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -15,7 +17,8 @@ class Base(decl_base):
     __abstract__ = True
 
     def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        inst = inspect(self)
+        return {c_attr.key: getattr(self, c_attr.key) for c_attr in inst.mapper.column_attrs}
 
 
 class User(Base):

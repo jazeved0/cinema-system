@@ -1,4 +1,4 @@
-from flask import Flask, g, jsonify, make_response
+from flask import Flask, g, jsonify
 from flask_restful import Api, Resource, reqparse, inputs
 from flask_cors import CORS
 from sqlalchemy import and_
@@ -6,11 +6,11 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from auth import authenticated, get_failed_auth_resp, hash_password, \
     provision_jwt, requires_admin, requires_manager
-from config import get_session
+from config import get_session, states
 from models import TUserDerived, Company, Visit, User, TCompanyDerived, \
     Theater, Manager, Movie
 from register import r_user, r_customer, r_manager, r_manager_customer
-from util import serialize, to_dict
+from util import to_dict, remove_non_numeric
 
 """
 Contains the core of the API logic, including RESTful endpoints and custom
@@ -29,7 +29,7 @@ class Param(object):
         self.optional = optional
 
 
-def parse_args(*param_list):
+def parse_args(*param_list, as_dict=False):
     parser = reqparse.RequestParser()
     for param in param_list:
         if type(param) == str:
@@ -43,6 +43,9 @@ def parse_args(*param_list):
 
     param_values = parser.parse_args()
     param_names = [p if type(p) == str else p.name for p in param_list]
+
+    if as_dict:
+        return {p: param_values[p] for p in param_names}
     return (param_values[p] for p in param_names)
 
 
@@ -59,31 +62,6 @@ class DBResource(Resource):
         if 'db' not in g:
             g.db = get_session()
         return g.db
-
-
-class ListResource(Resource):
-    @staticmethod
-    def register(api, resource_class, route, param="id"):
-        api.add_resource(resource_class, route, f"{route}/<{param}>",
-                         resource_class_kwargs={"id_name": param})
-
-    def __init__(self, *args, **kwargs):
-        id_name = kwargs.pop("id_name")
-        self.id_name = id_name
-        super().__init__(*args, **kwargs)
-
-    def get(self, *args, **kwargs):
-        if self.id_name in kwargs:
-            id_param = kwargs.pop(self.id_name)
-            return self.get_by_id(id_param, *args, **kwargs)
-        else:
-            return self.get_all(*args, **kwargs)
-
-    def get_all(self):
-        pass
-
-    def get_by_id(self, id):
-        pass
 
 
 class Login(DBResource):
@@ -103,48 +81,26 @@ class Login(DBResource):
         else:
             print("Successful authentication: {}".format(user.username))
             token = provision_jwt(user).get_token().decode()
-            return token, 200
+            return jsonify({"token": token})
 
 
 class RegistrationUser(DBResource):
     def post(self):
-        return r_user(*parse_args("first_name", "last_name", "username", "password"), self.db)
+        return r_user(
+            **parse_args(
+                "first_name",
+                "last_name",
+                "username",
+                "password",
+                as_dict=True),
+            database=self.db
+        )
 
 
 class RegistrationManager(DBResource):
     def post(self):
         return r_manager(
-            *parse_args(
-                "first_name",
-                "last_name",
-                "username",
-                "password",
-                "company",
-                "street_address",
-                "city",
-                "state",
-                "zipcode"),
-            self.db
-        )
-
-
-class RegistrationCustomer(DBResource):
-    def post(self):
-        return r_customer(
-            *parse_args(
-                "first_name",
-                "last_name",
-                "username",
-                "password",
-                Param("credit_cards", type=list)),
-            self.db
-        )
-
-
-class RegistrationManagerCustomer(DBResource):
-    def post(self):
-        return r_manager_customer(
-            *parse_args(
+            **parse_args(
                 "first_name",
                 "last_name",
                 "username",
@@ -154,17 +110,50 @@ class RegistrationManagerCustomer(DBResource):
                 "city",
                 "state",
                 "zipcode",
-                Param("credit_cards", type=list)),
-            self.db
+                as_dict=True),
+            database=self.db
         )
 
 
-class Companies(DBResource, ListResource):
-    def get_all(self):
+class RegistrationCustomer(DBResource):
+    def post(self):
+        return r_customer(
+            **parse_args(
+                "first_name",
+                "last_name",
+                "username",
+                "password",
+                Param("credit_cards", type=list),
+                as_dict=True),
+            database=self.db
+        )
+
+
+class RegistrationManagerCustomer(DBResource):
+    def post(self):
+        return r_manager_customer(
+            **parse_args(
+                "first_name",
+                "last_name",
+                "username",
+                "password",
+                "company",
+                "street_address",
+                "city",
+                "state",
+                "zipcode",
+                Param("credit_cards", type=list),
+                as_dict=True),
+            database=self.db
+        )
+
+
+class Companies(DBResource):
+    def get(self):
         only_names, = parse_args(Param("only_names", optional=True, type=inputs.boolean))
         if only_names:
             companies = self.db.query(Company.name).all()
-            return serialize([c.name for c in companies])
+            return jsonify({"companies": [c.name for c in companies]})
         else:
             return self.get_all_auth()
 
@@ -172,14 +161,7 @@ class Companies(DBResource, ListResource):
     @requires_admin
     def get_all_auth(self):
         companies = self.db.query(TCompanyDerived).all()
-        return serialize(companies, table=TCompanyDerived)
-
-    @authenticated
-    @requires_admin
-    def get_by_id(self, name):
-        company = self.db.query(TCompanyDerived).filter(
-            TCompanyDerived.c.name == name).first()
-        return serialize(company, table=TCompanyDerived)
+        return jsonify({"companies": to_dict(companies, table=TCompanyDerived)})
 
 
 class CompaniesTheaters(DBResource):
@@ -189,7 +171,7 @@ class CompaniesTheaters(DBResource):
         theaters = self.db.query(Theater).filter(
             Theater.companyname == name
         )
-        return jsonify([t.as_dict() for t in theaters])
+        return jsonify({"theaters": to_dict(theaters)})
 
 
 class CompaniesManagers(DBResource):
@@ -199,26 +181,27 @@ class CompaniesManagers(DBResource):
         managers = self.db.query(Manager).filter(
             Manager.companyname == name
         )
-        return jsonify([m.as_dict() for m in managers])
+        # Remove hashed password from output
+        return jsonify({"managers": to_dict(managers, scrub=["password"])})
 
 
 class CompaniesNumTheaters(DBResource):
     def get(self, company):
         num = self.db.query(Theater).filter(Theater.companyname == company.replace("%20", " ")).count()
-        return make_response(jsonify({"num_theaters": num}), 200)
+        return jsonify({"num_theaters": num})
 
 
 class CompaniesNumEmployees(DBResource):
     def get(self, company):
         num = self.db.query(Manager).filter(Manager.companyname == company).count()
-        return make_response(jsonify({"num_employees": num}), 200)
+        return jsonify({"num_employees": num})
 
 
 class CompaniesNumCities(DBResource):
     def get(self, company):
         num = self.db.query(Theater).distinct(Theater.city).filter(
             Theater.companyname == company.replace("%20", " ")).count()
-        return make_response(jsonify({"num_cities": num}), 200)
+        return jsonify({"num_cities": num})
 
 
 class Users(DBResource):
@@ -227,9 +210,7 @@ class Users(DBResource):
     def get(self):
         users = self.db.query(TUserDerived).all()
         # Remove hashed passwords from API output
-        scrubbed = [{k: v for k, v in user.items() if k != "password"}
-                    for user in to_dict(users, table=TUserDerived)]
-        return jsonify(scrubbed)
+        return jsonify({"users": to_dict(users, table=TUserDerived, scrub=["password"])})
 
 
 class UserApproveResource(DBResource):
@@ -281,10 +262,25 @@ class UserDeclineResource(DBResource):
             return "Success", 200
 
 
+class EligibleManagers(DBResource):
+    @authenticated
+    @requires_admin
+    def get(self):
+        try:
+            managers = self.db.query(Manager).outerjoin(Theater).filter(
+                Theater.theatername == None).all()
+        except SQLAlchemyError:
+            return "Could not find eligible managers", 403
+        else:
+            return jsonify({"managers": to_dict(managers, fields=[
+                "username", "companyname", "firstname", "lastname"])})
+
+
 class Theaters(DBResource):
+    @authenticated
+    @requires_admin
     def post(self):
-        # TODO validation
-        tn, cn, state, city, zip, cap, man, st = parse_args(
+        theatername, companyname, state, city, zipcode, capacity, manager, street = parse_args(
             "theatername",
             "companyname",
             "state",
@@ -295,20 +291,62 @@ class Theaters(DBResource):
             "street"
         )
 
-        theater = Theater(
-            theatername=tn,
-            companyname=cn,
-            state=state,
-            city=city,
-            zipcode=zip,
-            capacity=cap,
-            manager=man,
-            street=st
-        )
-        self.db.add(theater)
-        self.db.commit()
+        # Validate that company is valid
+        company = self.db.query(Company).filter(Company.name == companyname).first()
+        if not company:
+            return f"Company name {companyname} does not exist", 400
 
-        return 204
+        # Validate that name is unique within company
+        theater = self.db.query(Theater).filter(
+            Theater.theatername == theatername, Theater.companyname == companyname).first()
+        if theater:
+            return f"Theater name {theatername} must be unique", 400
+
+        # Validate that zipcode is in the correct format
+        formatted_zipcode = remove_non_numeric(zipcode)
+        if len(formatted_zipcode) != 5 or formatted_zipcode != zipcode:
+            return f"Zipcode {formatted_zipcode} must be 5 digits long", 400
+
+        # Validate state
+        if state.upper() not in states:
+            return "State must be a valid two-letter state", 400
+
+        # Validate capacity
+        if not capacity.isdigit() or int(capacity) <= 0:
+            return "Capacity must be an integer greater than 1", 400
+
+        # Validate that manager exists
+        manager_object = self.db.query(Manager).filter(Manager.username == manager).first()
+        if not manager_object:
+            return f"Manager @{manager} does not exist", 400
+
+        # Validate valid manager-company pairing
+        if manager_object.companyname != companyname:
+            return f"Manager @{manager} does not work for company {companyname}", 400
+
+        # Validate that manager is not managing any other theaters
+        manager_object = self.db.query(Manager).outerjoin(Theater).filter(
+            Theater.theatername != None, Manager.username == manager).first()
+        if manager_object:
+            return f"Manager @{manager} is already managing a theater", 400
+
+        try:
+            theater = Theater(
+                theatername=theatername,
+                companyname=companyname,
+                state=state,
+                city=city,
+                zipcode=zipcode,
+                capacity=capacity,
+                manager=manager,
+                street=street
+            )
+            self.db.add(theater)
+            self.db.commit()
+        except SQLAlchemyError:
+            return "Could not create theater", 403
+        else:
+            return 201
 
 
 class Movies(DBResource):
@@ -320,11 +358,11 @@ class Movies(DBResource):
         self.db.add(movie)
         self.db.commit()
 
-        return 204
+        return 201
 
     def get(self):
         movies = self.db.query(Movie).all()
-        return jsonify([m.as_dict() for m in movies])
+        return jsonify({'movies': to_dict(movies)})
 
 
 class MoviesSchedule(DBResource):
@@ -339,12 +377,13 @@ class MoviesSchedule(DBResource):
             "  SELECT CompanyName FROM Theater WHERE Manager = :username));",
             {"playdate": playdate, "moviename": moviename, "releasedate": releasedate, "username": jwt.username}
         )
-        return 204
+        return 201
+
 
 class ExploreMovie(DBResource):
     def get(self):
         result = self.db.execute("select * from movieplay natural join theater").fetchall()
-        return jsonify({'result': [dict(row) for row in result]})
+        return jsonify({'movies': [dict(row) for row in result]})
 
 
 class TheaterOverview(DBResource):
@@ -364,7 +403,7 @@ class TheaterOverview(DBResource):
             "RIGHT JOIN movie ON t1.MovieName = movie.Name",
             {"username": jwt.username}
         ).fetchall()
-        return jsonify({'result': [dict(row) for row in result]})
+        return jsonify({'movies': to_dict(result)})
 
 
 class Visits(DBResource):
@@ -376,7 +415,7 @@ class Visits(DBResource):
             Visit.companyname == company,
             Visit.date.between(start_date, end_date)
         )).all()
-        return serialize(visits)
+        return jsonify({'visits': to_dict(visits)})
 
 
 # Uptime checker route
@@ -388,23 +427,26 @@ def status():
 def app_factory():
     api = Api(app)
     api.add_resource(Login, "/login")
-    ListResource.register(api, Companies, "/companies", param="name")
-    api.add_resource(CompaniesManagers, "/companies/<string:name>/managers")
-    api.add_resource(CompaniesTheaters, "/companies/<string:name>/theaters")
-    api.add_resource(TheaterOverview, "/theater_overview")
-    api.add_resource(Users, "/users")
-    api.add_resource(UserApproveResource, "/users/<username>/approve")
-    api.add_resource(UserDeclineResource, "/users/<username>/decline")
-    # api.add_resource(CompaniesNumEmployees, "/companies/<string:company>/num_employees")
-    # api.add_resource(CompaniesNumCities, "/companies/<string:company>/num_cities")
-    # api.add_resource(CompaniesNumTheaters, "/companies/<string:company>/num_theaters")
     api.add_resource(RegistrationUser, "/register/user")
     api.add_resource(RegistrationManager, "/register/manager")
     api.add_resource(RegistrationCustomer, "/register/customer")
     api.add_resource(RegistrationManagerCustomer, "/register/manager-customer")
-    api.add_resource(Theaters, "/theaters")
+
+    api.add_resource(Companies, "/companies")
+    api.add_resource(CompaniesManagers, "/companies/<string:name>/managers")
+    api.add_resource(CompaniesTheaters, "/companies/<string:name>/theaters")
+
     api.add_resource(Movies, "/movies")
     api.add_resource(MoviesSchedule, "/movies/schedule")
     api.add_resource(ExploreMovie, "/movies/explore")
+
+    api.add_resource(Theaters, "/theaters")
+    api.add_resource(TheaterOverview, "/theater_overview")
+
+    api.add_resource(Users, "/users")
+    api.add_resource(UserApproveResource, "/users/<username>/approve")
+    api.add_resource(UserDeclineResource, "/users/<username>/decline")
+
     api.add_resource(Visits, "/visits")
+    api.add_resource(EligibleManagers, "/managers/eligible")
     return app

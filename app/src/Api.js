@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   buildPath,
   log,
@@ -9,44 +9,49 @@ import {
 import { useAuth } from "Authentication";
 import axios from "axios";
 
+// APO host (depending on development or production)
 export const API_ROOT =
   process.env.NODE_ENV === "development"
     ? "http://localhost:5000/"
     : "https://api.cinema-system.ga/";
 
+// Resolves API route via API_ROOT
 export function api(path) {
   return buildPath(API_ROOT, path);
 }
 
+// Shortcut hook to use list of company names via the API
 export function useCompanies() {
   // eslint-disable-next-line no-unused-vars
-  const [companies, isLoading] = useGet("/companies", {
-    config: { params: { only_names: true } }
-  });
+  const [{ companies }, { isLoading }] = useGet(
+    {
+      route: "/companies",
+      config: { params: { only_names: true } },
+      defaultValue: { companies: [] }
+    },
+    []
+  );
   return isLoading ? [] : companies;
 }
 
+// Handles axios errors by logging them and outputting an error string
 function handleAxiosError(error) {
   if (error.response) {
-    log(`${error.response.status} Error: ${error.response.data}`);
-    return error.response.data;
+    const { data } = error.response;
+    const dataText =
+      typeof data === "object" ? JSON.stringify(data) : data.toString();
+    log(`${error.response.status} Error: ${dataText}`);
+    return dataText;
   } else if (error.request) {
     log(`Client Error: ${JSON.stringify(error.request)}`);
-    return `Could not make request. Check network connectivity`;
+    return "Could not make request. Check network connectivity";
   } else {
     log(`Generic Error: ${error.message}`);
-    return error.message;
+    return error.message.toString();
   }
 }
 
-export function useAuthGet(route, options = {}) {
-  const { token } = useAuth();
-  return useGet(route, {
-    ...options,
-    config: withAuthHeader(options, token)
-  });
-}
-
+// Extends an axios config to add the header field
 export function withAuthHeader({ config = {} }, token) {
   return {
     ...config,
@@ -56,87 +61,114 @@ export function withAuthHeader({ config = {} }, token) {
   };
 }
 
-export function useGet(route, { retry = true, config = {} }) {
-  /* eslint-disable react-hooks/exhaustive-deps */
-  const [result, setResult] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  useRequest(route, "get", {
-    retry,
-    config,
-    onStart: () => {
-      setIsLoading(true);
-    },
-    onFailure: () => {
-      setIsLoading(false);
-    },
-    onSuccess: data => {
-      setIsLoading(false);
-      setResult(data);
-    }
-  });
-
-  return [result, isLoading, setResult];
-}
-
-export function useAuthRequest(
-  route,
-  method,
-  { retry = true, config = {}, onStart, onFailure, onSuccess }
-) {
-  const { token } = useAuth();
-  useEffect(() => {
-    onStart();
-    performAuthRequest(route, method, token, {
-      retry,
-      config,
-      onFailure,
-      onSuccess
-    });
-  }, [route]);
-}
-
-export function useRequest(
-  route,
-  method,
-  { retry = true, config = {}, onStart, onFailure, onSuccess }
-) {
-  useEffect(() => {
-    onStart();
-    performRequest(route, method, {
-      retry,
-      config,
-      onFailure,
-      onSuccess
-    });
-  }, [route]);
-}
-
+// Dispatches a cancellable API request with the auth token added
 export function performAuthRequest(
   route,
   method,
   token,
-  { retry = true, config = {}, onFailure, onSuccess }
+  { config = {}, ...rest }
 ) {
   const derivedConfig = withAuthHeader({ config }, token);
-  const request = () => axios({ method, url: api(route), ...derivedConfig });
-  (retry ? retryPromise(request, 1000, `fetching ${route}`) : request())
-    .then(response => onSuccess(response.data))
-    .catch(error => onFailure(handleAxiosError(error)));
+  return performRequest(route, method, { config: derivedConfig, ...rest });
 }
 
+// Dispatches a cancellable API request
 export function performRequest(
   route,
   method,
-  { retry = true, config = {}, onFailure, onSuccess }
+  { onSuccess, onFailure, retry = true, config = {} }
 ) {
+  const cancelRef = { current: false };
+  const cancel = () => (cancelRef.current = true);
   const request = () => axios({ method, url: api(route), ...config });
-  (retry ? retryPromise(request, 1000, `fetching ${route}`) : request())
-    .then(response => onSuccess(response.data))
-    .catch(error => onFailure(handleAxiosError(error)));
+
+  let promise = null;
+  if (retry) {
+    promise = retryPromise(request, {
+      taskName: `${method.toUpperCase()} ${route}`,
+      cancelRef: cancelRef
+    });
+  } else {
+    promise = request();
+  }
+
+  promise
+    .then(response => {
+      if (!cancelRef.current) {
+        onSuccess(response.data);
+      }
+    })
+    .catch(error => {
+      const errorText = handleAxiosError(error);
+      if (!cancelRef.current) {
+        log(`Request failed: ${method.toUpperCase()} ${route}`);
+        onFailure(errorText);
+      } else {
+        log(`Silently ignoring error due to cancelled task: ${errorText}`);
+      }
+    });
+
+  return cancel;
+}
+
+// Common use case where a resource is requested and is loaded
+export function useGet(
+  { route, retry = true, config = {}, defaultValue = null, onFailure },
+  dependencies = []
+) {
+  /* eslint-disable react-hooks/exhaustive-deps */
+  const [result, update] = useState(defaultValue);
+  const [isLoading, setIsLoading] = useState(false);
+  useEffect(() => {
+    setIsLoading(true);
+    const cancel = performRequest(route, "get", {
+      retry,
+      config,
+      onSuccess: data => {
+        setIsLoading(false);
+        update(data);
+      },
+      onFailure: error => {
+        setIsLoading(false);
+        if (isDefined(onFailure)) onFailure(error);
+      }
+    });
+
+    // Cancel request upon cleaning up effect
+    return cancel;
+  }, dependencies);
+
+  const refresh = useCallback(
+    () =>
+      performRequest(route, "get", {
+        retry,
+        config,
+        onSuccess: data => {
+          update(data);
+        }
+      }),
+    [retry, config, route, update]
+  );
+
+  return [result, { isLoading, update, refresh }];
+}
+
+// Common use case where a resource is requested and is loaded
+// (with auth headers automatically applied)
+export function useAuthGet({ config = {}, ...rest }, dependencies) {
+  const { token } = useAuth();
+  const derivedConfig = withAuthHeader({ config }, token);
+  return useGet({ config: derivedConfig, ...rest }, dependencies);
 }
 
 // Exposes loading, errors, and submission callback to API-enabled forms
-export function useApiForm({ path, show = true, onSuccess }) {
+export function useApiForm({
+  path,
+  show = true,
+  onSuccess,
+  onFailure,
+  config = {}
+}) {
   // Errors
   const [errors, setErrors] = useState([]);
   const onDismiss = id => setErrors(errors.filter(e => e.id !== id));
@@ -155,17 +187,29 @@ export function useApiForm({ path, show = true, onSuccess }) {
   });
 
   // On submission logic
-  const onSubmit = params => {
+  const onSubmit = data => {
     setIsLoading(true);
-    axios
-      .post(api(path), params)
+    axios({ url: api(path), method: "post", ...config, data })
       .then(response => {
         setIsLoading(false);
         clearErrors();
-        onSuccess(response.data);
+        onSuccess({ data, response: response.data });
       })
-      .catch(error => setError(handleAxiosError(error)));
+      .catch(error => {
+        setIsLoading(false);
+        const errorText = handleAxiosError(error);
+        setError(errorText);
+        if (isDefined(onFailure)) onFailure(errorText);
+      });
   };
 
   return { errorContext, isLoading, onSubmit };
+}
+
+// Exposes loading, errors, and submission callback to API-enabled forms
+// (with auth headers automatically applied)
+export function useAuthForm({ config = {}, ...rest }) {
+  const { token } = useAuth();
+  const derivedConfig = withAuthHeader({ config }, token);
+  return useApiForm({ config: derivedConfig, ...rest });
 }

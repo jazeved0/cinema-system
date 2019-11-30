@@ -10,7 +10,10 @@ import { NumericFilter, ComboFilter } from "Components/DataGrid";
 
 export default function ManageUser() {
   // Fetch API data
-  const [users, isLoading, adjustCache] = useAuthGet("/users");
+  const [{ users }, { isLoading, update: setUsers }] = useAuthGet({
+    route: "/users",
+    defaultValue: { users: [] }
+  });
 
   // Column definitions
   const baseColumn = {
@@ -51,11 +54,12 @@ export default function ManageUser() {
       onFailure: error => toast(error),
       onSuccess: () => {
         toast(`User ${username} declined`, "success");
-        adjustCache(user_list =>
-          user_list.map(u =>
+        setUsers(state => ({
+          ...state,
+          users: state.users.map(u =>
             u.username === username ? { ...u, status: "Declined" } : u
           )
-        );
+        }));
       }
     })
   );
@@ -64,11 +68,12 @@ export default function ManageUser() {
       onFailure: error => toast(error),
       onSuccess: () => {
         toast(`User ${username} approved`, "success");
-        adjustCache(user_list =>
-          user_list.map(u =>
+        setUsers(state => ({
+          ...state,
+          users: state.users.map(u =>
             u.username === username ? { ...u, status: "Approved" } : u
           )
-        );
+        }));
       }
     })
   );

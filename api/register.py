@@ -1,9 +1,11 @@
 import functools
+from flask import jsonify
 from sqlalchemy import and_
 
 from auth import hash_password, provision_jwt
 from models import TUserDerived, User, Company, Manager, Customer, Creditcard
 from config import states
+from util import remove_non_numeric
 
 """
 Handles registration validation & database mutation for the 4 registration
@@ -23,7 +25,7 @@ def validate_user(fn):
             return "Password must be at least 8 characters long", 400
 
         # Validate unique username
-        dup_user = kwargs.get("database").session.query(TUserDerived).filter(
+        dup_user = kwargs.get("database").query(TUserDerived).filter(
             TUserDerived.c.username == kwargs.get("username")).first()
         if dup_user is not None:
             return "Username must be unique", 400
@@ -42,7 +44,7 @@ def validate_customer(fn):
     def wrapped(*args, **kwargs):
         # Validate credit card length
         cc_list = kwargs.get("credit_cards")
-        trimmed_cc = [cc.replace(' ', '') for cc in cc_list]
+        trimmed_cc = [remove_non_numeric(cc.replace(' ', '')) for cc in cc_list]
         num_credit_cards = len(trimmed_cc)
         if num_credit_cards < 1 or num_credit_cards > 5:
             return "Number of credit cards must be between 1 and 5, inclusive", 400
@@ -71,7 +73,7 @@ def validate_manager(fn):
             return "State must be a valid two-letter state", 400
 
         # Validate address uniqueness
-        manager_dup = kwargs.get("database").session.query(
+        manager_dup = kwargs.get("database").query(
             Manager).filter(and_(
                 Manager.state == kwargs.get("state"),
                 Manager.city == kwargs.get("city"),
@@ -81,7 +83,7 @@ def validate_manager(fn):
             return "Address must be unique", 400
 
         # Validate company
-        company = kwargs.get("database").session.query(Company).filter(
+        company = kwargs.get("database").query(Company).filter(
             Company.name == kwargs.get("company")).first()
         if company is None:
             return "Company must be an existing company in the system", 400
@@ -99,7 +101,8 @@ def r_user(first_name, last_name, username, password, database):
     new_user.password = hash_password(password, new_user)
     database.add(new_user)
     database.commit()
-    return provision_jwt(new_user, cc_count=0).get_token(), 200
+    token = provision_jwt(new_user, cc_count=0).get_token().decode()
+    return jsonify({"token": token})
 
 
 @validate_user
@@ -113,7 +116,8 @@ def r_manager(first_name, last_name, username, password, company,
     new_manager.password = hash_password(password, new_manager)
     database.add(new_manager)
     database.commit()
-    return provision_jwt(new_manager, is_manager=True, cc_count=0).get_token(), 200
+    token = provision_jwt(new_manager, is_manager=True, cc_count=0).get_token().decode()
+    return jsonify({"token": token})
 
 
 @validate_user
@@ -141,8 +145,9 @@ def r_manager_customer(first_name, last_name, username, password, company,
         creditcardnum=cc, owner=username) for cc in credit_cards]
     database.add_all(new_credit_cards)
     database.commit()
-    return provision_jwt(new_manager, is_manager=True, is_customer=True,
-                         cc_count=len(credit_cards)).get_token(), 200
+    token = provision_jwt(new_manager, is_manager=True, is_customer=True,
+                          cc_count=len(credit_cards)).get_token().decode()
+    return jsonify({"token": token})
 
 
 @validate_user
@@ -158,5 +163,6 @@ def r_customer(first_name, last_name, username, password, credit_cards, database
 
     database.add_all([new_customer] + new_credit_cards)
     database.commit()
-    return provision_jwt(new_customer, is_customer=True,
-                         cc_count=len(credit_cards)).get_token(), 200
+    token = provision_jwt(new_customer, is_customer=True,
+                          cc_count=len(credit_cards)).get_token().decode()
+    return jsonify({"token": token})

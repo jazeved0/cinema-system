@@ -62,14 +62,16 @@ function PlaceholderText({
   text,
   style,
   inline = false,
-  size = "1.2em",
+  size = "1em",
   width = "5em",
   light = false,
   displayBlank = false,
+  auto,
   ...rest
 }) {
+  const PlaceholderComponent = auto ? PlaceholderAuto : Placeholder;
   return shouldUsePlaceholder(text, displayBlank) ? (
-    <Placeholder
+    <PlaceholderComponent
       style={style}
       height={multiplyDimension(addMissingUnit(size), 1.1)}
       width={width}

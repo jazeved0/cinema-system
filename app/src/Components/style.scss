@@ -193,6 +193,7 @@
         display: flex;
         flex-direction: row;
         justify-content: flex-end;
+        margin-top: 0.75rem;
 
         .btn {
             padding-left: 1.5rem;
@@ -203,6 +204,19 @@
 
             &:not(:last-child) {
                 margin-right: 1.25rem;
+            }
+        }
+
+        &#{$this}--buttons__reverse {
+            flex-direction: row-reverse;
+            justify-content: flex-start;
+
+            .btn {
+                margin-right: 0;
+
+                &:not(:last-child) {
+                    margin-left: 1.25rem;
+                }
             }
         }
 
@@ -229,9 +243,19 @@
         }
     }
 
-    .form-group.row {
-        &:last-child {
-            margin-bottom: 0 !important;
+    &:not(.horizontal) {
+        @include respond-above(xs) {
+            .form-group {
+                margin-bottom: 0 !important;
+            }
+
+            .form-row {
+                margin-bottom: 1rem;
+
+                &:last-child {
+                    margin-bottom: 0 !important;
+                }
+            }
         }
     }
 
@@ -266,10 +290,10 @@
     }
 
     &__control {
-        border-radius: 8px;
-        transition: box-shadow 0.25s ease;
+        border-radius: 8px !important;
+        transition: box-shadow 0.25s ease !important;
         box-shadow: none;
-        cursor: pointer;
+        cursor: pointer !important;
 
         @include dark {
             background-color: blend($dark-000, $dark-400, 0.575) !important;
@@ -305,11 +329,7 @@
             cursor: not-allowed !important;
 
             @include dark {
-                background-color: blend(
-                    $dark-000,
-                    $dark-400,
-                    0.8
-                ) !important;
+                background-color: blend($dark-000, $dark-400, 0.8) !important;
                 color: rgba($-light, 0.8) !important;
                 border-color: $dark-200;
             }
@@ -323,7 +343,7 @@
 
     &.is-invalid {
         #{$this}__control {
-            border-color: $-danger;
+            border-color: $-danger !important;
 
             &:focus-within {
                 @include highlight-shadow($-danger);
@@ -333,7 +353,7 @@
 
     &.is-valid {
         #{$this}__control {
-            border-color: $-success;
+            border-color: $-success !important;
 
             &:focus-within {
                 @include highlight-shadow($-success);
@@ -361,6 +381,11 @@
 
     &__indicator {
         @include dark-fg(rgba($-light, 0.5));
+        cursor: pointer;
+
+        &:hover {
+            @include dark-fg(rgba($-light, 0.9));
+        }
     }
 
     &__menu {
@@ -372,7 +397,7 @@
     }
 
     &__option {
-        cursor: pointer;
+        cursor: pointer !important;
     }
 
     &__option--is-selected {
@@ -1146,6 +1171,7 @@ input.form-control.editor-main {
     }
 
     .react-grid-Toolbar {
+        $collapse-breakpoint: md;
         flex-grow: 0;
         z-index: 2;
         background-color: transparent;
@@ -1158,14 +1184,19 @@ input.form-control.editor-main {
         }
         height: auto;
 
-        @include respond-below(sm) {
+        .btn-primary {
+            background-color: $-primary;
+            border: none !important;
+        }
+
+        @include respond-below($collapse-breakpoint) {
             .tools {
                 float: none;
                 line-height: 1.5;
             }
         }
 
-        @include respond-above(sm) {
+        @include respond-above($collapse-breakpoint) {
             position: absolute;
             top: -76px;
             right: 0;
@@ -1205,7 +1236,7 @@ input.form-control.editor-main {
                 background-color 0.15s ease-in-out,
                 border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
             position: relative;
-            top: -8px;
+            top: -1px;
             outline: none;
         }
     }
@@ -1243,6 +1274,17 @@ input.form-control.editor-main {
             overflow: hidden;
             pointer-events: none;
         }
+
+        &::before {
+            content: " ";
+            position: absolute;
+            @include dark-bg($dark-100);
+            @include light-bg($light-300);
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
     }
 
     .react-grid-Header {
@@ -1258,6 +1300,7 @@ input.form-control.editor-main {
         margin-top: -1px;
         min-height: 0 !important;
         overflow-y: hidden !important;
+        box-shadow: $drop-shadow;
 
         &:first-child {
             border-top-left-radius: 8px;
@@ -1358,7 +1401,7 @@ input.form-control.editor-main {
 
         .react-grid-HeaderCell-sortable {
             &::after {
-                $height: 0;
+                $height: 3px;
                 position: absolute;
                 z-index: 0;
                 content: " ";
@@ -1366,8 +1409,11 @@ input.form-control.editor-main {
                 top: 0;
                 left: 0;
                 right: 0;
-                background-color: $-primary;
-                @include transitions("height");
+                height: $height;
+                @include dark-bg($-primary);
+                @include light-bg($-primary, 20%);
+                transform: translateY(-#{$height + 1px});
+                @include transitions(transform);
             }
 
             &:hover {
@@ -1375,7 +1421,7 @@ input.form-control.editor-main {
                 @include light-bg($data-grid-header-hover-light-bg);
 
                 &::after {
-                    height: 3px;
+                    transform: translateY(0);
                 }
             }
         }
@@ -1462,8 +1508,8 @@ input.form-control.editor-main {
     }
 
     .row-even {
-        @include light(background-color, rgba(black, 0.03));
-        @include dark(background-color, rgba(black, 0.1));
+        @include light-bg(rgba(0, 0, 0, 0.05));
+        @include dark-bg(rgba(0, 0, 0, 0.08));
         border-radius: 8px;
     }
 
@@ -1473,7 +1519,7 @@ input.form-control.editor-main {
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 400px;
+            min-height: 300px;
 
             .spinner-border {
                 width: 2.5rem;
@@ -1621,10 +1667,6 @@ input.form-control.editor-main {
         padding-left: 2rem;
         padding-right: 2rem;
     }
-
-    ._form--buttons {
-        flex-direction: row-reverse;
-    }
 }
 
 .notification-pane {
@@ -1710,5 +1752,89 @@ input.form-control.editor-main {
         @include respond-below($layout-breakpoint) {
             top: $header-offset;
         }
+    }
+}
+
+.company-detail {
+    &__row {
+        margin-bottom: 0.5rem;
+    }
+
+    &__row-label {
+        font-weight: 500;
+        margin-right: 1rem;
+    }
+
+    &__row-value {
+        .placeholder {
+            vertical-align: bottom;
+        }
+    }
+
+    &__theaters {
+        margin-top: 2.5rem;
+        min-height: 420px;
+        display: flex;
+        flex-direction: column;
+
+        .data-grid {
+            flex-grow: 1;
+        }
+    }
+}
+
+@mixin status-state($color) {
+    .btn-input-control {
+        border: 1px solid $color;
+
+        &:first-child {
+            border-right: none;
+        }
+
+        &:last-child {
+            border-left: none;
+        }
+
+        @include light {
+            background-color: rgba($color, 0.075);
+        }
+
+        @include dark {
+            background-color: rgba($color, 0.125);
+        }
+
+        &:focus {
+            @include highlight-shadow($color);
+
+            &:active {
+                @include highlight-active-shadow($color, $important: true);
+            }
+        }
+    }
+}
+
+.numeric-up-down {
+    &.is-invalid .input-group-append {
+        @include status-state($-danger);
+    }
+
+    &.is-valid .input-group-append {
+        @include status-state($-success);
+    }
+
+    &.disabled {
+        .input-group-append button {
+            cursor: not-allowed !important;
+        }
+    }
+
+    input {
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+    }
+
+    &.is-invalid ~ .invalid-feedback,
+    &.is-invalid ~ .invalid-tooltip {
+        display: block;
     }
 }

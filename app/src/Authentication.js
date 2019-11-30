@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useCallback } from "react";
 import { isDefined, log } from "Utility";
 import jwt_decode from "jwt-decode";
 
@@ -51,18 +51,24 @@ export function decodeJWT(jwt) {
 }
 
 export function useAuthStore() {
-  const login = session => {
-    const newSession = { ...authState, ...session };
-    setAuthState(newSession);
-    window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newSession));
-  };
+  const [authState, setAuthState] = useState(getInitialAuthState);
+  const login = useCallback(
+    session => {
+      const newSession = { ...authState, ...session };
+      setAuthState(newSession);
+      window.localStorage.setItem(
+        LOCAL_STORAGE_KEY,
+        JSON.stringify(newSession)
+      );
+    },
+    [authState]
+  );
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setAuthState(getDefaultAuthState());
     window.localStorage.removeItem(LOCAL_STORAGE_KEY);
-  };
+  }, []);
 
-  const [authState, setAuthState] = useState(getInitialAuthState);
   return {
     ...authState,
     isAuthenticated: isDefined(authState.token),

@@ -80,3 +80,10 @@ export function binarySearch(
   }
   return -1;
 }
+
+export function clamp(number, min, max) {
+  let result = number;
+  if (isDefined(min)) result = Math.max(result, min);
+  if (isDefined(max)) result = Math.min(result, max);
+  return result;
+}
