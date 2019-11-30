@@ -466,10 +466,10 @@ BEGIN
         ) AS t1
         RIGHT JOIN movie ON t1.MovieName = movie.Name
         -- Perform movie name filter
-        AND ((i_movName <=> '' OR UPPER(movie.Name) <=> UPPER(i_movName)) OR i_movName = 'ALL')
+        WHERE ((movie.Name LIKE CONCAT("%", i_movName, "%")) OR i_movName = '')
         -- Perform movie duration filter
-        AND (i_minMovDuration     IS NULL OR Duration          >= i_minMovDuration)
-        AND (i_maxMovDuration     IS NULL OR Duration          <= i_maxMovDuration)
+        AND (i_minMovDuration     IS NULL OR movie.Duration    >= i_minMovDuration)
+        AND (i_maxMovDuration     IS NULL OR movie.Duration    <= i_maxMovDuration)
         -- Perform movie release date filter
         AND (i_minMovReleaseDate  IS NULL OR movie.ReleaseDate >= i_minMovReleaseDate)
         AND (i_maxMovReleaseDate  IS NULL OR movie.ReleaseDate <= i_maxMovReleaseDate)
@@ -477,7 +477,7 @@ BEGIN
         AND (i_minMovPlayDate     IS NULL OR t1.Date           >= i_minMovPlayDate)
         AND (i_maxMovPlayDate     IS NULL OR t1.Date           <= i_maxMovPlayDate)
         -- Perform include not played
-        AND (i_includeNotPlayed is NOT TRUE OR (i_includeNotPlayed is TRUE AND i_minMovPlayDate is NULL));
+        AND (i_includeNotPlayed is NOT TRUE OR (i_includeNotPlayed is TRUE AND t1.Date is NULL));
 END$$
 DELIMITER ;
 
