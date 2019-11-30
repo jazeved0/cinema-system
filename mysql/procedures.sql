@@ -324,7 +324,7 @@ BEGIN
             CREATE TABLE CompanyFilterTemp
                 SELECT Name AS comName, numCityCover, numTheater, numEmployee FROM CompanyDerived
                 -- Perform filter on company name parameter
-                WHERE (i_comName <=> '' OR UPPER(Name) <=> UPPER(i_comName))
+                WHERE (i_comName <=> '' OR UPPER(Name) <=> UPPER(i_comName) OR i_comName = 'ALL')
                 -- Perform min/max city filter
                 AND (i_minCity     IS NULL OR numCityCover >= i_minCity)
                 AND (i_maxCity     IS NULL OR numCityCover <= i_maxCity)
