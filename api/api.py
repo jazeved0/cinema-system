@@ -334,7 +334,7 @@ def app_factory():
     api.add_resource(Login, "/login")
     ListResource.register(api, Companies, "/companies", param="name")
     api.add_resource(CompaniesManagers, "/companies/<string:name>/managers")
-    api.add_resource(CompaniesTheaters, "/companies/<string:name>/rheaters")
+    api.add_resource(CompaniesTheaters, "/companies/<string:name>/theaters")
     api.add_resource(Users, "/users")
     api.add_resource(UserApproveResource, "/users/<username>/approve")
     api.add_resource(UserDeclineResource, "/users/<username>/decline")
