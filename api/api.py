@@ -10,7 +10,7 @@ from auth import authenticated, get_failed_auth_resp, hash_password, \
     provision_jwt, requires_admin, requires_manager
 from config import states
 from models import TUserDerived, Company, Visit, User, TCompanyDerived, \
-    Theater, Manager, Movie
+    Theater, Manager, Movie, TUsed
 from register import registration
 from util import to_dict, remove_non_numeric, DBResource, parse_args, Param
 
@@ -352,6 +352,43 @@ class Visits(DBResource):
         return jsonify({'visits': to_dict(visits)})
 
 
+class Views(DBResource):
+    @authenticated
+    def get(self, jwt):
+        views = self.db.execute(
+            "select * from used natural join creditcard where owner=:user", {"user": jwt.username}).fetchall()
+
+        return jsonify({'views': to_dict(views)})
+
+
+class MovieViews(DBResource):
+    @authenticated
+    def post(self, jwt):
+        moviename, releasedate, playdate, theatername, companyname, creditcardnum = parse_args(
+            "moviename", "releasedate", "playdate", "theatername", "companyname", "creditcardnum")
+        self.db.execute(
+            "INSERT INTO used (creditcardnum, playdate, moviename, releasedate, theatername, companyname) "
+            "VALUES (:ccn, :pd, :mn, :rd, :tn, :cn)", {
+                "ccn": creditcardnum,
+                "pd": playdate,
+                "tn": theatername,
+                "mn": moviename,
+                "rd": releasedate,
+                "cn": companyname,
+            })
+
+        self.db.execute(
+            "INSERT INTO visit (date, username, theatername, companyname) "
+            "VALUES (:date, :user, :tn, :cn)", {
+                "date", playdate,
+                "user", jwt.username,
+                "tn", theatername,
+                "cn", companyname,
+            })
+        self.db.commit()
+        return 204
+
+
 # Uptime checker route
 @app.route('/status', methods=['GET'])
 def status():
@@ -363,6 +400,7 @@ def app_factory():
     api.add_resource(Login, "/login")
     app.register_blueprint(registration, url_prefix="/register")
     api.add_resource(Visits, "/visits")
+    api.add_resource(Views, "/views")
     api.add_resource(EligibleManagers, "/managers/eligible")
 
     api.add_resource(Companies, "/companies")
@@ -370,6 +408,7 @@ def app_factory():
     api.add_resource(CompaniesTheaters, "/companies/<string:name>/theaters")
 
     api.add_resource(Movies, "/movies")
+    api.add_resource(MovieViews, "/movies/views")
     api.add_resource(MoviesSchedule, "/movies/schedule")
     api.add_resource(ExploreMovie, "/movies/explore")
 
