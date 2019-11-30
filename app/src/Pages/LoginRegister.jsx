@@ -45,6 +45,7 @@ export default function LoginRegister() {
       const { token } = response;
       const session = decodeJWT(token);
       loadAuth({ ...session, token });
+      history.push("/app");
     }
   });
 
