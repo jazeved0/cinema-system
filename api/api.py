@@ -327,7 +327,7 @@ class TheaterOverview(DBResource):
             "RIGHT JOIN movie ON t1.MovieName = movie.Name",
             {"username": jwt.username}
         ).fetchall()
-        return jsonify({'result': [dict(row) for row in result]})
+        return jsonify({'movies': to_dict(result)})
 
 
 class Visits(DBResource):
