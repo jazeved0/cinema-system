@@ -441,7 +441,7 @@
 }
 
 .card {
-    @include dark-bg($dark-400);
+    @include dark-bg($dark-350);
     @include light-bg($light-450);
 
     padding: 1.5rem;
@@ -1876,5 +1876,102 @@ input.form-control.editor-main {
     .icon {
         position: relative;
         top: -3px;
+    }
+
+    &.is-invalid {
+        input {
+            border-color: $-danger !important;
+
+            &:focus {
+                @include highlight-shadow($-danger);
+            }
+        }
+    }
+
+    .react-datepicker__close-icon {
+        &::after {
+            background-color: transparent !important;
+            height: 12px;
+            width: 32px;
+            padding: 0 2px;
+            font-size: 24px;
+            position: relative;
+            top: -3px;
+            opacity: 0.5;
+            @include transitions(opacity);
+
+            @include dark-fg;
+            @include light-fg;
+        }
+
+        &:hover {
+            &::after {
+                opacity: 1;
+            }
+        }
+    }
+    .react-datepicker__day--selected,
+    .react-datepicker__day--in-selecting-range,
+    .react-datepicker__day--in-range,
+    .react-datepicker__month-text--selected,
+    .react-datepicker__month-text--in-selecting-range,
+    .react-datepicker__month-text--in-range,
+    .react-datepicker__quarter-text--selected,
+    .react-datepicker__quarter-text--in-selecting-range,
+    .react-datepicker__quarter-text--in-range,
+    .react-datepicker__day--keyboard-selected,
+    .react-datepicker__month-text--keyboard-selected,
+    .react-datepicker__quarter-text--keyboard-selected {
+        background-color: $-primary !important;
+        color: $-light !important;
+    }
+
+    .react-datepicker {
+        @include light-bg($light-450);
+        @include dark-bg($dark-450);
+        @include light-fg;
+        @include dark-fg;
+        @include dark {
+            border-color: transparent;
+            box-shadow: $drop-shadow;
+        }
+    }
+
+    .react-datepicker__header {
+        @include light-bg($light-400);
+        @include dark-bg($dark-500);
+        @include dark {
+            border-color: transparent;
+            box-shadow: $drop-shadow;
+        }
+    }
+
+    .react-datepicker__triangle {
+        @include light(border-bottom-color, $light-400, $important: true);
+        @include dark(border-bottom-color, $dark-500, $important: true);
+
+        &::before {
+            @include dark(border-bottom-color, $dark-500, $important: true);
+        }
+    }
+
+    .react-datepicker__current-month,
+    .react-datepicker__day-name {
+        @include light-fg;
+        @include dark-fg;
+    }
+
+    .react-datepicker__day {
+        @include light-fade-fg;
+        @include dark-fade-fg;
+
+        &:hover {
+            @include dark-bg(rgba($dark-200, 0.5));
+        }
+    }
+
+    &.is-invalid ~ .invalid-feedback,
+    &.is-invalid ~ .invalid-tooltip {
+        display: block;
     }
 }

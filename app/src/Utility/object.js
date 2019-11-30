@@ -91,10 +91,8 @@ export function clamp(number, min, max) {
 }
 
 export function formatDate(date) {
-  const a = `${pad(date.getFullYear(), 4)}-${pad(date.getMonth(), 2)}-${pad(
+  return `${pad(date.getFullYear(), 4)}-${pad(date.getMonth(), 2)}-${pad(
     date.getDate(),
     2
   )}`;
-  console.log(a);
-  return a;
 }

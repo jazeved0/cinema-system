@@ -114,6 +114,8 @@ input[type="text"] {
         left: 10px;
     }
     border-radius: 8px;
+    border-width: 1px;
+    border-style: solid;
     transition: box-shadow 0.25s ease;
     box-shadow: none;
     background-color: white !important;
@@ -132,6 +134,14 @@ input[type="text"] {
     }
     &.form-control.is-valid {
         border-color: $-success;
+    }
+
+    @include light {
+        border-color: $input-border-color;
+
+        &:focus {
+            border-color: $active-input-border-color;
+        }
     }
 }
 

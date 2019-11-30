@@ -99,7 +99,10 @@ def serialize_object(model) -> Dict:
     try:
         return model.as_dict()
     except AttributeError:
-        return model
+        try:
+            return dict(model)
+        except AttributeError:
+            return model
 
 
 def serialize_result_row(row, table) -> Dict:

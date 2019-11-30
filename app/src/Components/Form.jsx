@@ -355,6 +355,8 @@ Form.DateInput = function(props, ref) {
     },
     [onChange, inputKey]
   );
+  console.log(isInvalid);
+  console.log(value);
   return (
     <>
       <div className={classNames("date-picker", { "is-invalid": isInvalid })}>
@@ -701,21 +703,19 @@ const steps = [
   {
     canApply: entry => !!entry.required,
     apply: ({ value, entry }) => {
-      if (typeof value === "string") {
-        if (value.trim().length === 0) {
-          return {
-            result: false,
-            message: `${entry.name} is a required field`
-          };
-        } else return null;
-      } else if (typeof value === "object" && Array.isArray(value)) {
-        if (value.length === 0) {
-          return {
-            result: false,
-            message: `${entry.name} is a required field`
-          };
-        } else return null;
-      } else return null;
+      const requiredResult = {
+        result: false,
+        message: `${entry.name} is a required field`
+      };
+      if (typeof value === "string" && value.trim().length === 0) {
+        return requiredResult;
+      } else if (
+        typeof value === "object" &&
+        Array.isArray(value) &&
+        value.length === 0
+      ) {
+        return requiredResult;
+      } else if (isNil(value)) return requiredResult;
     }
   },
   // Numeric is numeric validator
