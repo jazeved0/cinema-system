@@ -355,18 +355,20 @@
         @include dark-fg;
     }
 
-    &__menu {
-        @include dark-bg(blend($dark-000, $dark-400, 0.575));
-        @include light-border($input-border-color);
-        border-width: 1px;
-    }
-
     &__indicator-separator {
         @include dark-bg(rgba($-light, 0.3));
     }
 
     &__indicator {
         @include dark-fg(rgba($-light, 0.5));
+    }
+
+    &__menu {
+        @include dark-bg(blend($dark-000, $dark-400, 0.575));
+        @include light-border($input-border-color);
+        @include dark-fg;
+        @include light-fg;
+        border-width: 1px;
     }
 
     &__option {
@@ -1255,8 +1257,7 @@ input.form-control.editor-main {
         @extend %header-cell-fill;
         margin-top: -1px;
         min-height: 0 !important;
-        overflow-y: visible !important;
-        overflow-x: visible !important;
+        overflow-y: hidden !important;
 
         &:first-child {
             border-top-left-radius: 8px;
@@ -1314,6 +1315,8 @@ input.form-control.editor-main {
                 position: relative;
 
                 &__control {
+                    border-radius: 8px;
+
                     @include dark {
                         &.combo-input__control--is-focused {
                             @include highlight-shadow($-primary, 0.4);

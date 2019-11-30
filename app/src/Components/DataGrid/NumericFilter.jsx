@@ -133,7 +133,7 @@ class NumericFilter extends React.Component {
     };
 
     const tooltipText =
-      "Input Methods: Range (x-y), Greater Then (>x), Less Then (<y)";
+      "Input Methods: Range (x-y), Greater Than or Equal to (>x), Less Than or Equal to (<y)";
 
     return (
       <div>

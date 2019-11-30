@@ -58,7 +58,11 @@ export default class ComboFilter extends React.Component {
             className="combo-input"
             options={derivedOptions}
             onChange={this.handleChange}
+            menuPortalTarget={document.body}
+            menuPosition="fixed"
+            menuPlacement="bottom"
             isSearchable
+            isClearable
           />
         </div>
       </div>

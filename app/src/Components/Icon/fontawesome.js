@@ -1,10 +1,11 @@
 export {
   faMoon,
-  faTimesCircle,
   faPlus,
   faCaretDown,
+  faFilter,
+  faTimesCircle,
+  faInfoCircle,
   faQuestionCircle,
-  faCheckCircle,
-  faFilter
+  faCheckCircle
 } from "@fortawesome/free-solid-svg-icons";
 export { faGithub } from "@fortawesome/free-brands-svg-icons";
