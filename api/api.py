@@ -384,7 +384,7 @@ class Visits(DBResource):
         return jsonify({'visits': to_dict(visits)})
 
 
-class Views(DBResource):
+class MovieViews(DBResource):
     @authenticated
     @requires_customer
     def get(self, jwt):
@@ -393,33 +393,36 @@ class Views(DBResource):
 
         return jsonify({'views': to_dict(views)})
 
-
-class MovieViews(DBResource):
     @authenticated
+    @requires_customer
     def post(self, jwt):
         moviename, releasedate, playdate, theatername, companyname, creditcardnum = parse_args(
             "moviename", "releasedate", "playdate", "theatername", "companyname", "creditcardnum")
-        self.db.execute(
-            "INSERT INTO used (creditcardnum, playdate, moviename, releasedate, theatername, companyname) "
-            "VALUES (:ccn, :pd, :mn, :rd, :tn, :cn)", {
-                "ccn": creditcardnum,
-                "pd": playdate,
-                "tn": theatername,
-                "mn": moviename,
-                "rd": releasedate,
-                "cn": companyname,
-            })
+        try:
+            self.db.execute(
+                "INSERT INTO used (creditcardnum, playdate, moviename, releasedate, theatername, companyname) "
+                "VALUES (:ccn, :pd, :mn, :rd, :tn, :cn)", {
+                    "ccn": creditcardnum,
+                    "pd": playdate,
+                    "tn": theatername,
+                    "mn": moviename,
+                    "rd": releasedate,
+                    "cn": companyname,
+                })
 
-        self.db.execute(
-            "INSERT INTO visit (date, username, theatername, companyname) "
-            "VALUES (:date, :user, :tn, :cn)", {
-                "date", playdate,
-                "user", jwt.username,
-                "tn", theatername,
-                "cn", companyname,
-            })
-        self.db.commit()
-        return 204
+            self.db.execute(
+                "INSERT INTO visit (date, username, theatername, companyname) "
+                "VALUES (:date, :user, :tn, :cn)", {
+                    "date", playdate,
+                    "user", jwt.username,
+                    "tn", theatername,
+                    "cn", companyname,
+                })
+            self.db.commit()
+        except SQLAlchemyError:
+            return "Could not view movie", 403
+        else:
+            return 201
 
 
 # Uptime checker route
@@ -433,7 +436,6 @@ def app_factory():
     api.add_resource(Login, "/login")
     app.register_blueprint(registration, url_prefix="/register")
     api.add_resource(Visits, "/visits")
-    api.add_resource(Views, "/views")
     api.add_resource(EligibleManagers, "/managers/eligible")
 
     api.add_resource(Companies, "/companies")

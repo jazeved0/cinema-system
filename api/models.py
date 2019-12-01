@@ -1,6 +1,6 @@
 from sqlalchemy import BigInteger, Boolean, CHAR, CheckConstraint, Column, \
      Date, ForeignKey, ForeignKeyConstraint, Integer, String, Table, Text, \
-     UniqueConstraint, inspect
+     UniqueConstraint, inspect, text
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -167,7 +167,7 @@ class Visit(Base):
                              'theater.theatername', 'theater.companyname'], ondelete='CASCADE', onupdate='CASCADE'),
     )
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, server_default=text("nextval('visit_id_seq'::regclass)"))
     date = Column(Date, nullable=False)
     username = Column(ForeignKey(
         'User.username', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)

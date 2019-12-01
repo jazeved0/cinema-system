@@ -1,7 +1,8 @@
 import React, { useMemo, useRef, useCallback, useState } from "react";
 import { formatDate, identity, useCallbackOnce, isDefined } from "Utility";
-import { useAuthGet } from "Api";
+import { useAuthGet, performAuthRequest } from "Api";
 import { useNotifications } from "Notifications";
+import { useAuth } from "Authentication";
 
 import { AppBase } from "Pages";
 import { Circle } from "rc-progress";
@@ -21,7 +22,7 @@ export default function ExploreMovie() {
   // Fetch views from API
   const { toast } = useNotifications();
   const [{ views }, { isLoading: viewsLoading }] = useAuthGet({
-    route: "/views",
+    route: "/movies/views",
     defaultValue: { views: [] },
     onFailure: toast
   });
@@ -88,11 +89,6 @@ export default function ExploreMovie() {
     }
   ].map(c => ({ ...baseColumn, ...c }));
 
-  // Watch button
-  const watch = useCallback(movie => {
-    console.log("watching :)");
-  }, []);
-
   // Credit card number selection combo box
   const [creditCard, setCreditCard] = useState(null);
   const onChangeCreditCard = useCallbackOnce((_, e) => setCreditCard(e));
@@ -107,6 +103,43 @@ export default function ExploreMovie() {
       }
     }
   });
+
+  // Watch button
+  const { token } = useAuth();
+  const watch = useCallback(
+    movie => {
+      console.log({
+        moviename: movie.moviename,
+        releasedate: movie.releasedate,
+        playdate: movie.date,
+        theatername: movie.theatername,
+        companyname: movie.companyname,
+        creditcardnum: creditCard.value
+      });
+      performAuthRequest("/movies/views", "post", token, {
+        config: {
+          data: {
+            moviename: movie.moviename,
+            releasedate: movie.releasedate,
+            playdate: movie.date,
+            theatername: movie.theatername,
+            companyname: movie.companyname,
+            creditcardnum: creditCard.value
+          }
+        },
+        onSuccess: () => {
+          toast(
+            `Movie ${movie.moviename} successfully viewed on ${movie.date}`,
+            "success"
+          );
+          // TODO add to views
+        },
+        onFailure: toast,
+        retry: false
+      });
+    },
+    [creditCard, toast, token]
+  );
 
   return (
     <AppBase title="Explore Movie" level="customer">
