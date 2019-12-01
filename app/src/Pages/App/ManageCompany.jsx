@@ -10,7 +10,6 @@ import { NumericFilter, ComboFilter } from "Components/DataGrid";
 
 export default function ManageCompany() {
   // Fetch API data
-  // eslint-disable-next-line no-unused-vars
   let [{ companies }, { isLoading, refresh }] = useAuthGet({
     route: "/companies",
     config: { params: { only_names: false } },

@@ -8,7 +8,7 @@ import { default as ReactDatePicker } from "react-datepicker";
 const DatePicker = React.forwardRef((props, ref) => {
   const { isInvalid, className, noIcon, ...rest } = props;
   const component = (
-    <ReactDatePicker dateFormat="yyyy-MM-dd" {...rest} ref={ref} />
+    <ReactDatePicker {...rest} ref={ref} dateFormat="yyyy-MM-dd" />
   );
   return (
     <div

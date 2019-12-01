@@ -3,10 +3,11 @@ import React, { Suspense, lazy } from "react";
 import { Spinner } from "react-bootstrap";
 import { ErrorBoundary } from "Components";
 
-// Re-export filters
+// Re-export filters/formatters
 export { default as NumericFilter } from "./NumericFilter";
 export { default as ComboFilter } from "./ComboFilter";
-export { default as DateFilter } from "./DateFilter";
+export { default as PopoverFilter} from "./PopoverFilter";
+export { default as AddressFormatter } from "./AddressFormatter";
 
 // Lazy-loading tree contains:
 // - DataGrid

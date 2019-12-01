@@ -104,3 +104,10 @@ export function parseDate(dateStr) {
   var date = dateArray[2];
   return new Date(year, month, date);
 }
+
+export function constructMap(array) {
+  return Object.assign(
+    {},
+    ...array.map(({ key, ...rest }) => ({ [key]: rest }))
+  );
+}

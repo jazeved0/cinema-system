@@ -4,7 +4,7 @@ import { useNotifications } from "Notifications";
 import { isNil } from "Utility";
 
 import { DataGrid, Switch } from "Components";
-import { NumericFilter, DateFilter } from "Components/DataGrid";
+import { NumericFilter, PopoverFilter } from "Components/DataGrid";
 import { AppBase } from "Pages";
 
 export default function TheaterOverview() {
@@ -36,12 +36,14 @@ export default function TheaterOverview() {
     {
       key: "movreleasedate",
       name: "Release Date",
-      filterRenderer: DateFilter
+      filterRenderer: PopoverFilter,
+      popoverFilter: PopoverFilter.Date
     },
     {
       key: "movplaydate",
       name: "Play Date",
-      filterRenderer: DateFilter
+      filterRenderer: PopoverFilter,
+      popoverFilter: PopoverFilter.Date
     }
   ].map(c => ({ ...baseColumn, ...c }));
 
@@ -69,8 +71,8 @@ export default function TheaterOverview() {
           canDeleteRow={() => false}
           columnWidths={{
             base: [200, 170, 220, 220],
-            "992": [300, 140, 280, 280],
-            "1200": [null, 200, 300, 300]
+            "992": [300, 140, 200, 200],
+            "1200": [null, 200, 240, 240]
           }}
           toolbarComponents={
             <Switch
@@ -78,6 +80,7 @@ export default function TheaterOverview() {
               checked={showUnscheduled}
               label="Only Include Unscheduled"
               className="control-spacing"
+              disabled={isLoading}
             />
           }
         />

@@ -579,7 +579,7 @@
 
         border-radius: 6px;
         color: $-light;
-        background-color: $-primary;
+        background-color: $-primary !important;
         cursor: pointer;
         will-change: transform;
         transform: none;
@@ -1317,8 +1317,20 @@ input.form-control.editor-main {
     .react-grid-Header {
         @extend %base-bg;
         box-shadow: none;
+        position: relative;
         @include light {
             border: top;
+        }
+
+        &::before {
+            content: " ";
+            top: 0;
+            bottom: 0;
+            left: 0;
+            display: block;
+            height: 100%;
+            width: calc(100% - 1.1rem);
+            box-shadow: $drop-shadow;
         }
     }
 
@@ -1327,7 +1339,6 @@ input.form-control.editor-main {
         margin-top: -1px;
         min-height: 0 !important;
         overflow-y: hidden !important;
-        box-shadow: $drop-shadow;
 
         &:first-child {
             border-top-left-radius: 8px;
@@ -1372,10 +1383,6 @@ input.form-control.editor-main {
                     left: 10px;
                     top: 4px;
                     bottom: 14px;
-                }
-
-                input {
-                    border: none;
                 }
             }
 
@@ -1531,13 +1538,11 @@ input.form-control.editor-main {
                 display: block;
             }
         }
-        border-radius: 8px;
     }
 
     .row-even {
         @include light-bg(rgba(0, 0, 0, 0.05));
         @include dark-bg(rgba(0, 0, 0, 0.08));
-        border-radius: 8px;
     }
 
     .react-grid-Empty {
@@ -1872,7 +1877,6 @@ input.form-control.editor-main {
 
     .react-datepicker-wrapper {
         flex-grow: 1;
-        z-index: 1;
     }
 
     .react-datepicker__input-container,
@@ -2005,11 +2009,108 @@ input.form-control.editor-main {
             border-bottom-right-radius: 8px !important;
         }
     }
-    // display: flex;
-    // flex-direction: column;
-    // align-items: stretch;
+}
 
-    // .input-group {
-    //     flex-wrap: nowrap !important;
-    // }
+.popout-filter {
+    position: relative;
+    top: 1px;
+
+    button {
+        padding-top: 3px;
+        padding-bottom: 3px;
+        &:not(:focus):not(:hover) {
+            @include dark-fg($-primary, 50%);
+        }
+    }
+
+    .input-group {
+        flex-wrap: nowrap !important;
+    }
+
+    &__items {
+        flex-grow: 1;
+        flex-shrink: 1;
+        flex-basis: 0;
+        position: relative;
+        overflow: hidden !important;
+
+        .set-input--items-pane {
+            padding: 0.1rem 0.35rem 0.15rem 0.15rem !important;
+            border-top-left-radius: 8px;
+            border-bottom-left-radius: 8px;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            border: 1px solid $input-border-color;
+            border-right: none !important;
+            min-height: 36px !important;
+            max-height: 36px !important;
+            flex-wrap: none !important;
+            @include dark(border-color, transparent);
+            @include dark-bg($dark-400, $important: true);
+            @include light-bg($light-500, $important: true);
+
+            overflow: hidden;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+        }
+
+        .set-input--item {
+            margin-bottom: 0;
+        }
+    }
+
+    &__items-placeholder {
+        position: absolute;
+        top: 0;
+        left: 0.75rem;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        z-index: 1;
+        font-weight: 0.5;
+        user-select: none;
+        pointer-events: none;
+        font-weight: 400;
+        opacity: 0.5;
+
+        & > p {
+            margin-bottom: 0;
+        }
+    }
+}
+
+.popover-filter__popover {
+    @include respond-above(sm) {
+        max-width: none !important;
+    }
+}
+
+.address-filter {
+    width: 320px;
+
+    &__table {
+        width: 100%;
+
+        tr.form-group {
+            border-bottom: 8px solid;
+            border-color: transparent;
+            font-size: 1rem;
+
+            &:last-child {
+                border-bottom: none;
+            }
+        }
+
+        label {
+            position: relative;
+            top: 2px;
+            cursor: text;
+            margin-right: 1rem;
+            @include light-fade-fg;
+            @include dark-fade-fg;
+        }
+    }
 }

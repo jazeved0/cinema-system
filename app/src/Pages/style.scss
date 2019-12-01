@@ -414,3 +414,78 @@ $line-width: 225px;
     display: flex;
     flex-direction: column;
 }
+
+.explore-movie {
+    position: relative;
+
+    .app-header {
+        @include respond-above(md) {
+            margin-bottom: 4.5rem;
+        }
+    }
+
+    &__watch {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        @include respond-below(xs) {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        @include respond-above(sm) {
+            position: absolute;
+            top: 3.25rem;
+            right: 2rem;
+            justify-content: flex-end;
+            width: 100%;
+            pointer-events: none;
+
+            & > * {
+                pointer-events: initial;
+            }
+        }
+
+        @include respond-above(md) {
+            top: 3rem;
+        }
+    }
+
+    &__watch-label {
+        @include respond-above(xs) {
+            margin-bottom: 0 !important;
+            margin-right: 1rem;
+        }
+    }
+
+    &__watch-progress {
+        $size: 80px;
+
+        position: relative;
+        max-width: $size;
+        width: 100%;
+
+        svg path:first-child {
+            stroke-width: 8px;
+            @include dark(stroke, $dark-500, $important: true);
+        }
+    }
+
+    &__watch-progress-label-wrapper {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    &__watch-progress-label {
+        margin-bottom: 0 !important;
+        position: relative;
+        top: 2px;
+    }
+}

@@ -360,3 +360,41 @@ input[type="password"] {
         position: relative;
     }
 }
+
+.popover {
+    @include light-bg($light-450);
+    @include dark-bg($dark-450);
+    @include dark {
+        border-color: transparent;
+        box-shadow: $drop-shadow;
+    }
+
+    .popover-body {
+        @include light-fg;
+        @include dark-fg;
+    }
+
+    .popover-header {
+        @include light-fg;
+        @include dark-fg;
+        @include light-bg($light-400);
+        @include dark-bg($dark-500);
+        @include dark {
+            border-color: transparent;
+            box-shadow: $drop-shadow;
+        }
+        font-size: 1.2rem;
+        font-weight: 500;
+    }
+
+    .arrow {
+        &::after {
+            @include light(border-bottom-color, $light-400, $important: true);
+            @include dark(border-bottom-color, $dark-500, $important: true);
+        }
+
+        &::before {
+            @include dark(border-bottom-color, $dark-500, $important: true);
+        }
+    }
+}

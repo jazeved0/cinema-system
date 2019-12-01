@@ -7,7 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime, date
 
 from auth import authenticated, get_failed_auth_resp, hash_password, \
-    provision_jwt, requires_admin, requires_manager
+    provision_jwt, requires_admin, requires_manager, requires_customer
 from config import states
 from models import TUserDerived, Company, Visit, User, TCompanyDerived, \
     Theater, Manager, Movie, TUsed
@@ -328,7 +328,9 @@ class MoviesSchedule(DBResource):
 
 
 class ExploreMovie(DBResource):
-    def get(self):
+    @authenticated
+    @requires_customer
+    def get(self, jwt):
         result = self.db.execute("select * from movieplay natural join theater").fetchall()
         return jsonify({'movies': [dict(row) for row in result]})
 
@@ -367,6 +369,7 @@ class Visits(DBResource):
 
 class Views(DBResource):
     @authenticated
+    @requires_customer
     def get(self, jwt):
         views = self.db.execute(
             "select * from used natural join creditcard where owner=:user", {"user": jwt.username}).fetchall()

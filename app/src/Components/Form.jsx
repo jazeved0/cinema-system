@@ -13,7 +13,8 @@ import {
   isEmptyOrNil,
   equal,
   capitalize,
-  clamp
+  clamp,
+  constructMap
 } from "Utility";
 import hash from "object-hash";
 import classNames from "classnames";
@@ -494,7 +495,7 @@ const formInputs = {
   date: Form.DateInput
 };
 
-const placeholderFormats = {
+export const placeholderFormats = {
   combo: entry => `Select ${entry.name.toLowerCase()}`,
   set: entry => `Add ${entry.name.toLowerCase()}`,
   text: entry => `Enter ${entry.name.toLowerCase()}`,
@@ -640,7 +641,7 @@ function getDefaultNumeric({ min, max }) {
   } else return 0;
 }
 
-function calculateInitialState(entries) {
+export function calculateInitialState(entries) {
   const state = createObject();
   for (const entry of entries) {
     state[entry.key] = getDefaultValue(entry);
@@ -654,13 +655,6 @@ function calculateInitialFocusState(entries) {
     state[entry.key] = false;
   }
   return state;
-}
-
-function constructMap(array) {
-  return Object.assign(
-    {},
-    ...array.map(({ key, ...rest }) => ({ [key]: rest }))
-  );
 }
 
 function validate(entries, values, hasSubmitted) {

@@ -19,16 +19,11 @@ export default function SetInput(props) {
 
   return (
     <div className={classNames("set-input", className, { disabled })}>
-      <div className="set-input--items-pane">
-        {items.map((item, i) => (
-          <SetInput.Item
-            key={item}
-            index={i}
-            onRemove={removeItem}
-            children={renderItem(item)}
-          />
-        ))}
-      </div>
+      <SetInput.Items
+        items={items}
+        onRemove={removeItem}
+        renderItem={renderItem}
+      />
       <div className="set-input--input">
         {children}
         <Button
@@ -80,6 +75,27 @@ SetInput.displayName = "SetInput";
 // ? ==============
 // ? Sub-components
 // ? ==============
+
+SetInput.Items = function({ items, renderItem, onRemove }) {
+  return (
+    <div className="set-input--items-pane">
+      {items.map((item, i) => (
+        <SetInput.Item
+          key={item}
+          index={i}
+          onRemove={onRemove}
+          children={renderItem(item)}
+        />
+      ))}
+    </div>
+  );
+};
+SetInput.Items.defaultProps = {
+  items: [],
+  removeItem() {},
+  renderItem: item => <div>{String(item)}</div>
+};
+SetInput.Items.displayName = "SetInput.Items";
 
 SetInput.Item = function({ index, onRemove, children }) {
   // CRA throws error due to "nested" component declaration

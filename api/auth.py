@@ -144,7 +144,7 @@ def requires_customer(fn):
     @functools.wraps(fn)
     def wrapped(*args, **kwargs):
         if 'jwt' in kwargs:
-            jwt = kwargs.pop("jwt")
+            jwt = kwargs["jwt"]
             if not jwt.is_customer:
                 return get_failed_auth_resp(
                     "Insufficient authorization: requires customer status")
