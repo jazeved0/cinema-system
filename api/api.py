@@ -375,12 +375,8 @@ class UserCreditCards(DBResource):
 class Visits(DBResource):
     @authenticated
     def get(self, jwt):
-        company, start_date, end_date = parse_args("company", "startdate", "enddate")
-        visits = self.db.query(Visit).filter(and_(
-            Visit.username == jwt.username,
-            Visit.companyname == company,
-            Visit.date.between(start_date, end_date)
-        )).all()
+        visits = self.db.query(Visit, Theater).join(
+            Visit, Theater.theatername == Visit.theatername).all()
         return jsonify({'visits': to_dict(visits)})
 
 
@@ -388,7 +384,7 @@ class MovieViews(DBResource):
     @authenticated
     @requires_customer
     def get(self, jwt):
-        views = self.db.execute(
+        views=self.db.execute(
             "select * from used natural join creditcard where owner=:user", {"user": jwt.username}).fetchall()
 
         return jsonify({'views': to_dict(views)})
@@ -396,11 +392,11 @@ class MovieViews(DBResource):
     @authenticated
     @requires_customer
     def post(self, jwt):
-        moviename, releasedate, playdate, theatername, companyname, creditcardnum = parse_args(
+        moviename, releasedate, playdate, theatername, companyname, creditcardnum=parse_args(
             "moviename", "releasedate", "playdate", "theatername", "companyname", "creditcardnum")
 
         # Validate that the user hasn't watched 3 movies on the same date
-        result = self.db.execute("SELECT COUNT(*) as playcount, PlayDate FROM used "
+        result=self.db.execute("SELECT COUNT(*) as playcount, PlayDate FROM used "
                                  "NATURAL JOIN creditcard "
                                  "WHERE creditcard.Owner = :owner "
                                  "AND PlayDate = :playdate "
@@ -413,11 +409,11 @@ class MovieViews(DBResource):
             return "Can not watch more than 3 movies on the same day", 403
 
         # Validate that the user hasn't already seen the movie
-        views = self.db.query(TUsed).filter(TUsed.c.moviename == moviename, TUsed.c.playdate == playdate,
+        views=self.db.query(TUsed).filter(TUsed.c.moviename == moviename, TUsed.c.playdate == playdate,
                                             TUsed.c.releasedate == releasedate, TUsed.c.theatername == theatername,
                                             TUsed.c.companyname == companyname).all()
-        creditcards = {v.creditcardnum for v in views}
-        user_creditcards = {c.creditcardnum for c in self.db.query(Creditcard).filter(
+        creditcards={v.creditcardnum for v in views}
+        user_creditcards={c.creditcardnum for c in self.db.query(Creditcard).filter(
             Creditcard.owner == jwt.username).all()}
         if creditcards.intersection(user_creditcards):
             return "Can not watch movie that you have already seen", 403

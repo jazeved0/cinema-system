@@ -1,7 +1,6 @@
 import React, { useRef } from "react";
 import { useAuthGet } from "Api";
 import { useNotifications } from "Notifications";
-import { processCreditCardInput } from "Utility";
 
 import { AppBase } from "Pages";
 import { DataGrid } from "Components";
@@ -19,6 +18,17 @@ export default function ViewHistory() {
     defaultValue: { views: [] },
     onFailure: toast
   });
+
+  // Fetch company names
+  let [{ companies }] = useAuthGet({
+    route: "/companies",
+    config: { params: { only_names: true } },
+    defaultValue: { companies: [] }
+  });
+
+  // Use refs to bypass incorrect filter generation usage
+  const companyNameRef = useRef([]);
+  companyNameRef.current = companies;
 
   // Column definitions
   const baseColumn = {
@@ -44,8 +54,7 @@ export default function ViewHistory() {
     {
       key: "creditcardnum",
       name: "Credit Card",
-      formatter: CreditCardFormatter,
-      processValue: processCreditCardInput
+      formatter: CreditCardFormatter
     },
     {
       key: "playdate",
@@ -54,17 +63,6 @@ export default function ViewHistory() {
       popoverFilter: PopoverFilter.Date
     }
   ].map(c => ({ ...baseColumn, ...c }));
-
-  // Fetch company names
-  let [{ companies }] = useAuthGet({
-    route: "/companies",
-    config: { params: { only_names: true } },
-    defaultValue: { companies: [] }
-  });
-
-  // Use refs to bypass incorrect filter generation usage
-  const companyNameRef = useRef([]);
-  companyNameRef.current = companies;
 
   return (
     <AppBase title="View History" level="customer">

@@ -103,6 +103,16 @@ def serialize_object(model) -> Dict:
             return dict(model)
         except AttributeError:
             return model
+        except TypeError:
+            try:
+                # Might be result of join
+                if isinstance(model, tuple):
+                    dictionary = {}
+                    for submodel in model:
+                        dictionary.update(to_dict(submodel))
+                return dictionary
+            except AttributeError:
+                return model
 
 
 def serialize_result_row(row, table) -> Dict:
