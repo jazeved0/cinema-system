@@ -398,6 +398,30 @@ class MovieViews(DBResource):
     def post(self, jwt):
         moviename, releasedate, playdate, theatername, companyname, creditcardnum = parse_args(
             "moviename", "releasedate", "playdate", "theatername", "companyname", "creditcardnum")
+
+        # Validate that the user hasn't watched 3 movies on the same date
+        result = self.db.execute("SELECT COUNT(*) as playcount, PlayDate FROM used "
+                                 "NATURAL JOIN creditcard "
+                                 "WHERE creditcard.Owner = :owner "
+                                 "AND PlayDate = :playdate "
+                                 "GROUP BY Owner, PlayDate "
+                                 "HAVING COUNT(*) >= 3", {
+                                     "playdate": playdate,
+                                     "owner": jwt.username
+                                 }).fetchall()
+        if result:
+            return "Can not watch more than 3 movies on the same day", 403
+
+        # Validate that the user hasn't already seen the movie
+        views = self.db.query(TUsed).filter(TUsed.c.moviename == moviename, TUsed.c.playdate == playdate,
+                                            TUsed.c.releasedate == releasedate, TUsed.c.theatername == theatername,
+                                            TUsed.c.companyname == companyname).all()
+        creditcards = {v.creditcardnum for v in views}
+        user_creditcards = {c.creditcardnum for c in self.db.query(Creditcard).filter(
+            Creditcard.owner == jwt.username).all()}
+        if creditcards.intersection(user_creditcards):
+            return "Can not watch movie that you have already seen", 403
+
         try:
             self.db.execute(
                 "INSERT INTO used (creditcardnum, playdate, moviename, releasedate, theatername, companyname) "
@@ -413,13 +437,13 @@ class MovieViews(DBResource):
             self.db.execute(
                 "INSERT INTO visit (date, username, theatername, companyname) "
                 "VALUES (:date, :user, :tn, :cn)", {
-                    "date", playdate,
-                    "user", jwt.username,
-                    "tn", theatername,
-                    "cn", companyname,
+                    "date": playdate,
+                    "user": jwt.username,
+                    "tn": theatername,
+                    "cn": companyname,
                 })
             self.db.commit()
-        except SQLAlchemyError:
+        except SQLAlchemyError as e:
             return "Could not view movie", 403
         else:
             return 201

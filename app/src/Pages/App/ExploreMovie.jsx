@@ -13,6 +13,7 @@ import {
   ComboFilter,
   PopoverFilter
 } from "Components/DataGrid";
+import { pick } from "lodash";
 
 import { primaryColor } from "global.json";
 
@@ -21,11 +22,13 @@ const MAX_DAILY_VIEWS = 3;
 export default function ExploreMovie() {
   // Fetch views from API
   const { toast } = useNotifications();
-  const [{ views }, { isLoading: viewsLoading }] = useAuthGet({
-    route: "/movies/views",
-    defaultValue: { views: [] },
-    onFailure: toast
-  });
+  const [{ views }, { isLoading: viewsLoading, update: setViews }] = useAuthGet(
+    {
+      route: "/movies/views",
+      defaultValue: { views: [] },
+      onFailure: toast
+    }
+  );
 
   // Calculate views from today to display for quota
   const viewsToday = useMemo(() => {
@@ -40,6 +43,24 @@ export default function ExploreMovie() {
     defaultValue: { movies: [] },
     onFailure: toast
   });
+
+  // Filter out movies that the user has already seen
+  const filteredMovies = useMemo(() => {
+    const fields = [
+      "companyname",
+      "moviename",
+      "playdate",
+      "releasedate",
+      "theatername"
+    ];
+    const userPlaySet = new Set(
+      views.map(v => JSON.stringify(pick(v, fields)))
+    );
+    return movies.filter(({ date, ...rest }) => {
+      const moviePlay = pick({ playdate: date, ...rest }, fields);
+      return !userPlaySet.has(JSON.stringify(moviePlay));
+    });
+  }, [movies, views]);
 
   // Fetch company names
   let [{ companies }] = useAuthGet({
@@ -97,25 +118,15 @@ export default function ExploreMovie() {
     defaultValue: { creditCards: [] },
     onSuccess: ({ creditCards }) => {
       if (isDefined(creditCards) && creditCards.length > 0) {
-        console.log("called");
-        console.log(creditCards[0]);
         setCreditCard({ label: creditCards[0], value: creditCards[0] });
       }
     }
   });
 
   // Watch button
-  const { token } = useAuth();
+  const { token, username } = useAuth();
   const watch = useCallback(
     movie => {
-      console.log({
-        moviename: movie.moviename,
-        releasedate: movie.releasedate,
-        playdate: movie.date,
-        theatername: movie.theatername,
-        companyname: movie.companyname,
-        creditcardnum: creditCard.value
-      });
       performAuthRequest("/movies/views", "post", token, {
         config: {
           data: {
@@ -132,13 +143,26 @@ export default function ExploreMovie() {
             `Movie ${movie.moviename} successfully viewed on ${movie.date}`,
             "success"
           );
-          // TODO add to views
+          setViews(({ views }) => ({
+            views: [
+              ...views,
+              {
+                moviename: movie.moviename,
+                releasedate: movie.releasedate,
+                playdate: movie.date,
+                theatername: movie.theatername,
+                companyname: movie.companyname,
+                creditcardnum: creditCard.value,
+                owner: username
+              }
+            ]
+          }));
         },
         onFailure: toast,
         retry: false
       });
     },
-    [creditCard, toast, token]
+    [creditCard, toast, token, username, setViews]
   );
 
   return (
@@ -182,7 +206,7 @@ export default function ExploreMovie() {
         </BootstrapForm.Group>
       </div>
       <DataGrid
-        data={movies}
+        data={filteredMovies}
         columns={columns}
         canDeleteRow={() => false}
         columnWidths={{
@@ -190,7 +214,7 @@ export default function ExploreMovie() {
           "992": [180, 130, 300, 180, 190],
           "1200": [230, 130, 300, 200, null]
         }}
-        isLoading={moviesLoading}
+        isLoading={moviesLoading || viewsLoading}
         getRowActions={row => {
           if (
             moviesLoading ||
