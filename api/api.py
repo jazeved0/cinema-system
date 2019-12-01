@@ -260,6 +260,11 @@ class Theaters(DBResource):
         else:
             return 201
 
+    @authenticated
+    def get(self, jwt):
+        theaters = self.db.query(Theater).all()
+        return jsonify({"theaters": to_dict(theaters)})
+
 
 class Movies(DBResource):
     @authenticated
@@ -455,8 +460,12 @@ def app_factory():
     api = Api(app)
     api.add_resource(Login, "/login")
     app.register_blueprint(registration, url_prefix="/register")
+
     api.add_resource(Visits, "/visits")
+    api.add_resource(Theaters, "/theaters")
+
     api.add_resource(EligibleManagers, "/managers/eligible")
+    api.add_resource(TheaterOverview, "/manager/overview")
 
     api.add_resource(Companies, "/companies")
     api.add_resource(CompaniesManagers, "/companies/<string:name>/managers")
@@ -466,9 +475,6 @@ def app_factory():
     api.add_resource(MovieViews, "/movies/views")
     api.add_resource(MoviesSchedule, "/movies/schedule")
     api.add_resource(ExploreMovie, "/movies/explore")
-
-    api.add_resource(Theaters, "/theaters")
-    api.add_resource(TheaterOverview, "/manager/overview")
 
     api.add_resource(Users, "/users")
     api.add_resource(UserCreditCards, "/users/credit-cards")
