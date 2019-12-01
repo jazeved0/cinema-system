@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { states } from "Utility";
 import { useApiForm, useCompanies } from "Api";
+import { useNotifications } from "Notifications";
 import { useAuth, decodeJWT } from "Authentication";
+import { useHistory } from "react-router-dom";
 
 import { Card, Form, NotificationList } from "Components";
 import { RegisterBase } from "Pages";
@@ -9,6 +11,8 @@ import { RegisterBase } from "Pages";
 export default function RegisterManager() {
   const [isBlocking, setIsBlocking] = useState(true);
   const { loadAuth } = useAuth();
+  const { toast } = useNotifications();
+  const history = useHistory();
   const companies = useCompanies();
   const {
     errorContext: { errors, onDismiss },
@@ -21,6 +25,8 @@ export default function RegisterManager() {
       setIsBlocking(false);
       const session = decodeJWT(token);
       loadAuth({ ...session, token });
+      history.push("/app");
+      toast("Registered successfully");
     }
   });
 

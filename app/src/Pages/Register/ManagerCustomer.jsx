@@ -1,7 +1,9 @@
 import React, { useState } from "react";
-import { states } from "Utility";
+import { states, processCreditCardInput } from "Utility";
 import { useApiForm, useCompanies } from "Api";
+import { useNotifications } from "Notifications";
 import { useAuth, decodeJWT } from "Authentication";
+import { useHistory } from "react-router-dom";
 
 import { Card, Form, CreditCardDisplay, NotificationList } from "Components";
 import { RegisterBase } from "Pages";
@@ -9,6 +11,8 @@ import { RegisterBase } from "Pages";
 export default function ManagerCustomer() {
   const [isBlocking, setIsBlocking] = useState(true);
   const { loadAuth } = useAuth();
+  const { toast } = useNotifications();
+  const history = useHistory();
   const companies = useCompanies();
   const {
     errorContext: { errors, onDismiss },
@@ -16,11 +20,13 @@ export default function ManagerCustomer() {
     onSubmit
   } = useApiForm({
     path: "/register/manager-customer",
-    onSuccess: ({response}) => {
+    onSuccess: ({ response }) => {
       const { token } = response;
       setIsBlocking(false);
       const session = decodeJWT(token);
       loadAuth({ ...session, token });
+      history.push("/app");
+      toast("Registered successfully");
     }
   });
 
@@ -149,14 +155,7 @@ export default function ManagerCustomer() {
                     message: "Credit card must be 16 characters long"
                   };
                 },
-                processValue: value => {
-                  const numeric = value.replace(/\D/g, "");
-                  const formatted = numeric.replace(/(.{4})/g, "$1 ");
-                  const trimmed = formatted.substring(0, 20);
-                  if (trimmed.charAt(trimmed.length - 1) === " ") {
-                    return trimmed.slice(0, -1);
-                  } else return trimmed;
-                },
+                processValue: processCreditCardInput,
                 max: 5,
                 renderItem: item => <CreditCardDisplay text={item} />,
                 className: "credit-card-input"

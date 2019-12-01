@@ -131,7 +131,7 @@ $scrollbar-width: 12px;
     @include dark {
         @include discord-scrollbar(
             $app-content-dark-bg,
-            blend($-light, black, 0.65),
+            blend(color-adjust($-light, -20%), $-dark, 0.75),
             color-adjust($app-content-dark-bg, -10%),
             true
         );
@@ -139,7 +139,7 @@ $scrollbar-width: 12px;
     @include light {
         @include discord-scrollbar(
             $app-content-light-bg,
-            blend($-dark, white, 0.65),
+            blend(color-adjust($-dark, -20%), $-light, 0.75),
             color-adjust($app-content-light-bg, -4%)
         );
     }

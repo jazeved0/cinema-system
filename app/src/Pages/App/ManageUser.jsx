@@ -38,12 +38,8 @@ export default function ManageUser() {
     {
       key: "status",
       name: "Status",
-      filterRenderer: props => (
-        <ComboFilter
-          options={["All", "Pending", "Approved", "Declined"]}
-          {...props}
-        />
-      )
+      options: ["All", "Pending", "Approved", "Declined"],
+      filterRenderer: ComboFilter
     }
   ].map(c => ({ ...baseColumn, ...c }));
 

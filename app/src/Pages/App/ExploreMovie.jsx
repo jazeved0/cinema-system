@@ -69,9 +69,14 @@ export default function ExploreMovie() {
     defaultValue: { companies: [] }
   });
 
-  // Use ref to bypass incorrect generation usage
+  // Use refs to bypass incorrect filter generation usage
   const companyNameRef = useRef([]);
   companyNameRef.current = companies;
+  const movieNameRef = useRef([]);
+  movieNameRef.current = useMemo(
+    () => Array.from(new Set(filteredMovies.map(({ moviename }) => moviename))),
+    [filteredMovies]
+  );
 
   // Column definitions
   const baseColumn = {
@@ -82,7 +87,9 @@ export default function ExploreMovie() {
   const columns = [
     {
       key: "moviename",
-      name: "Movie Name"
+      name: "Movie Name",
+      optionsGetter: () => movieNameRef.current,
+      filterRenderer: ComboFilter
     },
     {
       key: "theatername",
@@ -98,9 +105,8 @@ export default function ExploreMovie() {
     {
       key: "companyname",
       name: "Company",
-      filterRenderer: props => (
-        <ComboFilter options={companyNameRef.current} {...props} />
-      )
+      optionsGetter: () => companyNameRef.current,
+      filterRenderer: ComboFilter
     },
     {
       key: "date",

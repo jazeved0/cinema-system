@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useApiForm } from "Api";
+import { useNotifications } from "Notifications";
 import { useAuth, decodeJWT } from "Authentication";
+import { useHistory } from "react-router-dom";
 
 import { Card, Form, NotificationList } from "Components";
 import { RegisterBase } from "Pages";
@@ -8,6 +10,8 @@ import { RegisterBase } from "Pages";
 export default function RegisterUser() {
   const [isBlocking, setIsBlocking] = useState(true);
   const { loadAuth } = useAuth();
+  const { toast } = useNotifications();
+  const history = useHistory();
   const {
     errorContext: { errors, onDismiss },
     isLoading,
@@ -19,6 +23,8 @@ export default function RegisterUser() {
       setIsBlocking(false);
       const session = decodeJWT(token);
       loadAuth({ ...session, token });
+      history.push("/app");
+      toast("Registered successfully");
     }
   });
 

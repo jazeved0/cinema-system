@@ -443,7 +443,7 @@ class MovieViews(DBResource):
                     "cn": companyname,
                 })
             self.db.commit()
-        except SQLAlchemyError as e:
+        except SQLAlchemyError:
             return "Could not view movie", 403
         else:
             return 201

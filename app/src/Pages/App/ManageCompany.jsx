@@ -32,9 +32,8 @@ export default function ManageCompany() {
     {
       key: "name",
       name: "Name",
-      filterRenderer: props => (
-        <ComboFilter options={companyNameRef.current} {...props} />
-      )
+      optionsGetter: () => companyNameRef.current,
+      filterRenderer: ComboFilter
     },
     {
       key: "numcitycover",

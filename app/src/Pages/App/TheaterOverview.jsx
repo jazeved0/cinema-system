@@ -63,28 +63,26 @@ export default function TheaterOverview() {
 
   return (
     <AppBase title="Theater Overview" level="manager">
-      <div className="theater-overview">
-        <DataGrid
-          isLoading={isLoading}
-          data={filteredData}
-          columns={columns}
-          canDeleteRow={() => false}
-          columnWidths={{
-            base: [200, 170, 220, 220],
-            "992": [300, 140, 200, 200],
-            "1200": [null, 200, 240, 240]
-          }}
-          toolbarComponents={
-            <Switch
-              onChange={onToggleShowUnscheduled}
-              checked={showUnscheduled}
-              label="Only Include Unscheduled"
-              className="control-spacing"
-              disabled={isLoading}
-            />
-          }
-        />
-      </div>
+      <DataGrid
+        isLoading={isLoading}
+        data={filteredData}
+        columns={columns}
+        canDeleteRow={() => false}
+        columnWidths={{
+          base: [200, 170, 220, 220],
+          "992": [300, 140, 200, 200],
+          "1200": [null, 200, 240, 240]
+        }}
+        toolbarComponents={
+          <Switch
+            onChange={onToggleShowUnscheduled}
+            checked={showUnscheduled}
+            label="Only Include Unscheduled"
+            className="control-spacing"
+            disabled={isLoading}
+          />
+        }
+      />
     </AppBase>
   );
 }

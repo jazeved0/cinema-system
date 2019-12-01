@@ -8,6 +8,7 @@ export { default as NumericFilter } from "./NumericFilter";
 export { default as ComboFilter } from "./ComboFilter";
 export { default as PopoverFilter} from "./PopoverFilter";
 export { default as AddressFormatter } from "./AddressFormatter";
+export { default as CreditCardFormatter } from "./CreditCardFormatter";
 
 // Lazy-loading tree contains:
 // - DataGrid

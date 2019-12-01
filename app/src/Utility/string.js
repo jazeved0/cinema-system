@@ -74,6 +74,20 @@ export function pad(string, length) {
   return ("0" + string).slice(-length);
 }
 
+export function formatCreditCard(number) {
+  const formatted = number.replace(/(.{4})/g, "$1 ");
+  const trimmed = formatted.substring(0, 20);
+  return trimmed;
+}
+
+export function processCreditCardInput(value) {
+  const numeric = value.replace(/\D/g, "");
+  const num = formatCreditCard(numeric);
+  if (num.charAt(num.length - 1) === " ") {
+    return num.slice(0, -1);
+  } else return num;
+}
+
 // ? ===============
 // ? Regex functions
 // ? ===============

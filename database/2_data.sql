@@ -4,7 +4,7 @@ SET session_replication_role = 'replica';
 -- Dumping data for table user
 --
 
-INSERT INTO "User" VALUES 
+INSERT INTO "User" VALUES
     ('calcultron',          'Approved', '7XEXyZkbKYlz7a6PJZX2dcswxcl9dfrbWz0mohokiec=', 'Dwight',     'Schrute'),
     ('calcultron2',         'Approved', 'U/rQadR9W7NIwDUve3o1XBUfGJyRr0aOepG4Ux+gNzY=', 'Jim',        'Halpert'),
     ('calcwizard',          'Approved', '6fJzzLAb5hKhO2Y5BImDeqfyxQq+9mxRn5ZOXxrLeuQ=', 'Issac',      'Newton'),
@@ -46,7 +46,7 @@ INSERT INTO admin VALUES ('cool_class4400');
 -- Dumping data for table company
 --
 
-INSERT INTO company VALUES 
+INSERT INTO company VALUES
     ('4400 Theater Company'),
     ('AI Theater Company'),
     ('Awesome Theater Company'),
@@ -217,11 +217,12 @@ INSERT INTO used VALUES
 -- Dumping data for table visit
 --
 
-INSERT INTO visit VALUES
-    (1, '2010-03-22', 'georgep',    'Main Movies', 'EZ Theater Company'),
-    (2, '2010-03-22', 'calcwizard', 'Main Movies', 'EZ Theater Company'),
-    (3, '2010-03-25', 'calcwizard', 'Star Movies', 'EZ Theater Company'),
-    (4, '2010-03-25', 'imready',    'Star Movies', 'EZ Theater Company'),
-    (5, '2010-03-20', 'calcwizard', 'ML Movies',   'AI Theater Company');
+INSERT INTO visit (Date, Username, TheaterName, CompanyName)
+VALUES
+    ('2010-03-22', 'georgep',    'Main Movies', 'EZ Theater Company'),
+    ('2010-03-22', 'calcwizard', 'Main Movies', 'EZ Theater Company'),
+    ('2010-03-25', 'calcwizard', 'Star Movies', 'EZ Theater Company'),
+    ('2010-03-25', 'imready',    'Star Movies', 'EZ Theater Company'),
+    ('2010-03-20', 'calcwizard', 'ML Movies',   'AI Theater Company');
 
 SET session_replication_role = 'origin';

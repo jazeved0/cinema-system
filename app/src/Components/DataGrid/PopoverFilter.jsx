@@ -61,12 +61,12 @@ export default class PopoverFilter extends React.Component {
     const isEmpty = filters.length === 0;
 
     return (
-      <div className="popout-filter">
+      <div className="popover-filter">
         <div className="form-group">
           <InputGroup>
-            <div className="popout-filter__items">
+            <div className="popover-filter__items">
               {isEmpty && (
-                <div className="popout-filter__items-placeholder">
+                <div className="popover-filter__items-placeholder">
                   <p>Add a filter</p>
                 </div>
               )}

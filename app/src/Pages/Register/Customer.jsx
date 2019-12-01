@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { useAuth, decodeJWT } from "Authentication";
+import { processCreditCardInput } from "Utility";
 import { useApiForm } from "Api";
+import { useNotifications } from "Notifications";
+import { useHistory } from "react-router-dom";
 
 import { Card, Form, CreditCardDisplay, NotificationList } from "Components";
 import { RegisterBase } from "Pages";
@@ -8,17 +11,21 @@ import { RegisterBase } from "Pages";
 export default function RegisterCustomer() {
   const [isBlocking, setIsBlocking] = useState(true);
   const { loadAuth } = useAuth();
+  const { toast } = useNotifications();
+  const history = useHistory();
   const {
     errorContext: { errors, onDismiss },
     isLoading,
     onSubmit
   } = useApiForm({
     path: "/register/customer",
-    onSuccess: ({response}) => {
+    onSuccess: ({ response }) => {
       const { token } = response;
       setIsBlocking(false);
       const session = decodeJWT(token);
       loadAuth({ ...session, token });
+      history.push("/app");
+      toast("Registered successfully");
     }
   });
 
@@ -90,14 +97,7 @@ export default function RegisterCustomer() {
                     message: "Credit card must be 16 characters long"
                   };
                 },
-                processValue: value => {
-                  const numeric = value.replace(/\D/g, "");
-                  const formatted = numeric.replace(/(.{4})/g, "$1 ");
-                  const trimmed = formatted.substring(0, 20);
-                  if (trimmed.charAt(trimmed.length - 1) === " ") {
-                    return trimmed.slice(0, -1);
-                  } else return trimmed;
-                },
+                processValue: processCreditCardInput,
                 max: 5,
                 renderItem: item => <CreditCardDisplay text={item} />,
                 className: "credit-card-input"

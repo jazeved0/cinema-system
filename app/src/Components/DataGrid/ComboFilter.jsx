@@ -38,12 +38,16 @@ export default class ComboFilter extends React.Component {
   }
 
   render() {
-    const { options } = this.props;
-    const derivedOptions = isDefined(options)
-      ? options.map(o =>
-          typeof o === "string" ? { value: o, label: capitalize(o) } : o
-        )
-      : null;
+    const { column } = this.props;
+    const { options, optionsGetter } = column;
+    const resolvedOptions = isDefined(options)
+      ? options
+      : isDefined(optionsGetter)
+      ? optionsGetter()
+      : [];
+    const derivedOptions = resolvedOptions.map(o =>
+      typeof o === "string" ? { value: o, label: capitalize(o) } : o
+    );
 
     const inputStyle = {
       width: "100%"
