@@ -1590,7 +1590,7 @@ input.form-control.editor-main {
 
     &--button {
         @extend %button-blank;
-        padding: 0.65rem 0.4rem !important;
+        padding: 0.45rem 0.4rem 0.65rem !important;
         top: 0 !important;
 
         @include light {

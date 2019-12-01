@@ -10,7 +10,7 @@ from auth import authenticated, get_failed_auth_resp, hash_password, \
     provision_jwt, requires_admin, requires_manager, requires_customer
 from config import states
 from models import TUserDerived, Company, Visit, User, TCompanyDerived, \
-    Theater, Manager, Movie, TUsed
+    Theater, Manager, Movie, TUsed, Creditcard
 from register import registration
 from util import to_dict, remove_non_numeric, DBResource, parse_args, Param
 
@@ -331,8 +331,12 @@ class ExploreMovie(DBResource):
     @authenticated
     @requires_customer
     def get(self, jwt):
-        result = self.db.execute("select * from movieplay natural join theater").fetchall()
-        return jsonify({'movies': [dict(row) for row in result]})
+        try:
+            result = self.db.execute("select * from movieplay natural join theater").fetchall()
+        except SQLAlchemyError:
+            return "Could not get movies", 403
+        else:
+            return jsonify({'movies': to_dict(result)})
 
 
 class TheaterOverview(DBResource):
@@ -353,6 +357,19 @@ class TheaterOverview(DBResource):
             {"username": jwt.username}
         ).fetchall()
         return jsonify({'movies': to_dict(result)})
+
+
+class UserCreditCards(DBResource):
+    @authenticated
+    @requires_customer
+    def get(self, jwt):
+        try:
+            result = self.db.query(Creditcard).filter(
+                Creditcard.owner == jwt.username).all()
+        except SQLAlchemyError:
+            return "Could not get credit cards", 403
+        else:
+            return jsonify({'creditCards': [c.creditcardnum for c in result]})
 
 
 class Visits(DBResource):
@@ -432,6 +449,7 @@ def app_factory():
     api.add_resource(TheaterOverview, "/manager/overview")
 
     api.add_resource(Users, "/users")
+    api.add_resource(UserCreditCards, "/users/credit-cards")
     api.add_resource(UserApproveResource, "/users/<username>/approve")
     api.add_resource(UserDeclineResource, "/users/<username>/decline")
 

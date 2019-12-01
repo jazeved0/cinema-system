@@ -8,6 +8,7 @@ export {
   faInfoCircle,
   faQuestionCircle,
   faCheckCircle,
-  faCalendarAlt
+  faCalendarAlt,
+  faArrowCircleRight
 } from "@fortawesome/free-solid-svg-icons";
 export { faGithub } from "@fortawesome/free-brands-svg-icons";

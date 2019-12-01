@@ -113,7 +113,14 @@ export function performRequest(
 
 // Common use case where a resource is requested and is loaded
 export function useGet(
-  { route, retry = true, config = {}, defaultValue = null, onFailure },
+  {
+    route,
+    retry = true,
+    config = {},
+    defaultValue = null,
+    onFailure,
+    onSuccess
+  },
   dependencies = []
 ) {
   /* eslint-disable react-hooks/exhaustive-deps */
@@ -127,6 +134,7 @@ export function useGet(
       onSuccess: data => {
         setIsLoading(false);
         update(data);
+        if (isDefined(onSuccess)) onSuccess(data);
       },
       onFailure: error => {
         setIsLoading(false);

@@ -360,6 +360,7 @@ $line-width: 225px;
 
     .data-grid {
         flex-grow: 1;
+        min-height: 400px;
     }
 
     .app-space {
@@ -418,9 +419,15 @@ $line-width: 225px;
 .explore-movie {
     position: relative;
 
-    .app-header {
+    &__credit-card {
+        max-width: 350px;
+
         @include respond-above(md) {
-            margin-bottom: 4.5rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .combo-input__control {
+            @include dark-bg($dark-300, $important: true);
         }
     }
 
@@ -432,6 +439,7 @@ $line-width: 225px;
         @include respond-below(xs) {
             flex-direction: column;
             align-items: flex-start;
+            margin-bottom: 1rem;
         }
 
         @include respond-above(sm) {
@@ -453,6 +461,8 @@ $line-width: 225px;
     }
 
     &__watch-label {
+        margin-bottom: 0.5rem;
+
         @include respond-above(xs) {
             margin-bottom: 0 !important;
             margin-right: 1rem;

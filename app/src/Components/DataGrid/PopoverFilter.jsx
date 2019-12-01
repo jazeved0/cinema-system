@@ -7,7 +7,8 @@ import {
   states,
   constructMap,
   isEmptyOrNil,
-  formatDate
+  formatDate,
+  parseDate
 } from "Utility";
 
 import { SetInput, Form } from "Components";
@@ -30,8 +31,8 @@ export default class PopoverFilter extends React.Component {
 
   // Applies every application function to the row, passing if and
   // only if it passes every filter
-  filterValues(row, { filterTerm }) {
-    return filterTerm.every(({ apply, value }) => apply(row, value));
+  filterValues(row, { filterTerm }, columnKey) {
+    return filterTerm.every(({ apply, value }) => apply(row, value, columnKey));
   }
 
   removeFilter(index) {
@@ -259,32 +260,33 @@ PopoverFilter.Address.displayName = "PopoverFilter.Address";
 // ! refactor it to a Form.Core component but I don't :)
 PopoverFilter.Date = function({ filters, onChange }) {
   /* eslint-disable react-hooks/rules-of-hooks */
-  const makeLabel = prefix => date => `${prefix}: ${formatDate(date)}`;
-  // const rawValue = row[columnKey];
-  // if (isNil(rawValue)) return false;
-  // const date = parseDate(rawValue);
-  // return filterTerm.every(({ mode, value }) => {
-  //   const equal =
-  //     date.getTime() === value.getTime() ||
-  //     formatDate(date) === formatDate(value);
-  //   if (equal) return true;
-  //   else if (mode === "min") return date > value;
-  //   else return date < value;
-  // });
+  const makeLabel = prefix => date => `${prefix} ${formatDate(date)}`;
+  const apply = mode => (row, value, columnKey) => {
+    if (isNil(value)) return true;
+    const rawValue = row[columnKey];
+    if (isNil(rawValue)) return false;
+    const date = parseDate(rawValue);
+    const equal =
+      date.getTime() === value.getTime() ||
+      formatDate(date) === formatDate(value);
+    if (equal) return true;
+    else if (mode === "min") return date > value;
+    else return date < value;
+  };
   const entries = [
     {
       key: "min",
       name: "Minimum",
       type: "date",
-      apply: () => true,
-      makeLabel: makeLabel("Min")
+      apply: apply("min"),
+      makeLabel: makeLabel(">")
     },
     {
       key: "max",
       name: "Maximum",
       type: "date",
-      apply: () => true,
-      makeLabel: makeLabel("Max")
+      apply: apply("max"),
+      makeLabel: makeLabel("<")
     }
   ];
 
