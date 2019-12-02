@@ -7,7 +7,13 @@ import ReactSwitch from "react-switch";
 
 import { lightColor, primaryColor } from "global.json";
 
-export default function Switch({ label, className, onChange, checked, ...rest }) {
+export default function Switch({
+  label,
+  className,
+  onChange,
+  checked,
+  ...rest
+}) {
   return (
     <span className={classNames("switch", className)}>
       <ReactSwitch

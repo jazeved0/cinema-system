@@ -23,4 +23,3 @@ export { default as AppMenu } from "./App/Menu";
 // General pages
 export { default as NotFound } from "./NotFound";
 export { default as LoginRegister } from "./LoginRegister";
-

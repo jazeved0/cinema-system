@@ -1,6 +1,6 @@
 from sqlalchemy import BigInteger, Boolean, CHAR, CheckConstraint, Column, \
-     Date, ForeignKey, ForeignKeyConstraint, Integer, String, Table, Text, \
-     UniqueConstraint, inspect, text
+    Date, ForeignKey, ForeignKeyConstraint, Integer, String, Table, Text, \
+    UniqueConstraint, inspect, text
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -187,6 +187,7 @@ TUsed = Table(
     Column('releasedate', Date, primary_key=True, nullable=False),
     Column('theatername', String(240), primary_key=True, nullable=False),
     Column('companyname', String(240), primary_key=True, nullable=False),
-    ForeignKeyConstraint(['playdate', 'moviename', 'releasedate', 'theatername', 'companyname'], ['movieplay.date', 'movieplay.moviename',
-                                                                                                  'movieplay.releasedate', 'movieplay.theatername', 'movieplay.companyname'], ondelete='CASCADE', onupdate='CASCADE')
+    ForeignKeyConstraint(['playdate', 'moviename', 'releasedate', 'theatername', 'companyname'],
+                         ['movieplay.date', 'movieplay.moviename', 'movieplay.releasedate',
+                          'movieplay.theatername', 'movieplay.companyname'], ondelete='CASCADE', onupdate='CASCADE')
 )

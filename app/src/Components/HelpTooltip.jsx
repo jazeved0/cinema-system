@@ -4,7 +4,15 @@ import classNames from "classnames";
 
 import { Icon, Tooltip } from "Components";
 
-export default function HelpTooltip({ content, top, right, left, className, style, ...rest }) {
+export default function HelpTooltip({
+  content,
+  top,
+  right,
+  left,
+  className,
+  style,
+  ...rest
+}) {
   return (
     <Tooltip
       text={content}

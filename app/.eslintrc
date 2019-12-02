@@ -1,12 +1,12 @@
 {
   "extends": ["prettier", "prettier/react"],
-  "plugins": ["react", "prettier"],
+  "parser": "babel-eslint",
+  "plugins": ["babel", "react", "prettier", "react-hooks", "jsx-a11y"],
   "parserOptions": {
-    "ecmaVersion": 2016,
+    "ecmaVersion": 2018,
     "sourceType": "module",
     "ecmaFeatures": {
-      "jsx": true,
-      "experimentalObjectRestSpread": true
+      "jsx": true
     }
   },
   "env": {
@@ -14,7 +14,7 @@
     "node": true
   },
   "rules": {
-    "prettier/prettier" : [
+    "prettier/prettier": [
       "error",
       {
         "singleQuote": false,
@@ -22,6 +22,7 @@
         "endOfLine": "auto"
       }
     ],
-    "react/prop-types": [1]
+    "react-hooks/rules-of-hooks": "off",
+    "react-hooks/exhaustive-deps": "error"
   }
 }

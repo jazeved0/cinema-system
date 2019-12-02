@@ -19,7 +19,7 @@ jobs:
         env:
           DOCKER_USERNAME: ${{ secrets.dockerHubUsername }}
           DOCKER_PASSWORD: ${{ secrets.dockerHubPassword }}
-        run: docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+        run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
       - name: Push compose containers
         run: docker compose push
   lint-backend:

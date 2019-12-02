@@ -2,7 +2,6 @@ from flask import Flask, g, jsonify
 from flask.json import JSONEncoder
 from flask_restful import Api, inputs
 from flask_cors import CORS
-from sqlalchemy import and_
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime, date
 
@@ -180,7 +179,7 @@ class EligibleManagers(DBResource):
     def get(self):
         try:
             managers = self.db.query(Manager).outerjoin(Theater).filter(
-                Theater.theatername == None).all()
+                Theater.theatername == None).all() # noqa E711
         except SQLAlchemyError:
             return "Could not find eligible managers", 403
         else:
@@ -238,7 +237,7 @@ class Theaters(DBResource):
 
         # Validate that manager is not managing any other theaters
         manager_object = self.db.query(Manager).outerjoin(Theater).filter(
-            Theater.theatername != None, Manager.username == manager).first()
+            Theater.theatername != None, Manager.username == manager).first() # noqa E711
         if manager_object:
             return f"Manager @{manager} is already managing a theater", 400
 
@@ -397,11 +396,12 @@ class Visits(DBResource):
         else:
             return 201
 
+
 class MovieViews(DBResource):
     @authenticated
     @requires_customer
     def get(self, jwt):
-        views=self.db.execute(
+        views = self.db.execute(
             "select * from used natural join creditcard where owner=:user", {"user": jwt.username}).fetchall()
 
         return jsonify({'views': to_dict(views)})
@@ -409,11 +409,11 @@ class MovieViews(DBResource):
     @authenticated
     @requires_customer
     def post(self, jwt):
-        moviename, releasedate, playdate, theatername, companyname, creditcardnum=parse_args(
+        moviename, releasedate, playdate, theatername, companyname, creditcardnum = parse_args(
             "moviename", "releasedate", "playdate", "theatername", "companyname", "creditcardnum")
 
         # Validate that the user hasn't watched 3 movies on the same date
-        result=self.db.execute("SELECT COUNT(*) as playcount, PlayDate FROM used "
+        result = self.db.execute("SELECT COUNT(*) as playcount, PlayDate FROM used "
                                  "NATURAL JOIN creditcard "
                                  "WHERE creditcard.Owner = :owner "
                                  "AND PlayDate = :playdate "
@@ -426,11 +426,11 @@ class MovieViews(DBResource):
             return "Can not watch more than 3 movies on the same day", 403
 
         # Validate that the user hasn't already seen the movie
-        views=self.db.query(TUsed).filter(TUsed.c.moviename == moviename, TUsed.c.playdate == playdate,
+        views = self.db.query(TUsed).filter(TUsed.c.moviename == moviename, TUsed.c.playdate == playdate,
                                             TUsed.c.releasedate == releasedate, TUsed.c.theatername == theatername,
                                             TUsed.c.companyname == companyname).all()
-        creditcards={v.creditcardnum for v in views}
-        user_creditcards={c.creditcardnum for c in self.db.query(Creditcard).filter(
+        creditcards = {v.creditcardnum for v in views}
+        user_creditcards = {c.creditcardnum for c in self.db.query(Creditcard).filter(
             Creditcard.owner == jwt.username).all()}
         if creditcards.intersection(user_creditcards):
             return "Can not watch movie that you have already seen", 403
