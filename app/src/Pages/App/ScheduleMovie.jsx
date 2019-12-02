@@ -81,9 +81,7 @@ export default function ScheduleMovie() {
               type: "date",
               width: 6,
               validator: ({ value, values }) => {
-                console.log("i am being ran");
                 if (isDefined(values.releaseDate) && isDefined(value)) {
-                  console.log("i am being ran");
                   if (formatDate(values.releaseDate) > formatDate(value)) {
                     return {
                       result: false,
