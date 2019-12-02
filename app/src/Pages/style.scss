@@ -510,7 +510,7 @@ $line-width: 225px;
 
         .date-picker {
             position: relative;
-            z-index: 2;
+            z-index: 3;
 
             input {
                 @include dark-bg($dark-300, $important: true);

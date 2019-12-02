@@ -158,8 +158,8 @@ export default function CreateTheaterForm({ show, onHide, onAdd }) {
             props: {
               getOptions: ({ values }) => {
                 let options = [];
-                if (!isEmptyOrNil(values.company)) {
-                  const eligible = companyToManagers[values.company.value];
+                if (!isEmptyOrNil(values.companyname)) {
+                  const eligible = companyToManagers[values.companyname.value];
                   options = eligible || [];
                 } else {
                   options = managers;
