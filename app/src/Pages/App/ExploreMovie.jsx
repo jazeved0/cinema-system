@@ -31,10 +31,10 @@ export default function ExploreMovie() {
   );
 
   // Calculate views from today to display for quota
+  const todayDate = formatDate(new Date());
   const viewsToday = useMemo(() => {
-    const today = formatDate(new Date());
-    return views.filter(({ playdate }) => playdate === today).length;
-  }, [views]);
+    return views.filter(({ playdate }) => playdate === todayDate).length;
+  }, [views, todayDate]);
   const quotaPercentage = (viewsToday / MAX_DAILY_VIEWS) * 100;
 
   // Fetch movies
@@ -222,11 +222,8 @@ export default function ExploreMovie() {
         }}
         isLoading={moviesLoading || viewsLoading}
         getRowActions={row => {
-          if (
-            moviesLoading ||
-            viewsToday >= MAX_DAILY_VIEWS ||
-            creditCards.length === 0
-          )
+          if (moviesLoading || creditCards.length === 0) return [];
+          else if (viewsToday >= MAX_DAILY_VIEWS && row.playdate === todayDate)
             return [];
           else
             return [
