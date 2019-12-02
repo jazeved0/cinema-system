@@ -180,7 +180,7 @@ class EligibleManagers(DBResource):
     def get(self):
         try:
             managers = self.db.query(Manager).outerjoin(Theater).filter(
-                Theater.theatername is None).all()
+                Theater.theatername == None).all()
         except SQLAlchemyError:
             return "Could not find eligible managers", 403
         else:
@@ -238,7 +238,7 @@ class Theaters(DBResource):
 
         # Validate that manager is not managing any other theaters
         manager_object = self.db.query(Manager).outerjoin(Theater).filter(
-            Theater.theatername is not None, Manager.username == manager).first()
+            Theater.theatername != None, Manager.username == manager).first()
         if manager_object:
             return f"Manager @{manager} is already managing a theater", 400
 
