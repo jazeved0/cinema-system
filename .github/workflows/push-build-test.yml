@@ -29,7 +29,7 @@ jobs:
       - name: Install flake8
         run: python3 -m pip install flake8
       - name: Run flake8
-        run: python3 -m flake8 --config=.flake --show-source --statistics
+        run: python3 -m flake8 --show-source --statistics
         working-directory: ./api
   build-frontend:
     runs-on: ubuntu-latest
