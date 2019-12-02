@@ -14,7 +14,6 @@ jobs:
         env:
           DOCKER_USERNAME: ${{ secrets.dockerHubUsername }}
           DOCKER_PASSWORD: ${{ secrets.dockerHubPassword }}
-        # TODO write integration tests with nginx
       - name: Log into docker hub
         env:
           DOCKER_USERNAME: ${{ secrets.dockerHubUsername }}
