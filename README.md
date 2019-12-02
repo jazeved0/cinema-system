@@ -1,10 +1,10 @@
-# [![Cinema System](https://i.imgur.com/ENP1kJ7.png)](https://cinema-system.ga/)
+# [![Cinema System](https://i.imgur.com/msjskh5.png)](https://cinema-system.ga/)
 
 [![API Uptime](https://img.shields.io/uptimerobot/ratio/7/m783881568-314a6d43a6abb50ec5c7a67f.svg?label=api%20uptime)](https://status.cinema-system.ga/) [![Netlify Status](https://api.netlify.com/api/v1/badges/f30033b8-a74c-427b-91d2-be5b2c46694d/deploy-status)](https://app.netlify.com/sites/cinema-system/deploys)
 
 > Database application to manage and view movie viewings at theaters, created as the result of a semester-long group project for CS 4400: Intro to Database Systems with Professor Mark Moss. The application is composed of a PostgreSQL persistence layer, a Python Flask application layer, and a React-powered dashboard.
 
-[![Web dashboard](https://i.imgur.com/7f0sbnn.png)](https://cinema-system.ga/app)
+[![Web dashboard](https://i.imgur.com/Uv6G4C3.png)](https://cinema-system.ga/app)
 
 ## 🚀 Getting Started
 
