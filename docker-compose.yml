@@ -12,6 +12,7 @@ services:
       - "${DB_PORT}:${DB_PORT}"
     networks:
       - webnet
+    image: jazevedo6/cinema-system-db
   api:
     build:
       context: ./
@@ -21,5 +22,6 @@ services:
     env_file: ./.env
     networks:
       - webnet
+    image: jazevedo6/cinema-system-api
 networks:
   webnet:

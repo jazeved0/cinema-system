@@ -1,0 +1,18 @@
+name: Backend Build
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Build the backend
+        run: docker-compose up -d --build
+      - name: Smoke test connectivity
+        run: docker run --network container:jazevedo6/cinema-system-api appropriate/curl -s --retry 10 --retry-connrefused http://localhost:5000/status\
+      - name: Log into docker hub
+        env:
+          DOCKER_USERNAME: ${{ secrets.dockerHubUsername }}
+          DOCKER_PASSWORD: ${{ secrets.dockerHubPassword }}
+        run: docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+      - name: Push compose containers
+        run: docker compose push

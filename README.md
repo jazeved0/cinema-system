@@ -1,11 +1,10 @@
 # [![Cinema System](https://i.imgur.com/msjskh5.png)](https://cinema-system.ga/)
 
-[![API Uptime](https://img.shields.io/uptimerobot/ratio/7/m783881568-314a6d43a6abb50ec5c7a67f.svg?label=api%20uptime)](https://status.cinema-system.ga/) [![Netlify Status](https://api.netlify.com/api/v1/badges/f30033b8-a74c-427b-91d2-be5b2c46694d/deploy-status)](https://app.netlify.com/sites/cinema-system/deploys)
+[![Dashboard Uptime](https://img.shields.io/uptimerobot/ratio/7/m783881574-627e76b97013eabd49501e1d.svg?label=dashboard%20uptime)](https://status.cinema-system.ga/) [![API Uptime](https://img.shields.io/uptimerobot/ratio/7/m783881568-314a6d43a6abb50ec5c7a67f.svg?label=api%20uptime)](https://status.cinema-system.ga/) [![Contributors](https://img.shields.io/github/contributors/jazevedo620/cinema-system.svg)](https://github.com/jazevedo620/cinema-system/graphs/contributors) [![Netlify Status](https://api.netlify.com/api/v1/badges/4b9228bb-9ea1-41bd-80b5-b1fad3e8ab94/deploy-status)](https://app.netlify.com/sites/cinema-system/deploys)
 
 > Database application to manage and view movie viewings at theaters, created as the result of a semester-long group project for CS 4400: Intro to Database Systems with Professor Mark Moss. The application is composed of a PostgreSQL persistence layer, a Python Flask application layer, and a React-powered dashboard.
 
 [![Web dashboard](https://i.imgur.com/Uv6G4C3.png)](https://cinema-system.ga/app)
-
 ## 🚀 Getting Started
 
 ### 🐍 Backend Services
@@ -65,3 +64,13 @@ yarn run lint
 - [Netlify](https://www.netlify.com/) - Used to automatically deploy & generate previews for PRs. Deploy information is available at [the Deploy page](https://app.netlify.com/sites/cinema-system/deploys)
 - [ESLint](https://eslint.org/) / [Prettier](https://prettier.io/) - Used to enforce consistent code style across the project & catch errors
 - [UptimeRobot](uptimerobot.com) - Used to track uptime and notify upon outage for [the website and the API](https://status.cinema-system.ga/)
+
+## 👥 Contributors
+
+Our team for CS 4400 consisted of the following members:
+
+- Joseph Azevedo ([jazevedo620](https://github.com/jazevedo620))
+- Jonathan Buchanan ([johnyburd](https://github.com/johnyburd))
+- Bhanu Garg ([unahb](https://github.com/unahb))
+- lucas Zhang ([LucasZhang58](https://github.com/LucasZhang58))
+  

@@ -1,0 +1,14 @@
+name: Frontend Build
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install dependencies
+        working-directory: ./app
+        run: yarn install
+      - name: Build
+        run: yarn run build
+      - name: Lint
+        run: yarn run lint
