@@ -35,11 +35,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - name: Cache node modules
+      - name: Cache node modules via yarn.lock
         uses: actions/cache@v1
         with:
           path: app/node_modules
-          key: ${{ runner.OS }}-build-${{ hashFiles('**/yarn.json') }}
+          key: ${{ runner.OS }}-build-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.OS }}-build-${{ env.cache-name }}-
             ${{ runner.OS }}-build-
@@ -54,11 +54,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - name: Cache node modules
+      - name: Cache node modules via yarn.lock
         uses: actions/cache@v1
         with:
           path: app/node_modules
-          key: ${{ runner.OS }}-build-${{ hashFiles('**/yarn.json') }}
+          key: ${{ runner.OS }}-build-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.OS }}-build-${{ env.cache-name }}-
             ${{ runner.OS }}-build-
