@@ -384,6 +384,18 @@ class Visits(DBResource):
             Visit, Theater.theatername == Visit.theatername).all()
         return jsonify({'visits': to_dict(visits)})
 
+    @authenticated
+    def post(self, jwt):
+        date, theatername, companyname = parse_args("date", "theatername", "companyname")
+        visit = Visit(date=date, username=jwt.username, theatername=theatername,
+                      companyname=companyname)
+        try:
+            self.db.add(visit)
+            self.db.commit()
+        except SQLAlchemyError:
+            return "Could not visit theater", 403
+        else:
+            return 201
 
 class MovieViews(DBResource):
     @authenticated

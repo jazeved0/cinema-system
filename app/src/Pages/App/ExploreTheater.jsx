@@ -1,9 +1,18 @@
-import React, { useRef, useMemo } from "react";
-import { useAuthGet } from "Api";
+import React, { useRef, useMemo, useCallback, useState } from "react";
+import { useAuthGet, performAuthRequest } from "Api";
+import { useAuth } from "Authentication";
 import { useNotifications } from "Notifications";
+import {
+  identity,
+  isNil,
+  useCallbackOnce,
+  isDefined,
+  formatDate
+} from "Utility";
 
 import { AppBase } from "Pages";
-import { DataGrid } from "Components";
+import { Form as BootstrapForm } from "react-bootstrap";
+import { DataGrid, Icon, Form } from "Components";
 import {
   AddressFormatter,
   PopoverFilter,
@@ -11,7 +20,7 @@ import {
 } from "Components/DataGrid";
 
 export default function ExploreTheater() {
-  // Fetch visits from API
+  // Fetch theaters from API
   const { toast } = useNotifications();
   const [{ theaters }, { isLoading }] = useAuthGet({
     route: "/theaters",
@@ -63,8 +72,67 @@ export default function ExploreTheater() {
     }
   ].map(c => ({ ...baseColumn, ...c }));
 
+  // Visit date entering box
+  const [visitDate, setVisitDate] = useState(null);
+  const [showValidation, setShowValidation] = useState(false);
+  const onChangeVisitDate = useCallbackOnce((_, e) => {
+    if (isDefined(e)) setShowValidation(false);
+    setVisitDate(e);
+  });
+  const visitDateRef = useRef([]);
+  visitDateRef.current = visitDate;
+
+  // Visit callback
+  const { token } = useAuth();
+  const visit = useCallback(
+    theater => {
+      if (isNil(visitDateRef.current)) {
+        setShowValidation(true);
+        return;
+      }
+
+      // Send API request
+      const visitDate = visitDateRef.current;
+      performAuthRequest("/visits", "post", token, {
+        config: {
+          data: {
+            date: formatDate(visitDate),
+            theatername: theater.theatername,
+            companyname: theater.companyname
+          }
+        },
+        onSuccess: () =>
+          toast(
+            `Theater ${theater.theatername} successfully visited on ${formatDate(
+              visitDate
+            )}`,
+            "success"
+          ),
+        onFailure: toast,
+        retry: false
+      });
+    },
+    [toast, token]
+  );
+
   return (
     <AppBase title="Explore Theater" level="user">
+      <div className="explore-theater__visit-date">
+        <BootstrapForm.Group>
+          <BootstrapForm.Label>Visit Date:</BootstrapForm.Label>
+          <Form.Input
+            type="date"
+            inputKey={null}
+            placeholder={"Select visit date"}
+            onChange={onChangeVisitDate}
+            value={visitDate}
+            onBlur={identity}
+            onKeyDown={identity}
+            isInvalid={showValidation}
+            message="A visit date must be selected before visiting any theater"
+          />
+        </BootstrapForm.Group>
+      </div>
       <DataGrid
         isLoading={isLoading}
         data={theaters}
@@ -74,6 +142,16 @@ export default function ExploreTheater() {
           base: [180, 300, 220],
           "992": [200, 300, 250],
           "1200": [270, null, 320]
+        }}
+        getRowActions={row => {
+          if (isLoading) return [];
+          else
+            return [
+              {
+                icon: <Icon name="scroll" size="lg" noAutoWidth />,
+                callback: () => visit(row)
+              }
+            ];
         }}
       />
     </AppBase>

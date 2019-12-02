@@ -499,3 +499,35 @@ $line-width: 225px;
         top: 2px;
     }
 }
+
+.explore-theater {
+    &__visit-date {
+        max-width: 350px;
+
+        @include respond-above(md) {
+            margin-bottom: 0.4rem;
+        }
+
+        .date-picker {
+            position: relative;
+            z-index: 2;
+
+            input {
+                @include dark-bg($dark-300, $important: true);
+            }
+
+            .react-datepicker__input-container {
+                z-index: 2;
+                position: relative;
+            }
+
+            .input-group-text {
+                @include dark(
+                    border-left-color,
+                    $dark-main-bg,
+                    $important: true
+                );
+            }
+        }
+    }
+}
