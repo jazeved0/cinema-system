@@ -29,14 +29,14 @@ to build the containers and run the application locally. The API will be accessi
 The backend uses [flake8](http://flake8.pycqa.org/) to enforce Python code style across the codebase. To install the linter to run locally, run:
 
 ```console
-python3.7 -m pip install flake8
+python -m pip install flake8
 ```
 
 Then, to lint the codebase, run:
 
 ```console
 cd api
-python3.7 -m flake8 --show-source --statistics --show-source
+python -m flake8 --show-source --statistics --show-source
 ```
 
 ### 🖥 Frontend App
@@ -44,6 +44,7 @@ python3.7 -m flake8 --show-source --statistics --show-source
 To run and develop the frontend services locally, first ensure that both [Node.js](https://nodejs.org/en/download/) and a package manager of your choice (either [Yarn](https://yarnpkg.com/lang/en/) or [npm](https://www.npmjs.com/get-npm)) are installed. Then, simply run:
 
 ```
+cd app
 yarn install
 ```
 
