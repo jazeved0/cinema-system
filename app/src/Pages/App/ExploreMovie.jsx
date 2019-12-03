@@ -1,5 +1,11 @@
 import React, { useMemo, useRef, useCallback, useState } from "react";
-import { formatDate, identity, useCallbackOnce, isDefined } from "Utility";
+import {
+  formatDate,
+  identity,
+  useCallbackOnce,
+  isDefined,
+  formatCreditCard
+} from "Utility";
 import { useAuthGet, performAuthRequest } from "Api";
 import { useNotifications } from "Notifications";
 import { useAuth } from "Authentication";
@@ -208,6 +214,7 @@ export default function ExploreMovie() {
             disabled={creditCardsLoading}
             isInvalid={!creditCardsLoading && creditCards.length === 0}
             message={"You must have at least one credit card to view a movie"}
+            getOptionLabel={({ label }) => formatCreditCard(label)}
           />
         </BootstrapForm.Group>
       </div>
