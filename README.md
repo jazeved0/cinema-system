@@ -11,14 +11,14 @@
 
 To run and develop the backend services locally, first make sure [Docker Compose is installed](https://docs.docker.com/compose/install/) and then run:
 
-```
+```console
 docker-compose up --build
 ```
 
 to build the containers and run the application locally. The API will be accessible at `localhost:5000` and the database will be accessible at `localhost:5432`.
 
 > **Note**: due to an issue in the way the `db` container/service is built, you may need to flush the locally built image any time the schema is changed. To do this, run the following commands in the project root:
-> ```bash
+> ```console
 > docker rm $(docker ps -a --format '{{.Names}}' | grep 'cinema-system')
 > docker rmi cinema-system_db
 > docker-compose build db
@@ -43,7 +43,7 @@ python -m flake8 --show-source --statistics --show-source
 
 To run and develop the frontend services locally, first ensure that both [Node.js](https://nodejs.org/en/download/) and a package manager of your choice (either [Yarn](https://yarnpkg.com/lang/en/) or [npm](https://www.npmjs.com/get-npm)) are installed. Then, simply run:
 
-```
+```console
 cd app
 yarn install
 ```
