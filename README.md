@@ -4,7 +4,7 @@
 
 > Database application to manage and view movie viewings at theaters, created as the result of a semester-long group project for CS 4400: Intro to Database Systems with Professor Mark Moss. The application is composed of a PostgreSQL persistence layer, a Python Flask application layer, and a React-powered dashboard.
 
-[![Web dashboard](https://i.imgur.com/6yfJSfG.png)](https://cinema-system.ga/app)
+[![Web dashboard](https://i.imgur.com/6yfJSfG.png)](https://cinema-system.ga/app) 
 ## 🚀 Getting Started
 
 ### 🐍 Backend Services
