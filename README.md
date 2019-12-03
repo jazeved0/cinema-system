@@ -1,10 +1,10 @@
 # [![Cinema System](https://i.imgur.com/msjskh5.png)](https://cinema-system.ga/)
 
-[![Build Status](https://github.com/jazevedo620/cinema-system/workflows/Build%2FTest/badge.svg)](https://github.com/jazevedo620/cinema-system/actions) [![Dashboard Uptime](https://img.shields.io/uptimerobot/ratio/7/m783881574-627e76b97013eabd49501e1d.svg?label=dashboard%20uptime)](https://status.cinema-system.ga/) [![API Uptime](https://img.shields.io/uptimerobot/ratio/7/m783881568-314a6d43a6abb50ec5c7a67f.svg?label=api%20uptime)](https://status.cinema-system.ga/) [![Contributors](https://img.shields.io/github/contributors/jazevedo620/cinema-system.svg)](https://github.com/jazevedo620/cinema-system/graphs/contributors) [![Netlify Status](https://img.shields.io/netlify/4b9228bb-9ea1-41bd-80b5-b1fad3e8ab94)](https://app.netlify.com/sites/cinema-system/deploys)
+[![Build Status](https://github.com/jazevedo620/cinema-system/workflows/Build%2FTest/badge.svg)](https://github.com/jazevedo620/cinema-system/actions) [![Dashboard Uptime](https://img.shields.io/uptimerobot/ratio/7/m783881574-ce7d7fc9be865ba1cbece837.svg?label=dashboard%20uptime)](https://status.cinema-system.ga/) [![API Uptime](https://img.shields.io/uptimerobot/ratio/7/m783881568-e1844c7ab23ce7316c87dbe5.svg?label=api%20uptime)](https://status.cinema-system.ga/) [![Contributors](https://img.shields.io/github/contributors/jazevedo620/cinema-system.svg)](https://github.com/jazevedo620/cinema-system/graphs/contributors) [![Netlify Status](https://img.shields.io/netlify/4b9228bb-9ea1-41bd-80b5-b1fad3e8ab94)](https://app.netlify.com/sites/cinema-system/deploys)
 
 > Database application to manage and view movie viewings at theaters, created as the result of a semester-long group project for CS 4400: Intro to Database Systems with Professor Mark Moss. The application is composed of a PostgreSQL persistence layer, a Python Flask application layer, and a React-powered dashboard.
 
-[![Web dashboard](https://i.imgur.com/6yfJSfG.png)](https://cinema-system.ga/app) 
+[![Web dashboard](https://i.imgur.com/EsPMPRS.png)](https://cinema-system.ga/app) 
 ## 🚀 Getting Started
 
 ### 🐍 Backend Services
@@ -91,5 +91,5 @@ Our team for CS 4400 consisted of the following members:
 - Joseph Azevedo ([jazevedo620](https://github.com/jazevedo620))
 - Jonathan Buchanan ([johnyburd](https://github.com/johnyburd))
 - Bhanu Garg ([unahb](https://github.com/unahb))
-- lucas Zhang ([LucasZhang58](https://github.com/LucasZhang58))
+- Lucas Zhang ([LucasZhang58](https://github.com/LucasZhang58))
   
