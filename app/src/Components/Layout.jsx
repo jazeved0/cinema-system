@@ -32,7 +32,7 @@ export default function Layout({ children }) {
               </>
             ) : null}
             <Link
-              href="https://github.com/jazevedo620/cs4400-team20"
+              href="https://github.com/jazevedo620/cinema-system"
               ariaLabel="Github"
             >
               <Icon name="github" />
