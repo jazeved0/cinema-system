@@ -10,7 +10,7 @@ jobs:
         working-directory: ./server
       - name: Smoke test internal connectivity
         # Find container name before running curl in network
-        run: docker run --network "container:$(docker ps -a --format '{{.Names}}' | grep 'cinema-system_api' | head -1)"
+        run: docker run --network "container:$(docker ps -a --format '{{.Names}}' | grep '_api_' | head -1)"
           appropriate/curl -s --retry 10 --retry-connrefused http://localhost:5000/status
         env:
           DOCKER_USERNAME: ${{ secrets.dockerHubUsername }}
