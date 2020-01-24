@@ -15,8 +15,6 @@ To run and develop the backend services locally, first make sure [Docker Compose
 docker-compose up --build
 ```
 
-to build the containers and run the application locally. The API will be accessible at `localhost:5000` and the database will be accessible at `localhost:5432`.
-
 ### 🖥 Frontend App
 
 To run and develop the frontend services locally, first ensure that both [Node.js](https://nodejs.org/en/download/) and a package manager of your choice (either [Yarn](https://yarnpkg.com/lang/en/) or [npm](https://www.npmjs.com/get-npm)) are installed. Then, simply run:
