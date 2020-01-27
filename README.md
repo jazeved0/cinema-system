@@ -12,7 +12,6 @@
 To run and develop the backend services locally, first make sure [Docker Compose is installed](https://docs.docker.com/compose/install/) and then run:
 
 ```console
-docker-compose up --build
 ```
 
 ### 🖥 Frontend App
